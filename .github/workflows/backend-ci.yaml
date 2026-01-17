@@ -33,10 +33,10 @@ jobs:
         with:
           pull: true
           load: true
-          source: backend
+          workdir: backend
           files: |
-            backend/compose.yaml
-            backend/compose.override.yaml
+            compose.yaml
+            compose.override.yaml
           set: |
             *.cache-from=type=gha,scope=${{github.ref}}
             *.cache-from=type=gha,scope=refs/heads/master
