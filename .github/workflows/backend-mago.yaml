@@ -38,5 +38,5 @@ jobs:
       - name: Run Mago
         run: |
           mago format --dry-run
-          mago lint --reporting-format=github
-          mago analyze --reporting-format=github
+          mago lint --reporting-format=github --minimum-report-level=warning
+          mago analyze --reporting-format=github --minimum-report-level=warning
