@@ -3,10 +3,8 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-  pull_request: ~
-  workflow_dispatch: ~
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -81,3 +79,4 @@ jobs:
           VALIDATE_PHP_PHPCS: false
           VALIDATE_PHP_PHPSTAN: false
           VALIDATE_PHP_PSALM: false
+          VALIDATE_MARKDOWN: false
