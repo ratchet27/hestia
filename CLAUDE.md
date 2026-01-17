@@ -1,5 +1,13 @@
 # Hestia - Claude Code Instructions
 
+## GitHub
+
+Use `ratchet27` account for this repo:
+
+```bash
+gh auth switch -u ratchet27
+```
+
 ## Git Commits
 
 Use conventional commits format with signoff:
