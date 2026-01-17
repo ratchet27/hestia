@@ -9,7 +9,7 @@ includes = ["vendor"]
 excludes = ["src/Kernel.php", "tests/bootstrap.php"]
 
 [formatter]
-preset = "prs-12"
+preset = "psr-12"
 print-width = 120
 tab-width = 4
 use-tabs = false
