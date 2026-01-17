@@ -27,7 +27,6 @@ RUN set -eux; \
 		@composer \
 		apcu \
 		intl \
-		opcache \
 		zip \
 	;
 
