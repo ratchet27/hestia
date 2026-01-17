@@ -34,9 +34,6 @@ jobs:
           pull: true
           load: true
           workdir: backend
-          files: |
-            compose.yaml
-            compose.override.yaml
           set: |
             *.cache-from=type=gha,scope=${{github.ref}}
             *.cache-from=type=gha,scope=refs/heads/master
@@ -80,6 +77,8 @@ jobs:
           # Disable everything else:
           VALIDATE_ANSIBLE: false
           VALIDATE_BIOME: false
+          VALIDATE_BIOME_FORMAT: false
+          VALIDATE_BIOME_LINT: false
           VALIDATE_CHECKOV: false
           VALIDATE_CLANG_FORMAT: false
           VALIDATE_CLOUDFORMATION: false
