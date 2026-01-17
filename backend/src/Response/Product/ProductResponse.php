@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Response\Product;
 
@@ -25,8 +25,9 @@ final readonly class ProductResponse
         public bool $active,
         public string $created_at,
         public ?string $updated_at,
-        public array $barcodes = [],
-    ) {}
+        public array $barcodes = []
+    ) {
+    }
 
     public static function fromEntity(Product $product, bool $includeBarcodes = false): self
     {
@@ -48,7 +49,7 @@ final readonly class ProductResponse
             active: $product->isActive(),
             created_at: $product->getCreatedAt()->format(\DateTimeInterface::ATOM),
             updated_at: $product->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
-            barcodes: $barcodes,
+            barcodes: $barcodes
         );
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
@@ -22,8 +22,9 @@ use Symfony\Component\Uid\Uuid;
 final class ProductController extends AbstractController
 {
     public function __construct(
-        private readonly ProductService $productService,
-    ) {}
+        private readonly ProductService $productService
+    ) {
+    }
 
     #[Route('/products', name: 'api_products_list', methods: ['GET'])]
     #[OA\Response(response: 200, description: 'List of products')]
@@ -45,14 +46,11 @@ final class ProductController extends AbstractController
 
         $products = $this->productService->listProducts($filters);
 
-        $data = array_map(
-            ProductResponse::fromEntity(...),
-            $products
-        );
+        $data = array_map(ProductResponse::fromEntity(...), $products);
 
         return $this->json([
             'data' => $data,
-            'meta' => ['total' => count($data)],
+            'meta' => ['total' => count($data)]
         ]);
     }
 
@@ -70,7 +68,7 @@ final class ProductController extends AbstractController
         $product = $this->productService->getProduct($uuid);
 
         return $this->json([
-            'data' => ProductResponse::fromEntity($product, includeBarcodes: true),
+            'data' => ProductResponse::fromEntity($product, includeBarcodes: true)
         ]);
     }
 
@@ -78,14 +76,15 @@ final class ProductController extends AbstractController
     #[OA\Response(response: 201, description: 'Product created')]
     #[OA\Response(response: 400, description: 'Invalid input')]
     public function create(
-        #[MapRequestPayload] CreateProductRequest $request,
+        #[MapRequestPayload]
+        CreateProductRequest $request
     ): JsonResponse {
         $product = $this->productService->createProduct($request);
 
-        return $this->json(
-            ['data' => ProductResponse::fromEntity($product, includeBarcodes: true)],
-            Response::HTTP_CREATED
-        );
+        return $this->json(['data' => ProductResponse::fromEntity(
+            $product,
+            includeBarcodes: true
+        )], Response::HTTP_CREATED);
     }
 
     #[Route('/products/{id}', name: 'api_products_update', methods: ['PATCH'])]
@@ -94,7 +93,8 @@ final class ProductController extends AbstractController
     #[OA\Response(response: 404, description: 'Product not found')]
     public function update(
         string $id,
-        #[MapRequestPayload] UpdateProductRequest $request,
+        #[MapRequestPayload]
+        UpdateProductRequest $request
     ): JsonResponse {
         try {
             $uuid = Uuid::fromString($id);
@@ -105,7 +105,7 @@ final class ProductController extends AbstractController
         $product = $this->productService->updateProduct($uuid, $request);
 
         return $this->json([
-            'data' => ProductResponse::fromEntity($product, includeBarcodes: true),
+            'data' => ProductResponse::fromEntity($product, includeBarcodes: true)
         ]);
     }
 

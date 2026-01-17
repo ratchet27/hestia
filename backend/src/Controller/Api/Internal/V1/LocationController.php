@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
@@ -15,8 +15,9 @@ use Symfony\Component\Routing\Attribute\Route;
 final class LocationController extends AbstractController
 {
     public function __construct(
-        private readonly LocationRepository $locationRepository,
-    ) {}
+        private readonly LocationRepository $locationRepository
+    ) {
+    }
 
     #[Route('/locations', name: 'api_locations_list', methods: ['GET'])]
     #[OA\Response(response: 200, description: 'List of locations')]
@@ -24,14 +25,11 @@ final class LocationController extends AbstractController
     {
         $locations = $this->locationRepository->findAllOrderedByName();
 
-        $data = array_map(
-            LocationResponse::fromEntity(...),
-            $locations
-        );
+        $data = array_map(LocationResponse::fromEntity(...), $locations);
 
         return $this->json([
             'data' => $data,
-            'meta' => ['total' => count($data)],
+            'meta' => ['total' => count($data)]
         ]);
     }
 }

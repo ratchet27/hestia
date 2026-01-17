@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Command;
 
@@ -15,10 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand(
-    name: 'app:seed',
-    description: 'Seeds the database with default data (idempotent)',
-)]
+#[AsCommand(name: 'app:seed', description: 'Seeds the database with default data (idempotent)')]
 class SeedCommand extends Command
 {
     /** @var string[] */
@@ -31,7 +28,7 @@ class SeedCommand extends Command
         'Гигиена',
         'Овощи',
         'Фрукты',
-        'Напитки',
+        'Напитки'
     ];
 
     /** @var string[] */
@@ -39,13 +36,13 @@ class SeedCommand extends Command
         'Холодильник',
         'Кладовая',
         'Ванная',
-        'Другое',
+        'Другое'
     ];
 
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly CategoryRepository $categoryRepository,
-        private readonly LocationRepository $locationRepository,
+        private readonly LocationRepository $locationRepository
     ) {
         parent::__construct();
     }

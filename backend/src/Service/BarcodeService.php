@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Service;
 
@@ -20,8 +20,9 @@ class BarcodeService
         private readonly EntityManagerInterface $em,
         private readonly ProductRepository $productRepository,
         private readonly BarcodeRepository $barcodeRepository,
-        private readonly ValidatorInterface $validator,
-    ) {}
+        private readonly ValidatorInterface $validator
+    ) {
+    }
 
     /** @return Barcode[] */
     public function listBarcodes(Uuid $productId): array

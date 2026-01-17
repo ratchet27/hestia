@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Request;
 
@@ -11,6 +11,7 @@ final readonly class CreateBarcodeRequest
     public function __construct(
         #[Assert\NotBlank]
         #[Assert\Length(max: 50)]
-        public string $barcode,
-    ) {}
+        public string $barcode
+    ) {
+    }
 }

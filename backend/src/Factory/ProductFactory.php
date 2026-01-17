@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Factory;
 
@@ -26,7 +26,7 @@ final class ProductFactory extends PersistentProxyObjectFactory
             'defaultLocation' => LocationFactory::new(),
             'defaultExpiryDays' => self::faker()->optional(0.3)->numberBetween(1, 365),
             'minStock' => self::faker()->numberBetween(0, 10),
-            'active' => true,
+            'active' => true
         ];
     }
 }

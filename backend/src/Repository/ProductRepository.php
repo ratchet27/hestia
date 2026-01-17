@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Repository;
 
@@ -25,33 +25,36 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function findByFilters(array $filters): array
     {
-        $qb = $this->createQueryBuilder('p')
+        $qb = $this
+            ->createQueryBuilder('p')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.defaultLocation', 'l')
             ->addSelect('c', 'l')
             ->orderBy('p.name', 'ASC');
 
         if (isset($filters['name'])) {
-            $qb->andWhere('LOWER(p.name) LIKE LOWER(:name)')
-                ->setParameter('name', '%' . $filters['name'] . '%');
+            $qb->andWhere('LOWER(p.name) LIKE LOWER(:name)')->setParameter('name', '%' . $filters['name'] . '%');
         }
 
         if (isset($filters['category_id'])) {
-            $qb->andWhere('c.id = :categoryId')
-                ->setParameter('categoryId', Uuid::fromString($filters['category_id']));
+            $qb->andWhere('c.id = :categoryId')->setParameter('categoryId', Uuid::fromString($filters['category_id']));
         }
 
         if (isset($filters['active'])) {
-            $qb->andWhere('p.active = :active')
-                ->setParameter('active', $filters['active']);
+            $qb->andWhere('p.active = :active')->setParameter('active', $filters['active']);
         }
 
-        return $qb->getQuery()->getResult();
+        /** @var Product[] $result */
+        $result = $qb->getQuery()->getResult();
+
+        return $result;
     }
 
     public function findOneWithBarcodes(Uuid $id): ?Product
     {
-        return $this->createQueryBuilder('p')
+        /** @var Product|null $result */
+        $result = $this
+            ->createQueryBuilder('p')
             ->leftJoin('p.barcodes', 'b')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.defaultLocation', 'l')
@@ -60,5 +63,7 @@ class ProductRepository extends ServiceEntityRepository
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
+
+        return $result;
     }
 }

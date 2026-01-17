@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
@@ -15,8 +15,9 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CategoryController extends AbstractController
 {
     public function __construct(
-        private readonly CategoryRepository $categoryRepository,
-    ) {}
+        private readonly CategoryRepository $categoryRepository
+    ) {
+    }
 
     #[Route('/categories', name: 'api_categories_list', methods: ['GET'])]
     #[OA\Response(response: 200, description: 'List of categories')]
@@ -24,14 +25,11 @@ final class CategoryController extends AbstractController
     {
         $categories = $this->categoryRepository->findAllOrderedByName();
 
-        $data = array_map(
-            CategoryResponse::fromEntity(...),
-            $categories
-        );
+        $data = array_map(CategoryResponse::fromEntity(...), $categories);
 
         return $this->json([
             'data' => $data,
-            'meta' => ['total' => count($data)],
+            'meta' => ['total' => count($data)]
         ]);
     }
 }

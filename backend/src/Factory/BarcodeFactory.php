@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Factory;
 
@@ -22,7 +22,7 @@ final class BarcodeFactory extends PersistentProxyObjectFactory
     {
         return [
             'barcode' => self::faker()->unique()->ean13(),
-            'product' => ProductFactory::new(),
+            'product' => ProductFactory::new()
         ];
     }
 }

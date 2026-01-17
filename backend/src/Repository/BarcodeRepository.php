@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Repository;
 
@@ -21,7 +21,9 @@ class BarcodeRepository extends ServiceEntityRepository
 
     public function findByCode(string $code): ?Barcode
     {
-        return $this->createQueryBuilder('b')
+        /** @var Barcode|null $result */
+        $result = $this
+            ->createQueryBuilder('b')
             ->leftJoin('b.product', 'p')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.defaultLocation', 'l')
@@ -30,23 +32,31 @@ class BarcodeRepository extends ServiceEntityRepository
             ->setParameter('code', $code)
             ->getQuery()
             ->getOneOrNullResult();
+
+        return $result;
     }
 
     /** @return Barcode[] */
     public function findByProduct(Uuid $productId): array
     {
-        return $this->createQueryBuilder('b')
+        /** @var Barcode[] $result */
+        $result = $this
+            ->createQueryBuilder('b')
             ->leftJoin('b.product', 'p')
             ->where('p.id = :productId')
             ->setParameter('productId', $productId)
             ->orderBy('b.createdAt', 'ASC')
             ->getQuery()
             ->getResult();
+
+        return $result;
     }
 
     public function findOneByProductAndCode(Uuid $productId, string $code): ?Barcode
     {
-        return $this->createQueryBuilder('b')
+        /** @var Barcode|null $result */
+        $result = $this
+            ->createQueryBuilder('b')
             ->leftJoin('b.product', 'p')
             ->where('p.id = :productId')
             ->andWhere('b.barcode = :code')
@@ -54,5 +64,7 @@ class BarcodeRepository extends ServiceEntityRepository
             ->setParameter('code', $code)
             ->getQuery()
             ->getOneOrNullResult();
+
+        return $result;
     }
 }

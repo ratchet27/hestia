@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
@@ -21,8 +21,9 @@ use Symfony\Component\Uid\Uuid;
 final class BarcodeController extends AbstractController
 {
     public function __construct(
-        private readonly BarcodeService $barcodeService,
-    ) {}
+        private readonly BarcodeService $barcodeService
+    ) {
+    }
 
     #[Route('/products/{id}/barcodes', name: 'api_products_barcodes_list', methods: ['GET'])]
     #[OA\Response(response: 200, description: 'List of barcodes for a product')]
@@ -37,14 +38,11 @@ final class BarcodeController extends AbstractController
 
         $barcodes = $this->barcodeService->listBarcodes($uuid);
 
-        $data = array_map(
-            BarcodeResponse::fromEntity(...),
-            $barcodes
-        );
+        $data = array_map(BarcodeResponse::fromEntity(...), $barcodes);
 
         return $this->json([
             'data' => $data,
-            'meta' => ['total' => count($data)],
+            'meta' => ['total' => count($data)]
         ]);
     }
 
@@ -54,7 +52,8 @@ final class BarcodeController extends AbstractController
     #[OA\Response(response: 404, description: 'Product not found')]
     public function addToProduct(
         string $id,
-        #[MapRequestPayload] CreateBarcodeRequest $request,
+        #[MapRequestPayload]
+        CreateBarcodeRequest $request
     ): JsonResponse {
         try {
             $uuid = Uuid::fromString($id);
@@ -64,10 +63,7 @@ final class BarcodeController extends AbstractController
 
         $barcode = $this->barcodeService->addBarcode($uuid, $request->barcode);
 
-        return $this->json(
-            ['data' => BarcodeResponse::fromEntity($barcode)],
-            Response::HTTP_CREATED
-        );
+        return $this->json(['data' => BarcodeResponse::fromEntity($barcode)], Response::HTTP_CREATED);
     }
 
     #[Route('/products/{id}/barcodes/{barcode}', name: 'api_products_barcodes_delete', methods: ['DELETE'])]
@@ -94,7 +90,7 @@ final class BarcodeController extends AbstractController
         $product = $this->barcodeService->lookupBarcode($code);
 
         return $this->json([
-            'data' => ProductResponse::fromEntity($product, includeBarcodes: true),
+            'data' => ProductResponse::fromEntity($product, includeBarcodes: true)
         ]);
     }
 }

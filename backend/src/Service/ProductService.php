@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Service;
 
@@ -23,8 +23,9 @@ class ProductService
         private readonly ProductRepository $productRepository,
         private readonly CategoryRepository $categoryRepository,
         private readonly LocationRepository $locationRepository,
-        private readonly ValidatorInterface $validator,
-    ) {}
+        private readonly ValidatorInterface $validator
+    ) {
+    }
 
     /**
      * @param array{name?: string, category_id?: string, active?: bool} $filters

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Factory;
 
@@ -21,7 +21,7 @@ final class CategoryFactory extends PersistentProxyObjectFactory
     protected function defaults(): array
     {
         return [
-            'name' => self::faker()->unique()->word(),
+            'name' => self::faker()->unique()->word()
         ];
     }
 }

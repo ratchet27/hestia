@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Request;
 
@@ -28,6 +28,7 @@ final readonly class CreateProductRequest
         #[Assert\PositiveOrZero]
         public int $min_stock = 0,
 
-        public bool $active = true,
-    ) {}
+        public bool $active = true
+    ) {
+    }
 }

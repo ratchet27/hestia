@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Request;
 
@@ -27,6 +27,7 @@ final readonly class UpdateProductRequest
 
         public ?bool $active = null,
 
-        public bool $clear_default_expiry_days = false,
-    ) {}
+        public bool $clear_default_expiry_days = false
+    ) {
+    }
 }

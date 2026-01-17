@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Entity;
 
@@ -56,7 +56,12 @@ class Product
     private ?\DateTimeImmutable $updatedAt = null;
 
     /** @var Collection<int, Barcode> */
-    #[ORM\OneToMany(targetEntity: Barcode::class, mappedBy: 'product', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(
+        targetEntity: Barcode::class,
+        mappedBy: 'product',
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
     private Collection $barcodes;
 
     public function __construct()

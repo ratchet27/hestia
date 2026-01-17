@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Repository;
 
@@ -21,9 +21,13 @@ class CategoryRepository extends ServiceEntityRepository
     /** @return Category[] */
     public function findAllOrderedByName(): array
     {
-        return $this->createQueryBuilder('c')
+        /** @var Category[] $result */
+        $result = $this
+            ->createQueryBuilder('c')
             ->orderBy('c.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        return $result;
     }
 }
