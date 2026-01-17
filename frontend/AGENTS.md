@@ -4,7 +4,15 @@
 
 - React SPA
 - Bun (runtime, bundler, package manager)
+- Vite (dev server, build)
 - TypeScript
+
+## Bun Commands
+
+- `bun install` instead of npm/yarn/pnpm install
+- `bun run <script>` instead of npm run
+- `bunx <pkg>` instead of npx
+- `bun test` for tests
 
 ## Code Quality
 
