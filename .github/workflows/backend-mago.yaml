@@ -1,5 +1,5 @@
 ---
-name: Mago Code Quality
+name: Backend Mago
 
 on:
   push:
@@ -7,6 +7,10 @@ on:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: backend
 
 jobs:
   mago:
