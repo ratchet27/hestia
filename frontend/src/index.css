@@ -1,1 +1,5 @@
 @import 'tailwindcss';
+
+html {
+  font-size: 125%; /* 20px base instead of 16px - scales all rem units */
+}
