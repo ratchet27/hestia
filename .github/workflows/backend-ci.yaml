@@ -29,18 +29,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build Docker images
-        uses: docker/bake-action@v6
-        with:
-          pull: true
-          load: true
-          workdir: backend
-          files: |
-            ./compose.yaml
-            ./compose.override.yaml
-          set: |
-            *.cache-from=type=gha,scope=${{github.ref}}
-            *.cache-from=type=gha,scope=refs/heads/master
-            *.cache-to=type=gha,scope=${{github.ref}},mode=max
+        working-directory: backend
+        run: |
+          docker buildx bake \
+            --file compose.yaml \
+            --file compose.override.yaml \
+            --set '*.cache-from=type=gha,scope=${{ github.ref }}' \
+            --set '*.cache-from=type=gha,scope=refs/heads/master' \
+            --set '*.cache-to=type=gha,scope=${{ github.ref }},mode=max' \
+            --pull \
+            --load
       - name: Start services
         run: docker compose up --wait --no-build
       - name: Check HTTP reachability
