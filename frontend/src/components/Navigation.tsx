@@ -1,5 +1,8 @@
 import { NavLink } from 'react-router-dom'
 import { Icons } from './Icons'
+import { UserProfile } from './UserProfile'
+
+// TODO: Move date/time display (and possibly weather) to top-right corner of main content area
 
 const navItems = [
   { path: '/', label: 'Главная', icon: Icons.Dashboard },
@@ -12,14 +15,6 @@ const navItems = [
 ]
 
 export function Navigation(): React.ReactElement {
-  const today = new Date()
-  const dateStr = today.toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-  const dayStr = today.toLocaleDateString('ru-RU', { weekday: 'long' })
-
   return (
     <nav className="fixed left-0 top-0 h-full w-56 bg-stone-900 text-stone-300 flex flex-col">
       <div className="p-5 border-b border-stone-700">
@@ -45,10 +40,7 @@ export function Navigation(): React.ReactElement {
           )
         })}
       </div>
-      <div className="p-4 border-t border-stone-700 text-xs text-stone-500">
-        <p>{dateStr}</p>
-        <p className="mt-1 capitalize">{dayStr}</p>
-      </div>
+      <UserProfile />
     </nav>
   )
 }

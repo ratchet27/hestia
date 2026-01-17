@@ -1,5 +1,5 @@
 import { createContext, useState, type ReactNode } from 'react'
-import type { Product, StockEntry, ShoppingItem, Chore, Task, Recipe } from './types'
+import type { Product, StockEntry, ShoppingItem, Chore, Task, Recipe, User } from './types'
 import {
   mockProducts,
   mockStockEntries,
@@ -7,6 +7,7 @@ import {
   mockChores,
   mockTasks,
   mockRecipes,
+  mockUser,
 } from './mocks'
 
 export interface ProductsContextValue {
@@ -39,12 +40,19 @@ export interface RecipesContextValue {
   setRecipes: React.Dispatch<React.SetStateAction<Recipe[]>>
 }
 
+export interface AuthContextValue {
+  user: User | null
+  login: (username: string, password: string) => boolean
+  logout: () => void
+}
+
 export const ProductsContext = createContext<ProductsContextValue | null>(null)
 export const StockContext = createContext<StockContextValue | null>(null)
 export const ShoppingContext = createContext<ShoppingContextValue | null>(null)
 export const ChoresContext = createContext<ChoresContextValue | null>(null)
 export const TasksContext = createContext<TasksContextValue | null>(null)
 export const RecipesContext = createContext<RecipesContextValue | null>(null)
+export const AuthContext = createContext<AuthContextValue | null>(null)
 
 interface DataProviderProps {
   children: ReactNode
@@ -72,5 +80,31 @@ export function DataProvider({ children }: DataProviderProps): React.ReactElemen
         </ShoppingContext.Provider>
       </StockContext.Provider>
     </ProductsContext.Provider>
+  )
+}
+
+interface AuthProviderProps {
+  children: ReactNode
+}
+
+export function AuthProvider({ children }: AuthProviderProps): React.ReactElement {
+  const [user, setUser] = useState<User | null>(null)
+
+  const login = (username: string, password: string): boolean => {
+    if (username === 'pavel' && password === 'password') {
+      setUser(mockUser)
+      return true
+    }
+    return false
+  }
+
+  const logout = (): void => {
+    setUser(null)
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
   )
 }

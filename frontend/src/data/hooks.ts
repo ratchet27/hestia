@@ -6,12 +6,14 @@ import {
   ChoresContext,
   TasksContext,
   RecipesContext,
+  AuthContext,
   type ProductsContextValue,
   type StockContextValue,
   type ShoppingContextValue,
   type ChoresContextValue,
   type TasksContextValue,
   type RecipesContextValue,
+  type AuthContextValue,
 } from './context'
 
 export function useProducts(): ProductsContextValue {
@@ -58,6 +60,14 @@ export function useRecipes(): RecipesContextValue {
   const context = useContext(RecipesContext)
   if (!context) {
     throw new Error('useRecipes must be used within a DataProvider')
+  }
+  return context
+}
+
+export function useAuth(): AuthContextValue {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
 }

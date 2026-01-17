@@ -1,4 +1,11 @@
-import type { Product, StockEntry, ShoppingItem, Chore, Task, Recipe } from './types'
+import type { Product, StockEntry, ShoppingItem, Chore, Task, Recipe, User } from './types'
+
+export const mockUser: User = {
+  id: 1,
+  name: 'Pavel',
+  username: 'pavel',
+  email: 'ratchet270@gmail.com',
+}
 
 export const mockProducts: Product[] = [
   {
