@@ -1,5 +1,5 @@
 ---
-name: Backend Mago
+name: Backend Code Quality
 
 on:
   push:
@@ -13,8 +13,8 @@ defaults:
     working-directory: backend
 
 jobs:
-  mago:
-    name: Run Mago Checks
+  code-quality:
+    name: Code Quality
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
