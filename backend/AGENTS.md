@@ -77,3 +77,33 @@ PostgreSQL connection configured via `DATABASE_URL` env var.
 # Access database
 docker compose exec database psql -U app -d app
 ```
+
+## Testing
+
+PHPUnit 12 via Symfony test-pack.
+
+```bash
+# Run tests
+docker compose exec php bin/phpunit
+
+# Run specific test
+docker compose exec php bin/phpunit tests/SomeTest.php
+```
+
+## Code Quality
+
+Mago for linting, formatting, and static analysis. Runs locally (not in container).
+
+```bash
+# Lint
+mago lint src/
+
+# Format
+mago fmt src/
+
+# Check (no changes)
+mago fmt --check src/
+
+# Static analysis
+mago analyze src/
+```
