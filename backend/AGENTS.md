@@ -55,6 +55,7 @@ config/
 - Doctrine ORM with attributes
 - Repository pattern for queries
 - UUID primary keys preferred
+- For unique fields: use BOTH `#[UniqueEntity]` (validation) AND `#[ORM\Column(unique: true)]` (database constraint)
 
 ## Commands
 
@@ -107,3 +108,15 @@ mago fmt --check src/
 # Static analysis
 mago analyze src/
 ```
+
+## Claude Code Notes
+
+### Permission Issues
+
+Docker creates files as root. If you encounter `EACCES: permission denied` errors when writing files:
+
+1. **Stop execution immediately**
+2. Ask the user to run: `sudo chown -R $USER:$USER /home/pavel/projects/hestia/backend`
+3. Wait for confirmation before continuing
+
+Do NOT work around this by writing files through Docker exec - it masks the underlying issue and creates inconsistent file ownership.

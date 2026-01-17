@@ -9,3 +9,9 @@
 
 controllers:
     resource: routing.controllers
+
+# Internal API v1 routes
+api_internal_v1:
+    resource: '../src/Controller/Api/Internal/V1/'
+    type: attribute
+    prefix: /api/internal/v1
