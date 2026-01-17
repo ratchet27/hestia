@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller\Api\Internal\V1;
 
-use App\DTO\Request\CreateProductRequest;
-use App\DTO\Request\UpdateProductRequest;
-use App\DTO\Response\ProductResponse;
+use App\Request\CreateProductRequest;
+use App\Request\UpdateProductRequest;
+use App\Response\Product\ProductResponse;
 use App\Service\ProductService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +18,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 
+#[OA\Tag(name: 'Products')]
 final class ProductController extends AbstractController
 {
     public function __construct(
@@ -24,6 +26,7 @@ final class ProductController extends AbstractController
     ) {}
 
     #[Route('/products', name: 'api_products_list', methods: ['GET'])]
+    #[OA\Response(response: 200, description: 'List of products')]
     public function list(Request $request): JsonResponse
     {
         $filters = [];
@@ -43,7 +46,7 @@ final class ProductController extends AbstractController
         $products = $this->productService->listProducts($filters);
 
         $data = array_map(
-            static fn($product) => ProductResponse::fromEntity($product)->toArray(),
+            ProductResponse::fromEntity(...),
             $products
         );
 
@@ -54,6 +57,8 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/products/{id}', name: 'api_products_show', methods: ['GET'])]
+    #[OA\Response(response: 200, description: 'Product details')]
+    #[OA\Response(response: 404, description: 'Product not found')]
     public function show(string $id): JsonResponse
     {
         try {
@@ -65,23 +70,28 @@ final class ProductController extends AbstractController
         $product = $this->productService->getProduct($uuid);
 
         return $this->json([
-            'data' => ProductResponse::fromEntity($product, includeBarcodes: true)->toArray(),
+            'data' => ProductResponse::fromEntity($product, includeBarcodes: true),
         ]);
     }
 
     #[Route('/products', name: 'api_products_create', methods: ['POST'])]
+    #[OA\Response(response: 201, description: 'Product created')]
+    #[OA\Response(response: 400, description: 'Invalid input')]
     public function create(
         #[MapRequestPayload] CreateProductRequest $request,
     ): JsonResponse {
-        $product = $this->productService->createProduct($request->toArray());
+        $product = $this->productService->createProduct($request);
 
         return $this->json(
-            ['data' => ProductResponse::fromEntity($product, includeBarcodes: true)->toArray()],
+            ['data' => ProductResponse::fromEntity($product, includeBarcodes: true)],
             Response::HTTP_CREATED
         );
     }
 
     #[Route('/products/{id}', name: 'api_products_update', methods: ['PATCH'])]
+    #[OA\Response(response: 200, description: 'Product updated')]
+    #[OA\Response(response: 400, description: 'Invalid input')]
+    #[OA\Response(response: 404, description: 'Product not found')]
     public function update(
         string $id,
         #[MapRequestPayload] UpdateProductRequest $request,
@@ -92,14 +102,16 @@ final class ProductController extends AbstractController
             throw new BadRequestHttpException('Invalid UUID format');
         }
 
-        $product = $this->productService->updateProduct($uuid, $request->toArray());
+        $product = $this->productService->updateProduct($uuid, $request);
 
         return $this->json([
-            'data' => ProductResponse::fromEntity($product, includeBarcodes: true)->toArray(),
+            'data' => ProductResponse::fromEntity($product, includeBarcodes: true),
         ]);
     }
 
     #[Route('/products/{id}', name: 'api_products_delete', methods: ['DELETE'])]
+    #[OA\Response(response: 204, description: 'Product deleted')]
+    #[OA\Response(response: 404, description: 'Product not found')]
     public function delete(string $id, Request $request): JsonResponse
     {
         try {

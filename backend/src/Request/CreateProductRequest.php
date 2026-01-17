@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\DTO\Request;
+namespace App\Request;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class CreateProductRequest
 {
+    // @mago-ignore lint:excessive-parameter-list
     public function __construct(
         #[Assert\NotBlank]
         #[Assert\Length(max: 255)]
@@ -29,17 +30,4 @@ final readonly class CreateProductRequest
 
         public bool $active = true,
     ) {}
-
-    /** @return array{name: string, category_id: string, default_location_id: string, default_expiry_days: int|null, min_stock: int, active: bool} */
-    public function toArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'category_id' => $this->category_id,
-            'default_location_id' => $this->default_location_id,
-            'default_expiry_days' => $this->default_expiry_days,
-            'min_stock' => $this->min_stock,
-            'active' => $this->active,
-        ];
-    }
 }

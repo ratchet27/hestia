@@ -15,3 +15,10 @@ api_internal_v1:
     resource: '../src/Controller/Api/Internal/V1/'
     type: attribute
     prefix: /api/internal/v1
+
+# API Documentation
+api_doc:
+    path: /api/doc.json
+    methods: GET
+    defaults:
+        _controller: nelmio_api_doc.controller.swagger_json
