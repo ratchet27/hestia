@@ -2,16 +2,18 @@
 
 ## Git Commits
 
-Always use `-s` flag when committing to add the Signed-off-by trailer:
+Use conventional commits format with signoff:
 
 ```bash
-git commit -s -m "message"
+git commit -s -m "<type>(<scope>): <description>"
 ```
 
 Or use the alias:
 
 ```bash
-git ci -m "message"
+git ci -m "<type>(<scope>): <description>"
 ```
+
+Use the `conventional-commits` skill for format reference.
 
 GPG signing is configured automatically for this repo.
