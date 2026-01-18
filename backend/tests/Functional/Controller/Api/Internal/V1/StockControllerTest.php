@@ -7,11 +7,11 @@ namespace App\Tests\Functional\Controller\Api\Internal\V1;
 use App\Entity\Category;
 use App\Entity\Location;
 use App\Entity\Product;
-use App\Entity\Stock;
+use App\Entity\StockEntry;
 use App\Factory\CategoryFactory;
 use App\Factory\LocationFactory;
 use App\Factory\ProductFactory;
-use App\Factory\StockFactory;
+use App\Factory\StockEntryFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,41 +30,33 @@ class StockControllerTest extends WebTestCase
         $this->client = static::createClient();
     }
 
-    /**
-     * @param array<string, mixed> $attributes
-     */
-    private function createStock(array $attributes = []): Stock
+    /** @param array<string, mixed> $attributes */
+    private function createEntry(array $attributes = []): StockEntry
     {
-        return StockFactory::createOne($attributes);
+        return StockEntryFactory::createOne($attributes);
     }
 
-    /**
-     * @param array<string, mixed> $attributes
-     */
+    /** @param array<string, mixed> $attributes */
     private function createProduct(array $attributes = []): Product
     {
         return ProductFactory::createOne($attributes);
     }
 
-    /**
-     * @param array<string, mixed> $attributes
-     */
+    /** @param array<string, mixed> $attributes */
     private function createCategory(array $attributes = []): Category
     {
         return CategoryFactory::createOne($attributes);
     }
 
-    /**
-     * @param array<string, mixed> $attributes
-     */
+    /** @param array<string, mixed> $attributes */
     private function createLocation(array $attributes = []): Location
     {
         return LocationFactory::createOne($attributes);
     }
 
-    // ========== List Tests ==========
+    // ========== Summary Tests ==========
 
-    public function testListStocksReturnsEmptyArray(): void
+    public function testSummaryReturnsEmptyArray(): void
     {
         $response = $this->apiGet('/stocks');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -72,7 +64,7 @@ class StockControllerTest extends WebTestCase
         static::assertListResponse($data, 0);
     }
 
-    public function testListStocksReturnsStockEntries(): void
+    public function testSummaryReturnsAggregatedData(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -81,41 +73,21 @@ class StockControllerTest extends WebTestCase
             'category' => $category,
             'defaultLocation' => $location
         ]);
-        $this->createStock([
-            'product' => $product,
-            'location' => $location,
-            'quantity' => 10
-        ]);
+
+        // Create 3 entries for the same product
+        $this->createEntry(['product' => $product, 'location' => $location]);
+        $this->createEntry(['product' => $product, 'location' => $location]);
+        $this->createEntry(['product' => $product, 'location' => $location]);
 
         $response = $this->apiGet('/stocks');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertListResponse($data, 1);
-        static::assertSame(10, $data['data'][0]['quantity']);
+        static::assertSame(3, $data['data'][0]['total_quantity']);
         static::assertSame('Test Product', $data['data'][0]['product']['name']);
     }
 
-    public function testListStocksFiltersByLocation(): void
-    {
-        $category = $this->createCategory(['name' => 'Test Category']);
-        $location1 = $this->createLocation(['name' => 'Kitchen']);
-        $location2 = $this->createLocation(['name' => 'Pantry']);
-        $product = $this->createProduct([
-            'name' => 'Test Product',
-            'category' => $category,
-            'defaultLocation' => $location1
-        ]);
-        $this->createStock(['product' => $product, 'location' => $location1, 'quantity' => 5]);
-        $this->createStock(['product' => $product, 'location' => $location2, 'quantity' => 3]);
-
-        $response = $this->apiGet('/stocks', ['location' => (string) $location1->getId()]);
-        $data = static::assertJsonResponse($response, Response::HTTP_OK);
-
-        static::assertListResponse($data, 1);
-        static::assertSame(5, $data['data'][0]['quantity']);
-    }
-
-    public function testListStocksFiltersLowStock(): void
+    public function testSummaryFiltersLowStock(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -129,10 +101,18 @@ class StockControllerTest extends WebTestCase
             'name' => 'OK Stock Product',
             'category' => $category,
             'defaultLocation' => $location,
-            'minStock' => 5
+            'minStock' => 2
         ]);
-        $this->createStock(['product' => $productLow, 'location' => $location, 'quantity' => 3]);
-        $this->createStock(['product' => $productOk, 'location' => $location, 'quantity' => 10]);
+
+        // Low stock: 3 entries, min is 10
+        $this->createEntry(['product' => $productLow, 'location' => $location]);
+        $this->createEntry(['product' => $productLow, 'location' => $location]);
+        $this->createEntry(['product' => $productLow, 'location' => $location]);
+
+        // OK stock: 5 entries, min is 2
+        for ($i = 0; $i < 5; $i++) {
+            $this->createEntry(['product' => $productOk, 'location' => $location]);
+        }
 
         $response = $this->apiGet('/stocks', ['low_stock' => 'true']);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -141,9 +121,9 @@ class StockControllerTest extends WebTestCase
         static::assertSame('Low Stock Product', $data['data'][0]['product']['name']);
     }
 
-    // ========== Movement Tests ==========
+    // ========== List Entries Tests ==========
 
-    public function testCreateMovementAddCreatesStockAndMovement(): void
+    public function testListEntriesReturnsAll(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -153,22 +133,85 @@ class StockControllerTest extends WebTestCase
             'defaultLocation' => $location
         ]);
 
-        $response = $this->apiPost('/stocks/movements', [
+        $this->createEntry(['product' => $product, 'location' => $location]);
+        $this->createEntry(['product' => $product, 'location' => $location]);
+
+        $response = $this->apiGet('/stocks/entries');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 2);
+    }
+
+    public function testListEntriesFiltersByLocation(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location1 = $this->createLocation(['name' => 'Kitchen']);
+        $location2 = $this->createLocation(['name' => 'Pantry']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location1
+        ]);
+
+        $this->createEntry(['product' => $product, 'location' => $location1]);
+        $this->createEntry(['product' => $product, 'location' => $location1]);
+        $this->createEntry(['product' => $product, 'location' => $location2]);
+
+        $response = $this->apiGet('/stocks/entries', ['location' => (string) $location1->getId()]);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 2);
+    }
+
+    public function testListEntriesFiltersByProduct(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product1 = $this->createProduct([
+            'name' => 'Product 1',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+        $product2 = $this->createProduct([
+            'name' => 'Product 2',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        $this->createEntry(['product' => $product1, 'location' => $location]);
+        $this->createEntry(['product' => $product2, 'location' => $location]);
+        $this->createEntry(['product' => $product2, 'location' => $location]);
+
+        $response = $this->apiGet('/stocks/entries', ['product' => (string) $product2->getId()]);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 2);
+    }
+
+    // ========== Add Stock Tests ==========
+
+    public function testAddStockCreatesEntries(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        $response = $this->apiPost('/stocks/add', [
             'product_id' => (string) $product->getId(),
             'location_id' => (string) $location->getId(),
-            'type' => 'ADD',
-            'quantity' => 5,
-            'notes' => 'Initial stock'
+            'quantity' => 5
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
 
-        static::assertSame('ADD', $data['data']['type']);
-        static::assertSame(5, $data['data']['quantity']);
-        static::assertSame(5, $data['data']['stock']['quantity']);
-        static::assertSame('Initial stock', $data['data']['notes']);
+        static::assertSame(5, $data['data']['created']);
+        static::assertCount(5, $data['data']['entries']);
     }
 
-    public function testCreateMovementRemoveDecreasesQuantity(): void
+    public function testAddStockWithBestBefore(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -177,20 +220,35 @@ class StockControllerTest extends WebTestCase
             'category' => $category,
             'defaultLocation' => $location
         ]);
-        $this->createStock(['product' => $product, 'location' => $location, 'quantity' => 10]);
 
-        $response = $this->apiPost('/stocks/movements', [
+        $response = $this->apiPost('/stocks/add', [
             'product_id' => (string) $product->getId(),
             'location_id' => (string) $location->getId(),
-            'type' => 'REMOVE',
-            'quantity' => 3
+            'quantity' => 2,
+            'best_before' => '2026-02-15'
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
 
-        static::assertSame(7, $data['data']['stock']['quantity']);
+        static::assertSame('2026-02-15', $data['data']['entries'][0]['best_before']);
     }
 
-    public function testCreateMovementAdjustSetsAbsoluteQuantity(): void
+    public function testAddStockFailsWithInvalidProduct(): void
+    {
+        $location = $this->createLocation(['name' => 'Kitchen']);
+
+        $response = $this->apiPost('/stocks/add', [
+            'product_id' => '01936f00-0000-7000-8000-000000000000',
+            'location_id' => (string) $location->getId(),
+            'quantity' => 5
+        ]);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
+
+        static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
+    }
+
+    // ========== Consume Stock Tests ==========
+
+    public function testConsumeStockDeletesEntriesFifo(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -199,20 +257,37 @@ class StockControllerTest extends WebTestCase
             'category' => $category,
             'defaultLocation' => $location
         ]);
-        $this->createStock(['product' => $product, 'location' => $location, 'quantity' => 10]);
 
-        $response = $this->apiPost('/stocks/movements', [
+        // Create entries with different best_before dates
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-01-20')
+        ]);
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-01-25')
+        ]);
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-01-30')
+        ]);
+
+        $response = $this->apiPost('/stocks/consume', [
             'product_id' => (string) $product->getId(),
             'location_id' => (string) $location->getId(),
-            'type' => 'ADJUST',
-            'quantity' => 3
+            'quantity' => 2
         ]);
-        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        static::assertSame(3, $data['data']['stock']['quantity']);
+        static::assertSame(2, $data['data']['consumed']);
+        static::assertCount(2, $data['data']['deleted_entries']);
+        static::assertSame(1, $data['data']['remaining_at_location']);
     }
 
-    public function testCreateMovementRemoveFailsWithInsufficientStock(): void
+    public function testConsumeStockFailsWithInsufficientStock(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -221,36 +296,96 @@ class StockControllerTest extends WebTestCase
             'category' => $category,
             'defaultLocation' => $location
         ]);
-        $this->createStock(['product' => $product, 'location' => $location, 'quantity' => 5]);
 
-        $response = $this->apiPost('/stocks/movements', [
+        $this->createEntry(['product' => $product, 'location' => $location]);
+        $this->createEntry(['product' => $product, 'location' => $location]);
+
+        $response = $this->apiPost('/stocks/consume', [
             'product_id' => (string) $product->getId(),
             'location_id' => (string) $location->getId(),
-            'type' => 'REMOVE',
-            'quantity' => 10
+            'quantity' => 5
         ]);
         $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
         static::assertSame('INSUFFICIENT_STOCK', $data['type']);
     }
 
-    public function testCreateMovementFailsWithInvalidProduct(): void
-    {
-        $location = $this->createLocation(['name' => 'Kitchen']);
+    // ========== Update Entry Tests ==========
 
-        $response = $this->apiPost('/stocks/movements', [
-            'product_id' => '01936f00-0000-7000-8000-000000000000',
-            'location_id' => (string) $location->getId(),
-            'type' => 'ADD',
-            'quantity' => 5
+    public function testUpdateEntryChangesLocation(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location1 = $this->createLocation(['name' => 'Kitchen']);
+        $location2 = $this->createLocation(['name' => 'Pantry']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location1
         ]);
+
+        $entry = $this->createEntry(['product' => $product, 'location' => $location1]);
+
+        $response = $this->apiPatch('/stocks/entries/' . $entry->getId(), [
+            'location_id' => (string) $location2->getId()
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertSame('Pantry', $data['data']['location']['name']);
+    }
+
+    public function testUpdateEntryChangesBestBefore(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        $entry = $this->createEntry(['product' => $product, 'location' => $location]);
+
+        $response = $this->apiPatch('/stocks/entries/' . $entry->getId(), [
+            'best_before' => '2026-03-15'
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertSame('2026-03-15', $data['data']['best_before']);
+    }
+
+    // ========== Delete Entry Tests ==========
+
+    public function testDeleteEntryRemovesEntry(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        $entry = $this->createEntry(['product' => $product, 'location' => $location]);
+
+        $response = $this->apiDelete('/stocks/entries/' . $entry->getId());
+        static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
+
+        // Verify it's gone
+        $response = $this->apiGet('/stocks/entries/' . $entry->getId());
+        static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
+    }
+
+    public function testDeleteEntryReturns404ForMissing(): void
+    {
+        $response = $this->apiDelete('/stocks/entries/01936f00-0000-7000-8000-000000000000');
         $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
-        static::assertSame('Product not found', $data['title']);
-        static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
+        static::assertSame('STOCK_ENTRY_NOT_FOUND', $data['type']);
     }
 
-    public function testCreateMovementFailsWithInvalidLocation(): void
+    // ========== Expiring Tests ==========
+
+    public function testExpiringReturnsEntriesWithinDays(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -260,35 +395,25 @@ class StockControllerTest extends WebTestCase
             'defaultLocation' => $location
         ]);
 
-        $response = $this->apiPost('/stocks/movements', [
-            'product_id' => (string) $product->getId(),
-            'location_id' => '01936f00-0000-7000-8000-000000000000',
-            'type' => 'ADD',
-            'quantity' => 5
+        // Expiring in 3 days
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable()->modify('+3 days')
         ]);
-        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
-
-        static::assertSame('Location not found', $data['title']);
-        static::assertSame('LOCATION_NOT_FOUND', $data['type']);
-    }
-
-    public function testCreateMovementFailsWithNegativeQuantity(): void
-    {
-        $category = $this->createCategory(['name' => 'Test Category']);
-        $location = $this->createLocation(['name' => 'Kitchen']);
-        $product = $this->createProduct([
-            'name' => 'Test Product',
-            'category' => $category,
-            'defaultLocation' => $location
+        // Expiring in 10 days (outside default 7)
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable()->modify('+10 days')
         ]);
+        // No expiry date
+        $this->createEntry(['product' => $product, 'location' => $location, 'bestBefore' => null]);
 
-        $response = $this->apiPost('/stocks/movements', [
-            'product_id' => (string) $product->getId(),
-            'location_id' => (string) $location->getId(),
-            'type' => 'ADD',
-            'quantity' => -5
-        ]);
+        $response = $this->apiGet('/stocks/expiring', ['days' => '7']);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        static::assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+        static::assertListResponse($data, 1);
+        static::assertArrayHasKey('days_until_expiry', $data['data'][0]);
     }
 }
