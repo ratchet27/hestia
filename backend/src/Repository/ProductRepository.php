@@ -49,6 +49,18 @@ class ProductRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function exists(Uuid $id): bool
+    {
+        return (bool) $this
+            ->createQueryBuilder('p')
+            ->select('1')
+            ->where('p.id = :id')
+            ->setParameter('id', $id)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     public function findOneWithBarcodes(Uuid $id): ?Product
     {
         // @mago-ignore analysis:mixed-return-statement

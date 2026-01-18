@@ -29,7 +29,9 @@ class BarcodeService
     /** @return Barcode[] */
     public function listBarcodes(Uuid $productId): array
     {
-        $this->getProduct($productId);
+        if (!$this->productRepository->exists($productId)) {
+            throw new ProductNotFoundException($productId);
+        }
 
         return $this->barcodeRepository->findByProduct($productId);
     }
