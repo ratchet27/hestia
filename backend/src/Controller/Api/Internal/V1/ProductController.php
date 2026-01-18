@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 
@@ -22,7 +23,8 @@ use Symfony\Component\Uid\Uuid;
 final class ProductController extends AbstractController
 {
     public function __construct(
-        private readonly ProductService $productService
+        private readonly ProductService $productService,
+        private readonly ObjectMapperInterface $mapper
     ) {
     }
 
@@ -46,7 +48,7 @@ final class ProductController extends AbstractController
 
         $products = $this->productService->listProducts($filters);
 
-        $data = array_map(ProductResponse::fromEntity(...), $products);
+        $data = array_map(fn($product) => $this->mapper->map($product, ProductResponse::class), $products);
 
         return $this->json([
             'data' => $data,
@@ -68,7 +70,7 @@ final class ProductController extends AbstractController
         $product = $this->productService->getProduct($uuid);
 
         return $this->json([
-            'data' => ProductResponse::fromEntity($product, includeBarcodes: true)
+            'data' => $this->mapper->map($product, ProductResponse::class)
         ]);
     }
 
@@ -81,10 +83,9 @@ final class ProductController extends AbstractController
     ): JsonResponse {
         $product = $this->productService->createProduct($request);
 
-        return $this->json(['data' => ProductResponse::fromEntity(
-            $product,
-            includeBarcodes: true
-        )], Response::HTTP_CREATED);
+        return $this->json([
+            'data' => $this->mapper->map($product, ProductResponse::class)
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/products/{id}', name: 'api_products_update', methods: ['PATCH'])]
@@ -105,7 +106,7 @@ final class ProductController extends AbstractController
         $product = $this->productService->updateProduct($uuid, $request);
 
         return $this->json([
-            'data' => ProductResponse::fromEntity($product, includeBarcodes: true)
+            'data' => $this->mapper->map($product, ProductResponse::class)
         ]);
     }
 

@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 
@@ -21,7 +22,8 @@ use Symfony\Component\Uid\Uuid;
 final class BarcodeController extends AbstractController
 {
     public function __construct(
-        private readonly BarcodeService $barcodeService
+        private readonly BarcodeService $barcodeService,
+        private readonly ObjectMapperInterface $mapper
     ) {
     }
 
@@ -38,7 +40,7 @@ final class BarcodeController extends AbstractController
 
         $barcodes = $this->barcodeService->listBarcodes($uuid);
 
-        $data = array_map(BarcodeResponse::fromEntity(...), $barcodes);
+        $data = array_map(fn($barcode) => $this->mapper->map($barcode, BarcodeResponse::class), $barcodes);
 
         return $this->json([
             'data' => $data,
@@ -63,7 +65,9 @@ final class BarcodeController extends AbstractController
 
         $barcode = $this->barcodeService->addBarcode($uuid, $request->barcode);
 
-        return $this->json(['data' => BarcodeResponse::fromEntity($barcode)], Response::HTTP_CREATED);
+        return $this->json([
+            'data' => $this->mapper->map($barcode, BarcodeResponse::class)
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/products/{id}/barcodes/{barcode}', name: 'api_products_barcodes_delete', methods: ['DELETE'])]
@@ -90,7 +94,7 @@ final class BarcodeController extends AbstractController
         $product = $this->barcodeService->lookupBarcode($code);
 
         return $this->json([
-            'data' => ProductResponse::fromEntity($product, includeBarcodes: true)
+            'data' => $this->mapper->map($product, ProductResponse::class)
         ]);
     }
 }

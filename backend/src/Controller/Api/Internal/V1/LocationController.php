@@ -9,13 +9,15 @@ use App\Response\Location\LocationResponse;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag(name: 'Locations')]
 final class LocationController extends AbstractController
 {
     public function __construct(
-        private readonly LocationRepository $locationRepository
+        private readonly LocationRepository $locationRepository,
+        private readonly ObjectMapperInterface $mapper
     ) {
     }
 
@@ -25,7 +27,7 @@ final class LocationController extends AbstractController
     {
         $locations = $this->locationRepository->findAllOrderedByName();
 
-        $data = array_map(LocationResponse::fromEntity(...), $locations);
+        $data = array_map(fn($location) => $this->mapper->map($location, LocationResponse::class), $locations);
 
         return $this->json([
             'data' => $data,

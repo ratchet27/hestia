@@ -9,13 +9,15 @@ use App\Response\Category\CategoryResponse;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag(name: 'Categories')]
 final class CategoryController extends AbstractController
 {
     public function __construct(
-        private readonly CategoryRepository $categoryRepository
+        private readonly CategoryRepository $categoryRepository,
+        private readonly ObjectMapperInterface $mapper
     ) {
     }
 
@@ -25,7 +27,7 @@ final class CategoryController extends AbstractController
     {
         $categories = $this->categoryRepository->findAllOrderedByName();
 
-        $data = array_map(CategoryResponse::fromEntity(...), $categories);
+        $data = array_map(fn($category) => $this->mapper->map($category, CategoryResponse::class), $categories);
 
         return $this->json([
             'data' => $data,
