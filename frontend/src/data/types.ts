@@ -5,17 +5,6 @@ export interface User {
   email: string
 }
 
-export interface Product {
-  id: number
-  name: string
-  category: string
-  defaultExpiryDays: number
-  minStock: number
-  defaultLocation: string
-  barcode: string
-  active: boolean
-}
-
 export interface StockEntry {
   id: number
   productId: number
@@ -64,18 +53,6 @@ export const locations: Record<string, string> = {
   bathroom: 'Ванная',
   other: 'Другое',
 }
-
-export const categories = [
-  'Молочные',
-  'Хлеб',
-  'Мясо',
-  'Крупы',
-  'Консервы',
-  'Гигиена',
-  'Овощи',
-  'Фрукты',
-  'Напитки',
-]
 
 // Utility functions
 export function formatDate(dateStr: string | null): string {

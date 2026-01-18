@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "format": "prettier --write src"
+    "format": "prettier --write src",
+    "generate-api": "orval",
+    "generate-api:watch": "orval --watch"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -18,10 +20,12 @@
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
+    "ajv": "^8.17.1",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
+    "orval": "^8.0.1",
     "prettier": "^3.8.0",
     "tailwindcss": "^4.1.18",
     "typescript-eslint": "^8.53.0",
@@ -31,8 +35,11 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.19",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-hook-form": "^7.71.1",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.12.0"
   }
 }

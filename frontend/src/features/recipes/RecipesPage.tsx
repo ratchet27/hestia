@@ -1,26 +1,26 @@
 import { Icons } from '../../components/Icons'
-import { useProducts, useStock, useRecipes } from '../../data/hooks'
-import type { Product, Recipe } from '../../data/types'
+import { useStock, useRecipes } from '../../data/hooks'
+import type { Recipe } from '../../data/types'
 
 interface CheckedIngredient {
   productId: number
   amount: number
-  product: Product | undefined
+  product: { name: string } | undefined
   inStock: number
   hasEnough: boolean
 }
 
 export function RecipesPage(): React.ReactElement {
-  const { products } = useProducts()
   const { stock } = useStock()
   const { recipes } = useRecipes()
 
   const checkIngredients = (recipe: Recipe): CheckedIngredient[] => {
     return recipe.ingredients.map((ing) => {
+      // Stock uses number IDs - won't match with UUID products until API integrated
       const totalStock = stock.filter((e) => e.productId === ing.productId).reduce((sum, e) => sum + e.amount, 0)
       return {
         ...ing,
-        product: products.find((p) => p.id === ing.productId),
+        product: undefined, // Products have UUID, recipes have number ID
         inStock: totalStock,
         hasEnough: totalStock >= ing.amount,
       }

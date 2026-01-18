@@ -1,13 +1,11 @@
 import { useContext } from 'react'
 import {
-  ProductsContext,
   StockContext,
   ShoppingContext,
   ChoresContext,
   TasksContext,
   RecipesContext,
   AuthContext,
-  type ProductsContextValue,
   type StockContextValue,
   type ShoppingContextValue,
   type ChoresContextValue,
@@ -15,14 +13,6 @@ import {
   type RecipesContextValue,
   type AuthContextValue,
 } from './context'
-
-export function useProducts(): ProductsContextValue {
-  const context = useContext(ProductsContext)
-  if (!context) {
-    throw new Error('useProducts must be used within a DataProvider')
-  }
-  return context
-}
 
 export function useStock(): StockContextValue {
   const context = useContext(StockContext)
