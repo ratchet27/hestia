@@ -89,9 +89,11 @@ final readonly class ApiExceptionListener
             Response::HTTP_BAD_REQUEST => 'BAD_REQUEST',
             Response::HTTP_UNAUTHORIZED => 'UNAUTHORIZED',
             Response::HTTP_FORBIDDEN => 'FORBIDDEN',
+            Response::HTTP_NOT_ACCEPTABLE => 'NOT_ACCEPTABLE',
             Response::HTTP_NOT_FOUND => 'NOT_FOUND',
             Response::HTTP_METHOD_NOT_ALLOWED => 'METHOD_NOT_ALLOWED',
             Response::HTTP_CONFLICT => 'CONFLICT',
+            Response::HTTP_UNSUPPORTED_MEDIA_TYPE => 'UNSUPPORTED_MEDIA_TYPE',
             Response::HTTP_UNPROCESSABLE_ENTITY => 'UNPROCESSABLE_ENTITY',
             default => 'HTTP_ERROR'
         };
