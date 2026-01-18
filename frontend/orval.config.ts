@@ -3,7 +3,7 @@ import { defineConfig } from 'orval'
 export default defineConfig({
   hestia: {
     input: {
-      target: process.env.API_SPEC_URL || 'http://localhost:8000/api/doc.json',
+      target: process.env.API_SPEC_URL || 'https://localhost/api/doc.json',
     },
     output: {
       mode: 'tags-split',
