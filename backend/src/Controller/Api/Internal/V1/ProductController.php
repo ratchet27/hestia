@@ -84,6 +84,7 @@ final class ProductController extends AbstractController
         $response = new ProductResponse(
             id: $product->getId(),
             name: $product->getName(),
+            unit: $product->getUnit(),
             category: new CategoryResponse($product->getCategory()->getId(), $product->getCategory()->getName()),
             defaultLocation: new LocationResponse(
                 $product->getDefaultLocation()->getId(),

@@ -23,6 +23,7 @@ final readonly class ProductResponse
     public function __construct(
         public Uuid $id,
         public string $name,
+        public string $unit,
         public CategoryResponse $category,
         public LocationResponse $defaultLocation,
         public ?int $defaultExpiryDays,
