@@ -4,10 +4,13 @@ declare(strict_types = 1);
 
 namespace App\Tests\Functional\Trait;
 
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
 trait ApiTestTrait
 {
+    private KernelBrowser $client;
+
     private const string API_PREFIX = '/api/internal/v1';
 
     /** @var array<string, string> */
@@ -64,7 +67,7 @@ trait ApiTestTrait
     }
 
     /** @return array<string, mixed> */
-    protected function assertJsonResponse(Response $response, int $expectedStatusCode): array
+    protected static function assertJsonResponse(Response $response, int $expectedStatusCode): array
     {
         static::assertSame($expectedStatusCode, $response->getStatusCode());
         static::assertSame('application/json', $response->headers->get('Content-Type'));
@@ -73,7 +76,7 @@ trait ApiTestTrait
     }
 
     /** @param array<string, mixed> $data */
-    protected function assertListResponse(array $data, int $expectedTotal): void
+    protected static function assertListResponse(array $data, int $expectedTotal): void
     {
         static::assertArrayHasKey('data', $data);
         static::assertArrayHasKey('meta', $data);

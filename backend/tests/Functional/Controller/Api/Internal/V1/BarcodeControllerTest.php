@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace App\Tests\Functional\Controller\Api\Internal\V1;
 
+use App\Entity\Product;
 use App\Factory\BarcodeFactory;
 use App\Factory\ProductFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
@@ -21,18 +21,24 @@ class BarcodeControllerTest extends WebTestCase
     use Factories;
     use ResetDatabase;
 
-    private KernelBrowser $client;
-
     protected function setUp(): void
     {
         $this->client = static::createClient();
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function createProduct(array $attributes = []): Product
+    {
+        return ProductFactory::createOne($attributes);
     }
 
     // ========== List Tests ==========
 
     public function testListBarcodesReturnsEmptyWhenNoData(): void
     {
-        $product = ProductFactory::createOne();
+        $product = $this->createProduct();
 
         $response = $this->apiGet('/products/' . $product->getId()->toRfc4122() . '/barcodes');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -42,7 +48,7 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testListBarcodesReturnsBarcodesForProduct(): void
     {
-        $product = ProductFactory::createOne();
+        $product = $this->createProduct();
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product]);
         BarcodeFactory::createOne(['barcode' => '9876543210987', 'product' => $product]);
 
@@ -54,8 +60,8 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testListBarcodesDoesNotIncludeOtherProductBarcodes(): void
     {
-        $product1 = ProductFactory::createOne();
-        $product2 = ProductFactory::createOne();
+        $product1 = $this->createProduct();
+        $product2 = $this->createProduct();
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product1]);
         BarcodeFactory::createOne(['barcode' => '9876543210987', 'product' => $product2]);
 
@@ -86,7 +92,7 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testAddBarcodeSuccess(): void
     {
-        $product = ProductFactory::createOne();
+        $product = $this->createProduct();
 
         $response = $this->apiPost('/products/' . $product->getId()->toRfc4122() . '/barcodes', [
             'barcode' => '1234567890123'
@@ -99,7 +105,7 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testAddBarcodeResponseStructure(): void
     {
-        $product = ProductFactory::createOne();
+        $product = $this->createProduct();
 
         $response = $this->apiPost('/products/' . $product->getId()->toRfc4122() . '/barcodes', [
             'barcode' => '1234567890123'
@@ -117,8 +123,8 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testAddBarcodeDuplicateCode(): void
     {
-        $product1 = ProductFactory::createOne();
-        $product2 = ProductFactory::createOne();
+        $product1 = $this->createProduct();
+        $product2 = $this->createProduct();
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product1]);
 
         $response = $this->apiPost('/products/' . $product2->getId()->toRfc4122() . '/barcodes', [
@@ -131,7 +137,7 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testAddBarcodeEmptyCode(): void
     {
-        $product = ProductFactory::createOne();
+        $product = $this->createProduct();
 
         $response = $this->apiPost('/products/' . $product->getId()->toRfc4122() . '/barcodes', [
             'barcode' => ''
@@ -146,7 +152,7 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testAddBarcodeTooLongCode(): void
     {
-        $product = ProductFactory::createOne();
+        $product = $this->createProduct();
 
         $response = $this->apiPost('/products/' . $product->getId()->toRfc4122() . '/barcodes', [
             'barcode' => str_repeat('1', 51)
@@ -173,7 +179,7 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testRemoveBarcodeSuccess(): void
     {
-        $product = ProductFactory::createOne();
+        $product = $this->createProduct();
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product]);
 
         $response = $this->apiDelete('/products/' . $product->getId()->toRfc4122() . '/barcodes/1234567890123');
@@ -189,7 +195,7 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testRemoveBarcodeBarcodeNotFound(): void
     {
-        $product = ProductFactory::createOne();
+        $product = $this->createProduct();
 
         $response = $this->apiDelete('/products/' . $product->getId()->toRfc4122() . '/barcodes/nonexistent');
         $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
@@ -199,8 +205,8 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testRemoveBarcodeWrongProduct(): void
     {
-        $product1 = ProductFactory::createOne();
-        $product2 = ProductFactory::createOne();
+        $product1 = $this->createProduct();
+        $product2 = $this->createProduct();
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product1]);
 
         $response = $this->apiDelete('/products/' . $product2->getId()->toRfc4122() . '/barcodes/1234567890123');
@@ -213,7 +219,7 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testLookupBarcodeReturnsProduct(): void
     {
-        $product = ProductFactory::createOne(['name' => 'Test Product']);
+        $product = $this->createProduct(['name' => 'Test Product']);
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product]);
 
         $response = $this->apiGet('/barcodes/1234567890123');

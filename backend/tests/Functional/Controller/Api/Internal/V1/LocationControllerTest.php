@@ -6,7 +6,6 @@ namespace App\Tests\Functional\Controller\Api\Internal\V1;
 
 use App\Factory\LocationFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Zenstruck\Foundry\Test\Factories;
@@ -17,8 +16,6 @@ class LocationControllerTest extends WebTestCase
     use ApiTestTrait;
     use Factories;
     use ResetDatabase;
-
-    private KernelBrowser $client;
 
     protected function setUp(): void
     {

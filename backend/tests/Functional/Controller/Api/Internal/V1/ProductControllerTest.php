@@ -4,12 +4,14 @@ declare(strict_types = 1);
 
 namespace App\Tests\Functional\Controller\Api\Internal\V1;
 
+use App\Entity\Category;
+use App\Entity\Location;
+use App\Entity\Product;
 use App\Factory\BarcodeFactory;
 use App\Factory\CategoryFactory;
 use App\Factory\LocationFactory;
 use App\Factory\ProductFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
@@ -23,11 +25,33 @@ class ProductControllerTest extends WebTestCase
     use Factories;
     use ResetDatabase;
 
-    private KernelBrowser $client;
-
     protected function setUp(): void
     {
         $this->client = static::createClient();
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function createProduct(array $attributes = []): Product
+    {
+        return ProductFactory::createOne($attributes);
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function createCategory(array $attributes = []): Category
+    {
+        return CategoryFactory::createOne($attributes);
+    }
+
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    private function createLocation(array $attributes = []): Location
+    {
+        return LocationFactory::createOne($attributes);
     }
 
     // ========== List Tests ==========
@@ -52,9 +76,9 @@ class ProductControllerTest extends WebTestCase
 
     public function testListFilterByName(): void
     {
-        ProductFactory::createOne(['name' => 'Apple Juice']);
-        ProductFactory::createOne(['name' => 'Orange Juice']);
-        ProductFactory::createOne(['name' => 'Milk']);
+        $this->createProduct(['name' => 'Apple Juice']);
+        $this->createProduct(['name' => 'Orange Juice']);
+        $this->createProduct(['name' => 'Milk']);
 
         $response = $this->apiGet('/products', ['name' => 'Juice']);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -64,12 +88,12 @@ class ProductControllerTest extends WebTestCase
 
     public function testListFilterByCategoryId(): void
     {
-        $category1 = CategoryFactory::createOne(['name' => 'Beverages']);
-        $category2 = CategoryFactory::createOne(['name' => 'Dairy']);
+        $category1 = $this->createCategory(['name' => 'Beverages']);
+        $category2 = $this->createCategory(['name' => 'Dairy']);
 
-        ProductFactory::createOne(['category' => $category1]);
-        ProductFactory::createOne(['category' => $category1]);
-        ProductFactory::createOne(['category' => $category2]);
+        $this->createProduct(['category' => $category1]);
+        $this->createProduct(['category' => $category1]);
+        $this->createProduct(['category' => $category2]);
 
         $response = $this->apiGet('/products', ['category_id' => $category1->getId()->toRfc4122()]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -79,9 +103,9 @@ class ProductControllerTest extends WebTestCase
 
     public function testListFilterByActive(): void
     {
-        ProductFactory::createOne(['active' => true]);
-        ProductFactory::createOne(['active' => true]);
-        ProductFactory::createOne(['active' => false]);
+        $this->createProduct(['active' => true]);
+        $this->createProduct(['active' => true]);
+        $this->createProduct(['active' => false]);
 
         $response = $this->apiGet('/products', ['active' => '1']);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -91,8 +115,8 @@ class ProductControllerTest extends WebTestCase
 
     public function testListFilterByInactive(): void
     {
-        ProductFactory::createOne(['active' => true]);
-        ProductFactory::createOne(['active' => false]);
+        $this->createProduct(['active' => true]);
+        $this->createProduct(['active' => false]);
 
         $response = $this->apiGet('/products', ['active' => '0']);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -102,11 +126,11 @@ class ProductControllerTest extends WebTestCase
 
     public function testListCombinedFilters(): void
     {
-        $category = CategoryFactory::createOne(['name' => 'Beverages']);
+        $category = $this->createCategory(['name' => 'Beverages']);
 
-        ProductFactory::createOne(['name' => 'Apple Juice', 'category' => $category, 'active' => true]);
-        ProductFactory::createOne(['name' => 'Orange Juice', 'category' => $category, 'active' => false]);
-        ProductFactory::createOne(['name' => 'Apple Cider', 'active' => true]);
+        $this->createProduct(['name' => 'Apple Juice', 'category' => $category, 'active' => true]);
+        $this->createProduct(['name' => 'Orange Juice', 'category' => $category, 'active' => false]);
+        $this->createProduct(['name' => 'Apple Cider', 'active' => true]);
 
         $response = $this->apiGet('/products', [
             'name' => 'Apple',
@@ -123,7 +147,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testShowReturnsProduct(): void
     {
-        $product = ProductFactory::createOne(['name' => 'Test Product']);
+        $product = $this->createProduct(['name' => 'Test Product']);
 
         $response = $this->apiGet('/products/' . $product->getId()->toRfc4122());
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -151,7 +175,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testShowIncludesBarcodes(): void
     {
-        $product = ProductFactory::createOne(['name' => 'Test Product']);
+        $product = $this->createProduct(['name' => 'Test Product']);
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product]);
         BarcodeFactory::createOne(['barcode' => '9876543210987', 'product' => $product]);
 
@@ -164,9 +188,9 @@ class ProductControllerTest extends WebTestCase
 
     public function testShowResponseStructure(): void
     {
-        $category = CategoryFactory::createOne(['name' => 'Test Category']);
-        $location = LocationFactory::createOne(['name' => 'Test Location']);
-        $product = ProductFactory::createOne([
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Test Location']);
+        $product = $this->createProduct([
             'name' => 'Test Product',
             'category' => $category,
             'defaultLocation' => $location,
@@ -202,8 +226,8 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductWithMinimalFields(): void
     {
-        $category = CategoryFactory::createOne();
-        $location = LocationFactory::createOne();
+        $category = $this->createCategory();
+        $location = $this->createLocation();
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
@@ -221,8 +245,8 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductWithAllFields(): void
     {
-        $category = CategoryFactory::createOne();
-        $location = LocationFactory::createOne();
+        $category = $this->createCategory();
+        $location = $this->createLocation();
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
@@ -242,8 +266,8 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductValidationErrorMissingName(): void
     {
-        $category = CategoryFactory::createOne();
-        $location = LocationFactory::createOne();
+        $category = $this->createCategory();
+        $location = $this->createLocation();
 
         $response = $this->apiPost('/products', [
             'category_id' => $category->getId()->toRfc4122(),
@@ -259,7 +283,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductValidationErrorMissingCategoryId(): void
     {
-        $location = LocationFactory::createOne();
+        $location = $this->createLocation();
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
@@ -275,7 +299,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductValidationErrorMissingDefaultLocationId(): void
     {
-        $category = CategoryFactory::createOne();
+        $category = $this->createCategory();
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
@@ -291,7 +315,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductInvalidCategory(): void
     {
-        $location = LocationFactory::createOne();
+        $location = $this->createLocation();
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
@@ -305,7 +329,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductInvalidLocation(): void
     {
-        $category = CategoryFactory::createOne();
+        $category = $this->createCategory();
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
@@ -319,9 +343,9 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductDuplicateName(): void
     {
-        $category = CategoryFactory::createOne();
-        $location = LocationFactory::createOne();
-        ProductFactory::createOne(['name' => 'Existing Product']);
+        $category = $this->createCategory();
+        $location = $this->createLocation();
+        $this->createProduct(['name' => 'Existing Product']);
 
         $response = $this->apiPost('/products', [
             'name' => 'Existing Product',
@@ -334,8 +358,8 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductInvalidMinStock(): void
     {
-        $category = CategoryFactory::createOne();
-        $location = LocationFactory::createOne();
+        $category = $this->createCategory();
+        $location = $this->createLocation();
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
@@ -353,8 +377,8 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductInvalidExpiryDays(): void
     {
-        $category = CategoryFactory::createOne();
-        $location = LocationFactory::createOne();
+        $category = $this->createCategory();
+        $location = $this->createLocation();
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
@@ -374,7 +398,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductName(): void
     {
-        $product = ProductFactory::createOne(['name' => 'Old Name']);
+        $product = $this->createProduct(['name' => 'Old Name']);
 
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'name' => 'New Name'
@@ -386,9 +410,9 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductCategory(): void
     {
-        $oldCategory = CategoryFactory::createOne(['name' => 'Old Category']);
-        $newCategory = CategoryFactory::createOne(['name' => 'New Category']);
-        $product = ProductFactory::createOne(['category' => $oldCategory]);
+        $oldCategory = $this->createCategory(['name' => 'Old Category']);
+        $newCategory = $this->createCategory(['name' => 'New Category']);
+        $product = $this->createProduct(['category' => $oldCategory]);
 
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'category_id' => $newCategory->getId()->toRfc4122()
@@ -400,9 +424,9 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductLocation(): void
     {
-        $oldLocation = LocationFactory::createOne(['name' => 'Old Location']);
-        $newLocation = LocationFactory::createOne(['name' => 'New Location']);
-        $product = ProductFactory::createOne(['defaultLocation' => $oldLocation]);
+        $oldLocation = $this->createLocation(['name' => 'Old Location']);
+        $newLocation = $this->createLocation(['name' => 'New Location']);
+        $product = $this->createProduct(['defaultLocation' => $oldLocation]);
 
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'default_location_id' => $newLocation->getId()->toRfc4122()
@@ -414,7 +438,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductMinStock(): void
     {
-        $product = ProductFactory::createOne(['minStock' => 5]);
+        $product = $this->createProduct(['minStock' => 5]);
 
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'min_stock' => 15
@@ -426,7 +450,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductExpiryDays(): void
     {
-        $product = ProductFactory::createOne(['defaultExpiryDays' => null]);
+        $product = $this->createProduct(['defaultExpiryDays' => null]);
 
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'default_expiry_days' => 60
@@ -438,7 +462,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductClearExpiryDays(): void
     {
-        $product = ProductFactory::createOne(['defaultExpiryDays' => 30]);
+        $product = $this->createProduct(['defaultExpiryDays' => 30]);
 
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'clear_default_expiry_days' => true
@@ -450,7 +474,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductActive(): void
     {
-        $product = ProductFactory::createOne(['active' => true]);
+        $product = $this->createProduct(['active' => true]);
 
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'active' => false
@@ -462,7 +486,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductEmptyPayload(): void
     {
-        $product = ProductFactory::createOne(['name' => 'Original Name']);
+        $product = $this->createProduct(['name' => 'Original Name']);
 
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), []);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -494,7 +518,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testDeleteProductSoftDeleteByDefault(): void
     {
-        $product = ProductFactory::createOne(['active' => true]);
+        $product = $this->createProduct(['active' => true]);
         $productId = $product->getId()->toRfc4122();
 
         $response = $this->apiDelete('/products/' . $productId);
@@ -510,7 +534,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testDeleteProductHardDelete(): void
     {
-        $product = ProductFactory::createOne();
+        $product = $this->createProduct();
         $productId = $product->getId()->toRfc4122();
 
         $response = $this->apiDelete('/products/' . $productId, ['hard' => '1']);
