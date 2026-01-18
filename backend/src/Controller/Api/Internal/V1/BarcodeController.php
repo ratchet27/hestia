@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
+use App\Exception\Common\InvalidUuidException;
 use App\Request\CreateBarcodeRequest;
 use App\Response\Barcode\BarcodeResponse;
 use App\Response\Product\ProductResponse;
@@ -13,7 +14,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
@@ -35,7 +35,7 @@ final class BarcodeController extends AbstractController
         try {
             $uuid = Uuid::fromString($id);
         } catch (\InvalidArgumentException) {
-            throw new BadRequestHttpException('Invalid UUID format');
+            throw new InvalidUuidException($id);
         }
 
         $barcodes = $this->barcodeService->listBarcodes($uuid);
@@ -60,7 +60,7 @@ final class BarcodeController extends AbstractController
         try {
             $uuid = Uuid::fromString($id);
         } catch (\InvalidArgumentException) {
-            throw new BadRequestHttpException('Invalid UUID format');
+            throw new InvalidUuidException($id);
         }
 
         $barcode = $this->barcodeService->addBarcode($uuid, $request->barcode);
@@ -78,7 +78,7 @@ final class BarcodeController extends AbstractController
         try {
             $uuid = Uuid::fromString($id);
         } catch (\InvalidArgumentException) {
-            throw new BadRequestHttpException('Invalid UUID format');
+            throw new InvalidUuidException($id);
         }
 
         $this->barcodeService->removeBarcode($uuid, $barcode);

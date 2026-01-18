@@ -75,17 +75,19 @@ class BarcodeControllerTest extends WebTestCase
     public function testListBarcodesProductNotFound(): void
     {
         $response = $this->apiGet('/products/' . Uuid::v7() . '/barcodes');
-        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
-        static::assertArrayHasKey('detail', $data);
+        static::assertSame('Product not found', $data['title']);
+        static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
     public function testListBarcodesInvalidUuid(): void
     {
         $response = $this->apiGet('/products/not-a-uuid/barcodes');
-        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertSame('Invalid UUID format', $data['detail']);
+        static::assertSame('Invalid UUID format', $data['title']);
+        static::assertSame('INVALID_UUID', $data['type']);
     }
 
     // ========== Add Tests ==========
@@ -127,9 +129,10 @@ class BarcodeControllerTest extends WebTestCase
         $response = $this->apiPost('/products/' . $product2->getId() . '/barcodes', [
             'barcode' => '1234567890123'
         ]);
-        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertErrorResponse($response, Response::HTTP_CONFLICT);
 
-        static::assertSame('This barcode is already registered', $data['detail']);
+        static::assertSame('Barcode already exists', $data['title']);
+        static::assertSame('BARCODE_ALREADY_EXISTS', $data['type']);
     }
 
     public function testAddBarcodeEmptyCode(): void
@@ -167,9 +170,10 @@ class BarcodeControllerTest extends WebTestCase
         $response = $this->apiPost('/products/' . Uuid::v7() . '/barcodes', [
             'barcode' => '1234567890123'
         ]);
-        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
-        static::assertArrayHasKey('detail', $data);
+        static::assertSame('Product not found', $data['title']);
+        static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
     // ========== Remove Tests ==========
@@ -195,9 +199,10 @@ class BarcodeControllerTest extends WebTestCase
         $product = $this->createProduct();
 
         $response = $this->apiDelete('/products/' . $product->getId() . '/barcodes/nonexistent');
-        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
-        static::assertSame('Barcode not found', $data['detail']);
+        static::assertSame('Barcode not found', $data['title']);
+        static::assertSame('BARCODE_NOT_FOUND', $data['type']);
     }
 
     public function testRemoveBarcodeWrongProduct(): void
@@ -207,9 +212,10 @@ class BarcodeControllerTest extends WebTestCase
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product1]);
 
         $response = $this->apiDelete('/products/' . $product2->getId() . '/barcodes/1234567890123');
-        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
-        static::assertSame('Barcode not found', $data['detail']);
+        static::assertSame('Barcode not found', $data['title']);
+        static::assertSame('BARCODE_NOT_FOUND', $data['type']);
     }
 
     // ========== Lookup Tests ==========
@@ -230,8 +236,9 @@ class BarcodeControllerTest extends WebTestCase
     public function testLookupBarcodeNotFound(): void
     {
         $response = $this->apiGet('/barcodes/nonexistent');
-        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
-        static::assertSame('Barcode not found', $data['detail']);
+        static::assertSame('Barcode not found', $data['title']);
+        static::assertSame('BARCODE_NOT_FOUND', $data['type']);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
+use App\Exception\Common\InvalidUuidException;
 use App\Request\CreateProductRequest;
 use App\Request\UpdateProductRequest;
 use App\Response\Product\ProductResponse;
@@ -14,7 +15,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
@@ -64,7 +64,7 @@ final class ProductController extends AbstractController
         try {
             $uuid = Uuid::fromString($id);
         } catch (\InvalidArgumentException) {
-            throw new BadRequestHttpException('Invalid UUID format');
+            throw new InvalidUuidException($id);
         }
 
         $product = $this->productService->getProduct($uuid);
@@ -100,7 +100,7 @@ final class ProductController extends AbstractController
         try {
             $uuid = Uuid::fromString($id);
         } catch (\InvalidArgumentException) {
-            throw new BadRequestHttpException('Invalid UUID format');
+            throw new InvalidUuidException($id);
         }
 
         $product = $this->productService->updateProduct($uuid, $request);
@@ -118,7 +118,7 @@ final class ProductController extends AbstractController
         try {
             $uuid = Uuid::fromString($id);
         } catch (\InvalidArgumentException) {
-            throw new BadRequestHttpException('Invalid UUID format');
+            throw new InvalidUuidException($id);
         }
 
         if ($request->query->getBoolean('hard', false)) {

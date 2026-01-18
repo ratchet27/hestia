@@ -5,15 +5,17 @@ declare(strict_types = 1);
 namespace App\Service;
 
 use App\Entity\Product;
+use App\Exception\Product\CategoryNotFoundException;
+use App\Exception\Product\LocationNotFoundException;
+use App\Exception\Product\ProductNotFoundException;
 use App\Repository\CategoryRepository;
 use App\Repository\LocationRepository;
 use App\Repository\ProductRepository;
 use App\Request\CreateProductRequest;
 use App\Request\UpdateProductRequest;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProductService
@@ -41,7 +43,7 @@ class ProductService
         $product = $this->productRepository->findOneWithBarcodes($id);
 
         if ($product === null) {
-            throw new NotFoundHttpException('Product not found');
+            throw new ProductNotFoundException($id);
         }
 
         return $product;
@@ -49,14 +51,16 @@ class ProductService
 
     public function createProduct(CreateProductRequest $request): Product
     {
-        $category = $this->categoryRepository->find(Uuid::fromString($request->categoryId));
+        $categoryId = Uuid::fromString($request->categoryId);
+        $category = $this->categoryRepository->find($categoryId);
         if ($category === null) {
-            throw new BadRequestHttpException('Category not found');
+            throw new CategoryNotFoundException($categoryId);
         }
 
-        $location = $this->locationRepository->find(Uuid::fromString($request->defaultLocationId));
+        $locationId = Uuid::fromString($request->defaultLocationId);
+        $location = $this->locationRepository->find($locationId);
         if ($location === null) {
-            throw new BadRequestHttpException('Location not found');
+            throw new LocationNotFoundException($locationId);
         }
 
         $product = new Product();
@@ -70,7 +74,7 @@ class ProductService
 
         $errors = $this->validator->validate($product);
         if (count($errors) > 0) {
-            throw new BadRequestHttpException((string) $errors);
+            throw new ValidationFailedException($product, $errors);
         }
 
         $this->em->persist($product);
@@ -83,14 +87,16 @@ class ProductService
     {
         $product = $this->getProduct($id);
 
-        $category = $this->categoryRepository->find(Uuid::fromString($request->categoryId));
+        $categoryId = Uuid::fromString($request->categoryId);
+        $category = $this->categoryRepository->find($categoryId);
         if ($category === null) {
-            throw new BadRequestHttpException('Category not found');
+            throw new CategoryNotFoundException($categoryId);
         }
 
-        $location = $this->locationRepository->find(Uuid::fromString($request->defaultLocationId));
+        $locationId = Uuid::fromString($request->defaultLocationId);
+        $location = $this->locationRepository->find($locationId);
         if ($location === null) {
-            throw new BadRequestHttpException('Location not found');
+            throw new LocationNotFoundException($locationId);
         }
 
         $product->setName($request->name);
@@ -103,7 +109,7 @@ class ProductService
 
         $errors = $this->validator->validate($product);
         if (count($errors) > 0) {
-            throw new BadRequestHttpException((string) $errors);
+            throw new ValidationFailedException($product, $errors);
         }
 
         $this->em->flush();

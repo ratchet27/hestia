@@ -6,12 +6,14 @@ namespace App\Service;
 
 use App\Entity\Barcode;
 use App\Entity\Product;
+use App\Exception\Barcode\BarcodeAlreadyExistsException;
+use App\Exception\Barcode\BarcodeNotFoundException;
+use App\Exception\Product\ProductNotFoundException;
 use App\Repository\BarcodeRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BarcodeService
@@ -38,7 +40,7 @@ class BarcodeService
 
         $existing = $this->barcodeRepository->findByCode($code);
         if ($existing !== null) {
-            throw new BadRequestHttpException('This barcode is already registered');
+            throw new BarcodeAlreadyExistsException($code);
         }
 
         $barcode = new Barcode();
@@ -47,7 +49,7 @@ class BarcodeService
 
         $errors = $this->validator->validate($barcode);
         if (count($errors) > 0) {
-            throw new BadRequestHttpException((string) $errors);
+            throw new ValidationFailedException($barcode, $errors);
         }
 
         $this->em->persist($barcode);
@@ -61,7 +63,7 @@ class BarcodeService
         $barcode = $this->barcodeRepository->findOneByProductAndCode($productId, $code);
 
         if ($barcode === null) {
-            throw new NotFoundHttpException('Barcode not found');
+            throw new BarcodeNotFoundException($code);
         }
 
         $this->em->remove($barcode);
@@ -73,7 +75,7 @@ class BarcodeService
         $barcode = $this->barcodeRepository->findByCode($code);
 
         if ($barcode === null) {
-            throw new NotFoundHttpException('Barcode not found');
+            throw new BarcodeNotFoundException($code);
         }
 
         return $barcode->getProduct();
@@ -84,7 +86,7 @@ class BarcodeService
         $product = $this->productRepository->find($id);
 
         if ($product === null) {
-            throw new NotFoundHttpException('Product not found');
+            throw new ProductNotFoundException($id);
         }
 
         return $product;

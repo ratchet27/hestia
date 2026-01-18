@@ -75,6 +75,15 @@ trait ApiTestTrait
         return json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
     }
 
+    /** @return array<string, mixed> */
+    protected static function assertErrorResponse(Response $response, int $expectedStatusCode): array
+    {
+        static::assertSame($expectedStatusCode, $response->getStatusCode());
+        static::assertSame('application/problem+json', $response->headers->get('Content-Type'));
+
+        return json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+    }
+
     /** @param array<string, mixed> $data */
     protected static function assertListResponse(array $data, int $expectedTotal): void
     {

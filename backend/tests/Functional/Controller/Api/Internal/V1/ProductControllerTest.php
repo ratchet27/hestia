@@ -159,18 +159,19 @@ class ProductControllerTest extends WebTestCase
     public function testShowReturnsNotFoundForMissingProduct(): void
     {
         $response = $this->apiGet('/products/' . Uuid::v7());
-        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
-        static::assertArrayHasKey('detail', $data);
+        static::assertSame('Product not found', $data['title']);
+        static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
     public function testShowReturnsBadRequestForInvalidUuid(): void
     {
         $response = $this->apiGet('/products/not-a-uuid');
-        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertArrayHasKey('detail', $data);
-        static::assertSame('Invalid UUID format', $data['detail']);
+        static::assertSame('Invalid UUID format', $data['title']);
+        static::assertSame('INVALID_UUID', $data['type']);
     }
 
     public function testShowIncludesBarcodes(): void
@@ -322,9 +323,10 @@ class ProductControllerTest extends WebTestCase
             'category_id' => Uuid::v7(),
             'default_location_id' => $location->getId()
         ]);
-        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertSame('Category not found', $data['detail']);
+        static::assertSame('Category not found', $data['title']);
+        static::assertSame('CATEGORY_NOT_FOUND', $data['type']);
     }
 
     public function testCreateProductInvalidLocation(): void
@@ -336,9 +338,10 @@ class ProductControllerTest extends WebTestCase
             'category_id' => $category->getId(),
             'default_location_id' => Uuid::v7()
         ]);
-        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertSame('Location not found', $data['detail']);
+        static::assertSame('Location not found', $data['title']);
+        static::assertSame('LOCATION_NOT_FOUND', $data['type']);
     }
 
     public function testCreateProductDuplicateName(): void
@@ -352,8 +355,10 @@ class ProductControllerTest extends WebTestCase
             'category_id' => $category->getId(),
             'default_location_id' => $location->getId()
         ]);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        static::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode(), (string) $response->getContent());
+        static::assertSame('Validation failed', $data['title']);
+        static::assertSame('VALIDATION_ERROR', $data['type']);
     }
 
     public function testCreateProductInvalidMinStock(): void
@@ -514,9 +519,10 @@ class ProductControllerTest extends WebTestCase
             'min_stock' => 0,
             'active' => true
         ]);
-        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
-        static::assertArrayHasKey('detail', $data);
+        static::assertSame('Product not found', $data['title']);
+        static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
     public function testUpdateProductInvalidUuid(): void
@@ -531,9 +537,10 @@ class ProductControllerTest extends WebTestCase
             'min_stock' => 0,
             'active' => true
         ]);
-        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertSame('Invalid UUID format', $data['detail']);
+        static::assertSame('Invalid UUID format', $data['title']);
+        static::assertSame('INVALID_UUID', $data['type']);
     }
 
     // ========== Delete Tests ==========
@@ -571,16 +578,18 @@ class ProductControllerTest extends WebTestCase
     public function testDeleteProductNotFound(): void
     {
         $response = $this->apiDelete('/products/' . Uuid::v7());
-        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
-        static::assertArrayHasKey('detail', $data);
+        static::assertSame('Product not found', $data['title']);
+        static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
     public function testDeleteProductInvalidUuid(): void
     {
         $response = $this->apiDelete('/products/not-a-uuid');
-        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertSame('Invalid UUID format', $data['detail']);
+        static::assertSame('Invalid UUID format', $data['title']);
+        static::assertSame('INVALID_UUID', $data['type']);
     }
 }
