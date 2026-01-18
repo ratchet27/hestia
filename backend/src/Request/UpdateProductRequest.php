@@ -10,24 +10,25 @@ final readonly class UpdateProductRequest
 {
     // @mago-ignore lint:excessive-parameter-list
     public function __construct(
+        #[Assert\NotBlank]
         #[Assert\Length(max: 255)]
-        public ?string $name = null,
+        public string $name,
 
+        #[Assert\NotBlank]
         #[Assert\Uuid]
-        public ?string $categoryId = null,
+        public string $categoryId,
 
+        #[Assert\NotBlank]
         #[Assert\Uuid]
-        public ?string $defaultLocationId = null,
+        public string $defaultLocationId,
 
         #[Assert\Positive]
         public ?int $defaultExpiryDays = null,
 
         #[Assert\PositiveOrZero]
-        public ?int $minStock = null,
+        public int $minStock = 0,
 
-        public ?bool $active = null,
-
-        public bool $clearDefaultExpiryDays = false
+        public bool $active = true
     ) {
     }
 }

@@ -43,10 +43,10 @@ trait ApiTestTrait
     }
 
     /** @param array<string, mixed> $data */
-    protected function apiPatch(string $uri, array $data): Response
+    protected function apiPut(string $uri, array $data): Response
     {
         $this->client->request(
-            'PATCH',
+            'PUT',
             self::API_PREFIX . $uri,
             [],
             [],

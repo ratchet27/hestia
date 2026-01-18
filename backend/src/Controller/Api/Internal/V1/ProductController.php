@@ -88,7 +88,7 @@ final class ProductController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
-    #[Route('/products/{id}', name: 'api_products_update', methods: ['PATCH'])]
+    #[Route('/products/{id}', name: 'api_products_update', methods: ['PUT'])]
     #[OA\Response(response: 200, description: 'Product updated')]
     #[OA\Response(response: 400, description: 'Invalid input')]
     #[OA\Response(response: 404, description: 'Product not found')]
@@ -123,9 +123,11 @@ final class ProductController extends AbstractController
 
         if ($request->query->getBoolean('hard', false)) {
             $this->productService->hardDelete($uuid);
-        } else {
-            $this->productService->softDelete($uuid);
+
+            return $this->json(null, Response::HTTP_NO_CONTENT);
         }
+
+        $this->productService->softDelete($uuid);
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }

@@ -8,7 +8,8 @@ use App\Factory\CategoryFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Uid\Uuid;use Zenstruck\Foundry\Test\Factories;
+use Symfony\Component\Uid\Uuid;
+use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
 class CategoryControllerTest extends WebTestCase

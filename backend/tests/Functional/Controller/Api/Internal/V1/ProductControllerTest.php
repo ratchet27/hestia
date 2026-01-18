@@ -396,13 +396,31 @@ class ProductControllerTest extends WebTestCase
 
     // ========== Update Tests ==========
 
+    /**
+     * Build a full PUT payload from a product with optional overrides.
+     *
+     * @param array<string, mixed> $overrides
+     * @return array<string, mixed>
+     */
+    private function buildUpdatePayload(Product $product, array $overrides = []): array
+    {
+        return array_merge([
+            'name' => $product->getName(),
+            'category_id' => (string) $product->getCategory()->getId(),
+            'default_location_id' => (string) $product->getDefaultLocation()->getId(),
+            'default_expiry_days' => $product->getDefaultExpiryDays(),
+            'min_stock' => $product->getMinStock(),
+            'active' => $product->isActive()
+        ], $overrides);
+    }
+
     public function testUpdateProductName(): void
     {
         $product = $this->createProduct(['name' => 'Old Name']);
 
-        $response = $this->apiPatch('/products/' . $product->getId(), [
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
             'name' => 'New Name'
-        ]);
+        ]));
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertSame('New Name', $data['data']['name']);
@@ -414,9 +432,9 @@ class ProductControllerTest extends WebTestCase
         $newCategory = $this->createCategory(['name' => 'New Category']);
         $product = $this->createProduct(['category' => $oldCategory]);
 
-        $response = $this->apiPatch('/products/' . $product->getId(), [
-            'category_id' => $newCategory->getId()
-        ]);
+        $response = $this->apiPut('/products/'
+            . $product->getId(), $this->buildUpdatePayload($product, ['category_id' =>
+            (string) $newCategory->getId()]));
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertSame('New Category', $data['data']['category']['name']);
@@ -428,9 +446,9 @@ class ProductControllerTest extends WebTestCase
         $newLocation = $this->createLocation(['name' => 'New Location']);
         $product = $this->createProduct(['defaultLocation' => $oldLocation]);
 
-        $response = $this->apiPatch('/products/' . $product->getId(), [
-            'default_location_id' => $newLocation->getId()
-        ]);
+        $response = $this->apiPut('/products/'
+            . $product->getId(), $this->buildUpdatePayload($product, ['default_location_id' =>
+            (string) $newLocation->getId()]));
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertSame('New Location', $data['data']['default_location']['name']);
@@ -440,9 +458,9 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['minStock' => 5]);
 
-        $response = $this->apiPatch('/products/' . $product->getId(), [
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
             'min_stock' => 15
-        ]);
+        ]));
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertSame(15, $data['data']['min_stock']);
@@ -452,9 +470,9 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['defaultExpiryDays' => null]);
 
-        $response = $this->apiPatch('/products/' . $product->getId(), [
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
             'default_expiry_days' => 60
-        ]);
+        ]));
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertSame(60, $data['data']['default_expiry_days']);
@@ -464,9 +482,9 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['defaultExpiryDays' => 30]);
 
-        $response = $this->apiPatch('/products/' . $product->getId(), [
-            'clear_default_expiry_days' => true
-        ]);
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'default_expiry_days' => null
+        ]));
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertNull($data['data']['default_expiry_days']);
@@ -476,28 +494,25 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['active' => true]);
 
-        $response = $this->apiPatch('/products/' . $product->getId(), [
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
             'active' => false
-        ]);
+        ]));
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertFalse($data['data']['active']);
     }
 
-    public function testUpdateProductEmptyPayload(): void
-    {
-        $product = $this->createProduct(['name' => 'Original Name']);
-
-        $response = $this->apiPatch('/products/' . $product->getId(), []);
-        $data = static::assertJsonResponse($response, Response::HTTP_OK);
-
-        static::assertSame('Original Name', $data['data']['name']);
-    }
-
     public function testUpdateProductNotFound(): void
     {
-        $response = $this->apiPatch('/products/' . Uuid::v7(), [
-            'name' => 'New Name'
+        $category = $this->createCategory();
+        $location = $this->createLocation();
+
+        $response = $this->apiPut('/products/' . Uuid::v7(), [
+            'name' => 'New Name',
+            'category_id' => (string) $category->getId(),
+            'default_location_id' => (string) $location->getId(),
+            'min_stock' => 0,
+            'active' => true
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
@@ -506,8 +521,15 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductInvalidUuid(): void
     {
-        $response = $this->apiPatch('/products/not-a-uuid', [
-            'name' => 'New Name'
+        $category = $this->createCategory();
+        $location = $this->createLocation();
+
+        $response = $this->apiPut('/products/not-a-uuid', [
+            'name' => 'New Name',
+            'category_id' => (string) $category->getId(),
+            'default_location_id' => (string) $location->getId(),
+            'min_stock' => 0,
+            'active' => true
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 

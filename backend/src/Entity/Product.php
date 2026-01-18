@@ -141,9 +141,24 @@ class Product
         return $this->active;
     }
 
+    // @mago-ignore lint:no-boolean-flag-parameter
     public function setActive(bool $active): static
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    public function activate(): static
+    {
+        $this->active = true;
+
+        return $this;
+    }
+
+    public function deactivate(): static
+    {
+        $this->active = false;
 
         return $this;
     }

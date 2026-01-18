@@ -65,7 +65,8 @@ class ProductService
         $product->setDefaultLocation($location);
         $product->setDefaultExpiryDays($request->defaultExpiryDays);
         $product->setMinStock($request->minStock);
-        $product->setActive($request->active);
+
+        $request->active ? $product->activate() : $product->deactivate();
 
         $errors = $this->validator->validate($product);
         if (count($errors) > 0) {
@@ -82,41 +83,23 @@ class ProductService
     {
         $product = $this->getProduct($id);
 
-        if ($request->name !== null) {
-            $product->setName($request->name);
+        $category = $this->categoryRepository->find(Uuid::fromString($request->categoryId));
+        if ($category === null) {
+            throw new BadRequestHttpException('Category not found');
         }
 
-        if ($request->categoryId !== null) {
-            $category = $this->categoryRepository->find(Uuid::fromString($request->categoryId));
-            if ($category === null) {
-                throw new BadRequestHttpException('Category not found');
-            }
-
-            $product->setCategory($category);
+        $location = $this->locationRepository->find(Uuid::fromString($request->defaultLocationId));
+        if ($location === null) {
+            throw new BadRequestHttpException('Location not found');
         }
 
-        if ($request->defaultLocationId !== null) {
-            $location = $this->locationRepository->find(Uuid::fromString($request->defaultLocationId));
-            if ($location === null) {
-                throw new BadRequestHttpException('Location not found');
-            }
+        $product->setName($request->name);
+        $product->setCategory($category);
+        $product->setDefaultLocation($location);
+        $product->setDefaultExpiryDays($request->defaultExpiryDays);
+        $product->setMinStock($request->minStock);
 
-            $product->setDefaultLocation($location);
-        }
-
-        if ($request->defaultExpiryDays !== null) {
-            $product->setDefaultExpiryDays($request->defaultExpiryDays);
-        } elseif ($request->clearDefaultExpiryDays) {
-            $product->setDefaultExpiryDays(null);
-        }
-
-        if ($request->minStock !== null) {
-            $product->setMinStock($request->minStock);
-        }
-
-        if ($request->active !== null) {
-            $product->setActive($request->active);
-        }
+        $request->active ? $product->activate() : $product->deactivate();
 
         $errors = $this->validator->validate($product);
         if (count($errors) > 0) {
@@ -131,7 +114,7 @@ class ProductService
     public function softDelete(Uuid $id): void
     {
         $product = $this->getProduct($id);
-        $product->setActive(false);
+        $product->deactivate();
 
         $this->em->flush();
     }
