@@ -131,7 +131,7 @@ class StockEntryRepository extends ServiceEntityRepository
     /**
      * Get stock summary grouped by product.
      *
-     * @return array<array{product_id: string, total_quantity: int, earliest_expiry: ?string}>
+     * @return array<array{product_id: string, total_quantity: int, earliest_expiry: ?\DateTimeInterface}>
      */
     public function getStockSummary(): array
     {
@@ -151,7 +151,7 @@ class StockEntryRepository extends ServiceEntityRepository
     /**
      * Get stock summary for products with low stock.
      *
-     * @return array<array{product_id: string, total_quantity: int, earliest_expiry: ?string}>
+     * @return array<array{product_id: string, total_quantity: int, earliest_expiry: ?\DateTimeInterface}>
      */
     public function getStockSummaryLowStock(): array
     {

@@ -17,7 +17,8 @@ class InsufficientStockException extends ApiException
             code: 400,
             extraData: [
                 'requested' => $requested,
-                'available' => $available
+                'available' => $available,
+                'message' => "Cannot consume {$requested} units, only {$available} available at this location"
             ]
         ));
     }
