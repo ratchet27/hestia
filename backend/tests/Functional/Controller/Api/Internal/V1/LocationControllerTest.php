@@ -8,7 +8,7 @@ use App\Factory\LocationFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
-use Zenstruck\Foundry\Test\Factories;
+use Symfony\Component\Uid\Uuid;use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
 class LocationControllerTest extends WebTestCase
@@ -58,9 +58,6 @@ class LocationControllerTest extends WebTestCase
         static::assertArrayHasKey('id', $location);
         static::assertArrayHasKey('name', $location);
         static::assertSame('Test Location', $location['name']);
-        static::assertMatchesRegularExpression(
-            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
-            $location['id']
-        );
+        static::assertTrue(Uuid::isValid($location['id']));
     }
 }

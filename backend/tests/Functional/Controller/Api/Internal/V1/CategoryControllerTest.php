@@ -8,7 +8,7 @@ use App\Factory\CategoryFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
-use Zenstruck\Foundry\Test\Factories;
+use Symfony\Component\Uid\Uuid;use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
 class CategoryControllerTest extends WebTestCase
@@ -58,9 +58,6 @@ class CategoryControllerTest extends WebTestCase
         static::assertArrayHasKey('id', $category);
         static::assertArrayHasKey('name', $category);
         static::assertSame('Test Category', $category['name']);
-        static::assertMatchesRegularExpression(
-            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
-            $category['id']
-        );
+        static::assertTrue(Uuid::isValid($category['id']));
     }
 }

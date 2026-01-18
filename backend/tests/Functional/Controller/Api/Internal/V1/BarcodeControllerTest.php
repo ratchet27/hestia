@@ -115,10 +115,7 @@ class BarcodeControllerTest extends WebTestCase
         $barcodeData = $data['data'];
         static::assertArrayHasKey('id', $barcodeData);
         static::assertArrayHasKey('barcode', $barcodeData);
-        static::assertMatchesRegularExpression(
-            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
-            $barcodeData['id']
-        );
+        static::assertTrue(Uuid::isValid($barcodeData['id']));
     }
 
     public function testAddBarcodeDuplicateCode(): void
