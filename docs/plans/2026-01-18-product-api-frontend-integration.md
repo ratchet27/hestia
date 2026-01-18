@@ -48,26 +48,26 @@ frontend/src/api/
 
 **Step 1: Install production dependencies**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm install @tanstack/react-query react-hook-form react-hot-toast`
+Run: `cd /home/pavel/projects/hestia/frontend && bun add @tanstack/react-query react-hook-form react-hot-toast`
 
 Expected: Packages added to dependencies in package.json
 
 **Step 2: Install dev dependencies**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm install -D orval`
+Run: `cd /home/pavel/projects/hestia/frontend && bun add -D orval`
 
 Expected: orval added to devDependencies in package.json
 
 **Step 3: Verify installation**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm ls @tanstack/react-query react-hook-form react-hot-toast orval`
+Run: `cd /home/pavel/projects/hestia/frontend && bun pm ls | grep -E "(react-query|react-hook-form|react-hot-toast|orval)"`
 
 Expected: All packages listed with versions
 
 **Step 4: Commit**
 
 ```bash
-cd /home/pavel/projects/hestia && git add frontend/package.json frontend/package-lock.json frontend/bun.lock 2>/dev/null || true
+cd /home/pavel/projects/hestia && git add frontend/package.json frontend/bun.lock
 git commit -s -m "feat(frontend): add react-query, react-hook-form, toast, orval dependencies"
 ```
 
@@ -144,7 +144,7 @@ export default defineConfig({
 })
 ```
 
-**Step 2: Add npm scripts to package.json**
+**Step 2: Add scripts to package.json**
 
 Add to `frontend/package.json` scripts section:
 ```json
@@ -299,7 +299,7 @@ Expected: JSON output starting with `{"openapi":"3.0.0"`
 
 **Step 3: Generate API client**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm run generate-api`
+Run: `cd /home/pavel/projects/hestia/frontend && bun run generate-api`
 
 Expected: Files created in `src/api/generated/` with plain fetch functions
 
@@ -615,7 +615,7 @@ createRoot(document.getElementById('root')!).render(
 
 **Step 2: Verify app still runs**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm run dev`
+Run: `cd /home/pavel/projects/hestia/frontend && bun run dev`
 
 Expected: App starts without errors
 
@@ -1063,7 +1063,7 @@ export function ProductsPage(): React.ReactElement {
 
 **Step 2: Verify the app compiles**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm run build`
+Run: `cd /home/pavel/projects/hestia/frontend && bun run build`
 
 Expected: Build succeeds
 
@@ -1116,7 +1116,7 @@ In `frontend/src/data/hooks.ts`:
 
 **Step 5: Verify app still compiles**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm run build`
+Run: `cd /home/pavel/projects/hestia/frontend && bun run build`
 
 Expected: Build succeeds
 
@@ -1143,7 +1143,7 @@ Run: `cd /home/pavel/projects/hestia/backend && docker compose exec php bin/cons
 
 **Step 3: Start frontend dev server**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm run dev`
+Run: `cd /home/pavel/projects/hestia/frontend && bun run dev`
 
 **Step 4: Manual testing checklist**
 
@@ -1174,15 +1174,15 @@ git commit -s -m "fix(frontend): address integration issues found during testing
 
 **Step 1: Run linter**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm run lint:fix`
+Run: `cd /home/pavel/projects/hestia/frontend && bun run lint:fix`
 
 **Step 2: Run formatter**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm run format`
+Run: `cd /home/pavel/projects/hestia/frontend && bun run format`
 
 **Step 3: Verify build**
 
-Run: `cd /home/pavel/projects/hestia/frontend && npm run build`
+Run: `cd /home/pavel/projects/hestia/frontend && bun run build`
 
 Expected: Clean build with no errors
 
