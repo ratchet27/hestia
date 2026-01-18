@@ -28,9 +28,9 @@ class CategoryControllerTest extends WebTestCase
     public function testListReturnsEmptyWhenNoData(): void
     {
         $response = $this->apiGet('/categories');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 0);
+        static::assertListResponse($data, 0);
     }
 
     public function testListReturnsCategoriesOrderedByName(): void
@@ -40,12 +40,12 @@ class CategoryControllerTest extends WebTestCase
         CategoryFactory::createOne(['name' => 'Mango']);
 
         $response = $this->apiGet('/categories');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 3);
-        $this->assertSame('Apple', $data['data'][0]['name']);
-        $this->assertSame('Mango', $data['data'][1]['name']);
-        $this->assertSame('Zebra', $data['data'][2]['name']);
+        static::assertListResponse($data, 3);
+        static::assertSame('Apple', $data['data'][0]['name']);
+        static::assertSame('Mango', $data['data'][1]['name']);
+        static::assertSame('Zebra', $data['data'][2]['name']);
     }
 
     public function testListResponseStructure(): void
@@ -53,15 +53,15 @@ class CategoryControllerTest extends WebTestCase
         CategoryFactory::createOne(['name' => 'Test Category']);
 
         $response = $this->apiGet('/categories');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 1);
+        static::assertListResponse($data, 1);
 
         $category = $data['data'][0];
-        $this->assertArrayHasKey('id', $category);
-        $this->assertArrayHasKey('name', $category);
-        $this->assertSame('Test Category', $category['name']);
-        $this->assertMatchesRegularExpression(
+        static::assertArrayHasKey('id', $category);
+        static::assertArrayHasKey('name', $category);
+        static::assertSame('Test Category', $category['name']);
+        static::assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
             $category['id']
         );

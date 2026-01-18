@@ -28,9 +28,9 @@ class LocationControllerTest extends WebTestCase
     public function testListReturnsEmptyWhenNoData(): void
     {
         $response = $this->apiGet('/locations');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 0);
+        static::assertListResponse($data, 0);
     }
 
     public function testListReturnsLocationsOrderedByName(): void
@@ -40,12 +40,12 @@ class LocationControllerTest extends WebTestCase
         LocationFactory::createOne(['name' => 'Garage']);
 
         $response = $this->apiGet('/locations');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 3);
-        $this->assertSame('Basement', $data['data'][0]['name']);
-        $this->assertSame('Garage', $data['data'][1]['name']);
-        $this->assertSame('Warehouse', $data['data'][2]['name']);
+        static::assertListResponse($data, 3);
+        static::assertSame('Basement', $data['data'][0]['name']);
+        static::assertSame('Garage', $data['data'][1]['name']);
+        static::assertSame('Warehouse', $data['data'][2]['name']);
     }
 
     public function testListResponseStructure(): void
@@ -53,15 +53,15 @@ class LocationControllerTest extends WebTestCase
         LocationFactory::createOne(['name' => 'Test Location']);
 
         $response = $this->apiGet('/locations');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 1);
+        static::assertListResponse($data, 1);
 
         $location = $data['data'][0];
-        $this->assertArrayHasKey('id', $location);
-        $this->assertArrayHasKey('name', $location);
-        $this->assertSame('Test Location', $location['name']);
-        $this->assertMatchesRegularExpression(
+        static::assertArrayHasKey('id', $location);
+        static::assertArrayHasKey('name', $location);
+        static::assertSame('Test Location', $location['name']);
+        static::assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
             $location['id']
         );

@@ -35,9 +35,9 @@ class BarcodeControllerTest extends WebTestCase
         $product = ProductFactory::createOne();
 
         $response = $this->apiGet('/products/' . $product->getId()->toRfc4122() . '/barcodes');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 0);
+        static::assertListResponse($data, 0);
     }
 
     public function testListBarcodesReturnsBarcodesForProduct(): void
@@ -47,9 +47,9 @@ class BarcodeControllerTest extends WebTestCase
         BarcodeFactory::createOne(['barcode' => '9876543210987', 'product' => $product]);
 
         $response = $this->apiGet('/products/' . $product->getId()->toRfc4122() . '/barcodes');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 2);
+        static::assertListResponse($data, 2);
     }
 
     public function testListBarcodesDoesNotIncludeOtherProductBarcodes(): void
@@ -60,26 +60,26 @@ class BarcodeControllerTest extends WebTestCase
         BarcodeFactory::createOne(['barcode' => '9876543210987', 'product' => $product2]);
 
         $response = $this->apiGet('/products/' . $product1->getId()->toRfc4122() . '/barcodes');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 1);
-        $this->assertSame('1234567890123', $data['data'][0]['barcode']);
+        static::assertListResponse($data, 1);
+        static::assertSame('1234567890123', $data['data'][0]['barcode']);
     }
 
     public function testListBarcodesProductNotFound(): void
     {
         $response = $this->apiGet('/products/' . Uuid::v7()->toRfc4122() . '/barcodes');
-        $data = $this->assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
-        $this->assertArrayHasKey('detail', $data);
+        static::assertArrayHasKey('detail', $data);
     }
 
     public function testListBarcodesInvalidUuid(): void
     {
         $response = $this->apiGet('/products/not-a-uuid/barcodes');
-        $data = $this->assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 
-        $this->assertSame('Invalid UUID format', $data['detail']);
+        static::assertSame('Invalid UUID format', $data['detail']);
     }
 
     // ========== Add Tests ==========
@@ -91,10 +91,10 @@ class BarcodeControllerTest extends WebTestCase
         $response = $this->apiPost('/products/' . $product->getId()->toRfc4122() . '/barcodes', [
             'barcode' => '1234567890123'
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_CREATED);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
 
-        $this->assertArrayHasKey('data', $data);
-        $this->assertSame('1234567890123', $data['data']['barcode']);
+        static::assertArrayHasKey('data', $data);
+        static::assertSame('1234567890123', $data['data']['barcode']);
     }
 
     public function testAddBarcodeResponseStructure(): void
@@ -104,12 +104,12 @@ class BarcodeControllerTest extends WebTestCase
         $response = $this->apiPost('/products/' . $product->getId()->toRfc4122() . '/barcodes', [
             'barcode' => '1234567890123'
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_CREATED);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
 
         $barcodeData = $data['data'];
-        $this->assertArrayHasKey('id', $barcodeData);
-        $this->assertArrayHasKey('barcode', $barcodeData);
-        $this->assertMatchesRegularExpression(
+        static::assertArrayHasKey('id', $barcodeData);
+        static::assertArrayHasKey('barcode', $barcodeData);
+        static::assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
             $barcodeData['id']
         );
@@ -124,9 +124,9 @@ class BarcodeControllerTest extends WebTestCase
         $response = $this->apiPost('/products/' . $product2->getId()->toRfc4122() . '/barcodes', [
             'barcode' => '1234567890123'
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 
-        $this->assertSame('This barcode is already registered', $data['detail']);
+        static::assertSame('This barcode is already registered', $data['detail']);
     }
 
     public function testAddBarcodeEmptyCode(): void
@@ -137,7 +137,7 @@ class BarcodeControllerTest extends WebTestCase
             'barcode' => ''
         ]);
 
-        $this->assertSame(
+        static::assertSame(
             Response::HTTP_UNPROCESSABLE_ENTITY,
             $response->getStatusCode(),
             (string) $response->getContent()
@@ -152,7 +152,7 @@ class BarcodeControllerTest extends WebTestCase
             'barcode' => str_repeat('1', 51)
         ]);
 
-        $this->assertSame(
+        static::assertSame(
             Response::HTTP_UNPROCESSABLE_ENTITY,
             $response->getStatusCode(),
             (string) $response->getContent()
@@ -164,9 +164,9 @@ class BarcodeControllerTest extends WebTestCase
         $response = $this->apiPost('/products/' . Uuid::v7()->toRfc4122() . '/barcodes', [
             'barcode' => '1234567890123'
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
-        $this->assertArrayHasKey('detail', $data);
+        static::assertArrayHasKey('detail', $data);
     }
 
     // ========== Remove Tests ==========
@@ -178,13 +178,13 @@ class BarcodeControllerTest extends WebTestCase
 
         $response = $this->apiDelete('/products/' . $product->getId()->toRfc4122() . '/barcodes/1234567890123');
 
-        $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode(), (string) $response->getContent());
+        static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode(), (string) $response->getContent());
 
         // Verify barcode is removed
         $response = $this->apiGet('/products/' . $product->getId()->toRfc4122() . '/barcodes');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 0);
+        static::assertListResponse($data, 0);
     }
 
     public function testRemoveBarcodeBarcodeNotFound(): void
@@ -192,9 +192,9 @@ class BarcodeControllerTest extends WebTestCase
         $product = ProductFactory::createOne();
 
         $response = $this->apiDelete('/products/' . $product->getId()->toRfc4122() . '/barcodes/nonexistent');
-        $data = $this->assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
-        $this->assertSame('Barcode not found', $data['detail']);
+        static::assertSame('Barcode not found', $data['detail']);
     }
 
     public function testRemoveBarcodeWrongProduct(): void
@@ -204,9 +204,9 @@ class BarcodeControllerTest extends WebTestCase
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product1]);
 
         $response = $this->apiDelete('/products/' . $product2->getId()->toRfc4122() . '/barcodes/1234567890123');
-        $data = $this->assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
-        $this->assertSame('Barcode not found', $data['detail']);
+        static::assertSame('Barcode not found', $data['detail']);
     }
 
     // ========== Lookup Tests ==========
@@ -217,18 +217,18 @@ class BarcodeControllerTest extends WebTestCase
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product]);
 
         $response = $this->apiGet('/barcodes/1234567890123');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertArrayHasKey('data', $data);
-        $this->assertSame('Test Product', $data['data']['name']);
-        $this->assertSame($product->getId()->toRfc4122(), $data['data']['id']);
+        static::assertArrayHasKey('data', $data);
+        static::assertSame('Test Product', $data['data']['name']);
+        static::assertSame($product->getId()->toRfc4122(), $data['data']['id']);
     }
 
     public function testLookupBarcodeNotFound(): void
     {
         $response = $this->apiGet('/barcodes/nonexistent');
-        $data = $this->assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
-        $this->assertSame('Barcode not found', $data['detail']);
+        static::assertSame('Barcode not found', $data['detail']);
     }
 }

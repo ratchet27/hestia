@@ -66,8 +66,8 @@ trait ApiTestTrait
     /** @return array<string, mixed> */
     protected function assertJsonResponse(Response $response, int $expectedStatusCode): array
     {
-        $this->assertSame($expectedStatusCode, $response->getStatusCode());
-        $this->assertSame('application/json', $response->headers->get('Content-Type'));
+        static::assertSame($expectedStatusCode, $response->getStatusCode());
+        static::assertSame('application/json', $response->headers->get('Content-Type'));
 
         return json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
     }
@@ -75,10 +75,10 @@ trait ApiTestTrait
     /** @param array<string, mixed> $data */
     protected function assertListResponse(array $data, int $expectedTotal): void
     {
-        $this->assertArrayHasKey('data', $data);
-        $this->assertArrayHasKey('meta', $data);
-        $this->assertArrayHasKey('total', $data['meta']);
-        $this->assertSame($expectedTotal, $data['meta']['total']);
-        $this->assertCount($expectedTotal, $data['data']);
+        static::assertArrayHasKey('data', $data);
+        static::assertArrayHasKey('meta', $data);
+        static::assertArrayHasKey('total', $data['meta']);
+        static::assertSame($expectedTotal, $data['meta']['total']);
+        static::assertCount($expectedTotal, $data['data']);
     }
 }

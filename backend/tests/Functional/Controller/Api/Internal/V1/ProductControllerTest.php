@@ -35,9 +35,9 @@ class ProductControllerTest extends WebTestCase
     public function testListReturnsEmptyWhenNoData(): void
     {
         $response = $this->apiGet('/products');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 0);
+        static::assertListResponse($data, 0);
     }
 
     public function testListReturnsProducts(): void
@@ -45,9 +45,9 @@ class ProductControllerTest extends WebTestCase
         ProductFactory::createMany(3);
 
         $response = $this->apiGet('/products');
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 3);
+        static::assertListResponse($data, 3);
     }
 
     public function testListFilterByName(): void
@@ -57,9 +57,9 @@ class ProductControllerTest extends WebTestCase
         ProductFactory::createOne(['name' => 'Milk']);
 
         $response = $this->apiGet('/products', ['name' => 'Juice']);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 2);
+        static::assertListResponse($data, 2);
     }
 
     public function testListFilterByCategoryId(): void
@@ -72,9 +72,9 @@ class ProductControllerTest extends WebTestCase
         ProductFactory::createOne(['category' => $category2]);
 
         $response = $this->apiGet('/products', ['category_id' => $category1->getId()->toRfc4122()]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 2);
+        static::assertListResponse($data, 2);
     }
 
     public function testListFilterByActive(): void
@@ -84,9 +84,9 @@ class ProductControllerTest extends WebTestCase
         ProductFactory::createOne(['active' => false]);
 
         $response = $this->apiGet('/products', ['active' => '1']);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 2);
+        static::assertListResponse($data, 2);
     }
 
     public function testListFilterByInactive(): void
@@ -95,9 +95,9 @@ class ProductControllerTest extends WebTestCase
         ProductFactory::createOne(['active' => false]);
 
         $response = $this->apiGet('/products', ['active' => '0']);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 1);
+        static::assertListResponse($data, 1);
     }
 
     public function testListCombinedFilters(): void
@@ -113,10 +113,10 @@ class ProductControllerTest extends WebTestCase
             'category_id' => $category->getId()->toRfc4122(),
             'active' => '1'
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertListResponse($data, 1);
-        $this->assertSame('Apple Juice', $data['data'][0]['name']);
+        static::assertListResponse($data, 1);
+        static::assertSame('Apple Juice', $data['data'][0]['name']);
     }
 
     // ========== Show Tests ==========
@@ -126,27 +126,27 @@ class ProductControllerTest extends WebTestCase
         $product = ProductFactory::createOne(['name' => 'Test Product']);
 
         $response = $this->apiGet('/products/' . $product->getId()->toRfc4122());
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertArrayHasKey('data', $data);
-        $this->assertSame('Test Product', $data['data']['name']);
+        static::assertArrayHasKey('data', $data);
+        static::assertSame('Test Product', $data['data']['name']);
     }
 
     public function testShowReturnsNotFoundForMissingProduct(): void
     {
         $response = $this->apiGet('/products/' . Uuid::v7()->toRfc4122());
-        $data = $this->assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
-        $this->assertArrayHasKey('detail', $data);
+        static::assertArrayHasKey('detail', $data);
     }
 
     public function testShowReturnsBadRequestForInvalidUuid(): void
     {
         $response = $this->apiGet('/products/not-a-uuid');
-        $data = $this->assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 
-        $this->assertArrayHasKey('detail', $data);
-        $this->assertSame('Invalid UUID format', $data['detail']);
+        static::assertArrayHasKey('detail', $data);
+        static::assertSame('Invalid UUID format', $data['detail']);
     }
 
     public function testShowIncludesBarcodes(): void
@@ -156,10 +156,10 @@ class ProductControllerTest extends WebTestCase
         BarcodeFactory::createOne(['barcode' => '9876543210987', 'product' => $product]);
 
         $response = $this->apiGet('/products/' . $product->getId()->toRfc4122());
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertArrayHasKey('barcodes', $data['data']);
-        $this->assertCount(2, $data['data']['barcodes']);
+        static::assertArrayHasKey('barcodes', $data['data']);
+        static::assertCount(2, $data['data']['barcodes']);
     }
 
     public function testShowResponseStructure(): void
@@ -176,26 +176,26 @@ class ProductControllerTest extends WebTestCase
         ]);
 
         $response = $this->apiGet('/products/' . $product->getId()->toRfc4122());
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         $productData = $data['data'];
-        $this->assertArrayHasKey('id', $productData);
-        $this->assertArrayHasKey('name', $productData);
-        $this->assertArrayHasKey('category', $productData);
-        $this->assertArrayHasKey('default_location', $productData);
-        $this->assertArrayHasKey('default_expiry_days', $productData);
-        $this->assertArrayHasKey('min_stock', $productData);
-        $this->assertArrayHasKey('active', $productData);
-        $this->assertArrayHasKey('created_at', $productData);
-        $this->assertArrayHasKey('updated_at', $productData);
-        $this->assertArrayHasKey('barcodes', $productData);
+        static::assertArrayHasKey('id', $productData);
+        static::assertArrayHasKey('name', $productData);
+        static::assertArrayHasKey('category', $productData);
+        static::assertArrayHasKey('default_location', $productData);
+        static::assertArrayHasKey('default_expiry_days', $productData);
+        static::assertArrayHasKey('min_stock', $productData);
+        static::assertArrayHasKey('active', $productData);
+        static::assertArrayHasKey('created_at', $productData);
+        static::assertArrayHasKey('updated_at', $productData);
+        static::assertArrayHasKey('barcodes', $productData);
 
-        $this->assertSame('Test Product', $productData['name']);
-        $this->assertSame('Test Category', $productData['category']['name']);
-        $this->assertSame('Test Location', $productData['default_location']['name']);
-        $this->assertSame(30, $productData['default_expiry_days']);
-        $this->assertSame(5, $productData['min_stock']);
-        $this->assertTrue($productData['active']);
+        static::assertSame('Test Product', $productData['name']);
+        static::assertSame('Test Category', $productData['category']['name']);
+        static::assertSame('Test Location', $productData['default_location']['name']);
+        static::assertSame(30, $productData['default_expiry_days']);
+        static::assertSame(5, $productData['min_stock']);
+        static::assertTrue($productData['active']);
     }
 
     // ========== Create Tests ==========
@@ -210,13 +210,13 @@ class ProductControllerTest extends WebTestCase
             'category_id' => $category->getId()->toRfc4122(),
             'default_location_id' => $location->getId()->toRfc4122()
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_CREATED);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
 
-        $this->assertArrayHasKey('data', $data);
-        $this->assertSame('New Product', $data['data']['name']);
-        $this->assertSame(0, $data['data']['min_stock']);
-        $this->assertTrue($data['data']['active']);
-        $this->assertNull($data['data']['default_expiry_days']);
+        static::assertArrayHasKey('data', $data);
+        static::assertSame('New Product', $data['data']['name']);
+        static::assertSame(0, $data['data']['min_stock']);
+        static::assertTrue($data['data']['active']);
+        static::assertNull($data['data']['default_expiry_days']);
     }
 
     public function testCreateProductWithAllFields(): void
@@ -232,12 +232,12 @@ class ProductControllerTest extends WebTestCase
             'min_stock' => 10,
             'active' => false
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_CREATED);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
 
-        $this->assertSame('New Product', $data['data']['name']);
-        $this->assertSame(90, $data['data']['default_expiry_days']);
-        $this->assertSame(10, $data['data']['min_stock']);
-        $this->assertFalse($data['data']['active']);
+        static::assertSame('New Product', $data['data']['name']);
+        static::assertSame(90, $data['data']['default_expiry_days']);
+        static::assertSame(10, $data['data']['min_stock']);
+        static::assertFalse($data['data']['active']);
     }
 
     public function testCreateProductValidationErrorMissingName(): void
@@ -250,7 +250,7 @@ class ProductControllerTest extends WebTestCase
             'default_location_id' => $location->getId()->toRfc4122()
         ]);
 
-        $this->assertSame(
+        static::assertSame(
             Response::HTTP_UNPROCESSABLE_ENTITY,
             $response->getStatusCode(),
             (string) $response->getContent()
@@ -266,7 +266,7 @@ class ProductControllerTest extends WebTestCase
             'default_location_id' => $location->getId()->toRfc4122()
         ]);
 
-        $this->assertSame(
+        static::assertSame(
             Response::HTTP_UNPROCESSABLE_ENTITY,
             $response->getStatusCode(),
             (string) $response->getContent()
@@ -282,7 +282,7 @@ class ProductControllerTest extends WebTestCase
             'category_id' => $category->getId()->toRfc4122()
         ]);
 
-        $this->assertSame(
+        static::assertSame(
             Response::HTTP_UNPROCESSABLE_ENTITY,
             $response->getStatusCode(),
             (string) $response->getContent()
@@ -298,9 +298,9 @@ class ProductControllerTest extends WebTestCase
             'category_id' => Uuid::v7()->toRfc4122(),
             'default_location_id' => $location->getId()->toRfc4122()
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 
-        $this->assertSame('Category not found', $data['detail']);
+        static::assertSame('Category not found', $data['detail']);
     }
 
     public function testCreateProductInvalidLocation(): void
@@ -312,9 +312,9 @@ class ProductControllerTest extends WebTestCase
             'category_id' => $category->getId()->toRfc4122(),
             'default_location_id' => Uuid::v7()->toRfc4122()
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 
-        $this->assertSame('Location not found', $data['detail']);
+        static::assertSame('Location not found', $data['detail']);
     }
 
     public function testCreateProductDuplicateName(): void
@@ -329,7 +329,7 @@ class ProductControllerTest extends WebTestCase
             'default_location_id' => $location->getId()->toRfc4122()
         ]);
 
-        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode(), (string) $response->getContent());
+        static::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode(), (string) $response->getContent());
     }
 
     public function testCreateProductInvalidMinStock(): void
@@ -344,7 +344,7 @@ class ProductControllerTest extends WebTestCase
             'min_stock' => -1
         ]);
 
-        $this->assertSame(
+        static::assertSame(
             Response::HTTP_UNPROCESSABLE_ENTITY,
             $response->getStatusCode(),
             (string) $response->getContent()
@@ -363,7 +363,7 @@ class ProductControllerTest extends WebTestCase
             'default_expiry_days' => 0
         ]);
 
-        $this->assertSame(
+        static::assertSame(
             Response::HTTP_UNPROCESSABLE_ENTITY,
             $response->getStatusCode(),
             (string) $response->getContent()
@@ -379,9 +379,9 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'name' => 'New Name'
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertSame('New Name', $data['data']['name']);
+        static::assertSame('New Name', $data['data']['name']);
     }
 
     public function testUpdateProductCategory(): void
@@ -393,9 +393,9 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'category_id' => $newCategory->getId()->toRfc4122()
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertSame('New Category', $data['data']['category']['name']);
+        static::assertSame('New Category', $data['data']['category']['name']);
     }
 
     public function testUpdateProductLocation(): void
@@ -407,9 +407,9 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'default_location_id' => $newLocation->getId()->toRfc4122()
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertSame('New Location', $data['data']['default_location']['name']);
+        static::assertSame('New Location', $data['data']['default_location']['name']);
     }
 
     public function testUpdateProductMinStock(): void
@@ -419,9 +419,9 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'min_stock' => 15
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertSame(15, $data['data']['min_stock']);
+        static::assertSame(15, $data['data']['min_stock']);
     }
 
     public function testUpdateProductExpiryDays(): void
@@ -431,9 +431,9 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'default_expiry_days' => 60
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertSame(60, $data['data']['default_expiry_days']);
+        static::assertSame(60, $data['data']['default_expiry_days']);
     }
 
     public function testUpdateProductClearExpiryDays(): void
@@ -443,9 +443,9 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'clear_default_expiry_days' => true
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertNull($data['data']['default_expiry_days']);
+        static::assertNull($data['data']['default_expiry_days']);
     }
 
     public function testUpdateProductActive(): void
@@ -455,9 +455,9 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
             'active' => false
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertFalse($data['data']['active']);
+        static::assertFalse($data['data']['active']);
     }
 
     public function testUpdateProductEmptyPayload(): void
@@ -465,9 +465,9 @@ class ProductControllerTest extends WebTestCase
         $product = ProductFactory::createOne(['name' => 'Original Name']);
 
         $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), []);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertSame('Original Name', $data['data']['name']);
+        static::assertSame('Original Name', $data['data']['name']);
     }
 
     public function testUpdateProductNotFound(): void
@@ -475,9 +475,9 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiPatch('/products/' . Uuid::v7()->toRfc4122(), [
             'name' => 'New Name'
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
-        $this->assertArrayHasKey('detail', $data);
+        static::assertArrayHasKey('detail', $data);
     }
 
     public function testUpdateProductInvalidUuid(): void
@@ -485,9 +485,9 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiPatch('/products/not-a-uuid', [
             'name' => 'New Name'
         ]);
-        $data = $this->assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 
-        $this->assertSame('Invalid UUID format', $data['detail']);
+        static::assertSame('Invalid UUID format', $data['detail']);
     }
 
     // ========== Delete Tests ==========
@@ -499,13 +499,13 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiDelete('/products/' . $productId);
 
-        $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode(), (string) $response->getContent());
+        static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode(), (string) $response->getContent());
 
         // Verify product is deactivated but still exists
         $response = $this->apiGet('/products/' . $productId);
-        $data = $this->assertJsonResponse($response, Response::HTTP_OK);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $this->assertFalse($data['data']['active']);
+        static::assertFalse($data['data']['active']);
     }
 
     public function testDeleteProductHardDelete(): void
@@ -515,26 +515,26 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiDelete('/products/' . $productId, ['hard' => '1']);
 
-        $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode(), (string) $response->getContent());
+        static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode(), (string) $response->getContent());
 
         // Verify product no longer exists
         $response = $this->apiGet('/products/' . $productId);
-        $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode(), (string) $response->getContent());
+        static::assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode(), (string) $response->getContent());
     }
 
     public function testDeleteProductNotFound(): void
     {
         $response = $this->apiDelete('/products/' . Uuid::v7()->toRfc4122());
-        $data = $this->assertJsonResponse($response, Response::HTTP_NOT_FOUND);
+        $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
-        $this->assertArrayHasKey('detail', $data);
+        static::assertArrayHasKey('detail', $data);
     }
 
     public function testDeleteProductInvalidUuid(): void
     {
         $response = $this->apiDelete('/products/not-a-uuid');
-        $data = $this->assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 
-        $this->assertSame('Invalid UUID format', $data['detail']);
+        static::assertSame('Invalid UUID format', $data['detail']);
     }
 }
