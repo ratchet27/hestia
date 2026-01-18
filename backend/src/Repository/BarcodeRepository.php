@@ -47,5 +47,4 @@ class BarcodeRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
 }

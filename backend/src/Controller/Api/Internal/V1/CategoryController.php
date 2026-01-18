@@ -6,6 +6,7 @@ namespace App\Controller\Api\Internal\V1;
 
 use App\Repository\CategoryRepository;
 use App\Response\Category\CategoryResponse;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,7 +23,7 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('/categories', name: 'api_categories_list', methods: ['GET'])]
-    #[OA\Response(response: 200, description: 'List of categories')]
+    #[OA\Response(response: 200, description: 'List of categories', content: new Model(type: CategoryResponse::class))]
     public function list(): JsonResponse
     {
         $categories = $this->categoryRepository->findAllOrderedByName();

@@ -4,10 +4,12 @@ declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
+use App\Exception\ApiProblem;
 use App\Request\CreateBarcodeRequest;
 use App\Response\Barcode\BarcodeResponse;
 use App\Response\Product\ProductResponse;
 use App\Service\BarcodeService;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,8 +35,12 @@ final class BarcodeController extends AbstractController
         requirements: ['uuid' => Requirement::UUID_V7],
         methods: ['GET']
     )]
-    #[OA\Response(response: 200, description: 'List of barcodes for a product')]
-    #[OA\Response(response: 404, description: 'Product not found')]
+    #[OA\Response(
+        response: 200,
+        description: 'List of barcodes for a product',
+        content: new Model(type: BarcodeResponse::class)
+    )]
+    #[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
     public function listForProduct(Uuid $uuid): JsonResponse
     {
         $barcodes = $this->barcodeService->listBarcodes($uuid);
@@ -53,9 +59,17 @@ final class BarcodeController extends AbstractController
         requirements: ['uuid' => Requirement::UUID_V7],
         methods: ['POST']
     )]
-    #[OA\Response(response: 201, description: 'Barcode added to product')]
-    #[OA\Response(response: 400, description: 'Invalid input or barcode already exists')]
-    #[OA\Response(response: 404, description: 'Product not found')]
+    #[OA\Response(
+        response: 201,
+        description: 'Barcode added to product',
+        content: new Model(type: BarcodeResponse::class)
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Invalid input or barcode already exists',
+        content: new Model(type: ApiProblem::class)
+    )]
+    #[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
     public function addToProduct(
         Uuid $uuid,
         #[MapRequestPayload]
@@ -70,7 +84,7 @@ final class BarcodeController extends AbstractController
 
     #[Route('/barcodes/{code}', name: 'api_barcodes_delete', methods: ['DELETE'])]
     #[OA\Response(response: 204, description: 'Barcode deleted')]
-    #[OA\Response(response: 404, description: 'Barcode not found')]
+    #[OA\Response(response: 404, description: 'Barcode not found', content: new Model(type: ApiProblem::class))]
     public function delete(string $code): JsonResponse
     {
         $this->barcodeService->removeBarcode($code);
@@ -79,8 +93,12 @@ final class BarcodeController extends AbstractController
     }
 
     #[Route('/barcodes/{code}', name: 'api_barcodes_lookup', methods: ['GET'])]
-    #[OA\Response(response: 200, description: 'Product found by barcode')]
-    #[OA\Response(response: 404, description: 'Barcode not found')]
+    #[OA\Response(
+        response: 200,
+        description: 'Product found by barcode',
+        content: new Model(type: ProductResponse::class)
+    )]
+    #[OA\Response(response: 404, description: 'Barcode not found', content: new Model(type: ApiProblem::class))]
     public function lookup(string $code): JsonResponse
     {
         $product = $this->barcodeService->lookupBarcode($code);

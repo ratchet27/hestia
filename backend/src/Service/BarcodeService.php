@@ -42,7 +42,7 @@ class BarcodeService
 
         if ($product === null) {
             throw new ProductNotFoundException($productId);
-        };
+        }
 
         $existing = $this->barcodeRepository->findByCode($code);
         if ($existing !== null) {
