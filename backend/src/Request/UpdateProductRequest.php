@@ -14,20 +14,20 @@ final readonly class UpdateProductRequest
         public ?string $name = null,
 
         #[Assert\Uuid]
-        public ?string $category_id = null,
+        public ?string $categoryId = null,
 
         #[Assert\Uuid]
-        public ?string $default_location_id = null,
+        public ?string $defaultLocationId = null,
 
         #[Assert\Positive]
-        public ?int $default_expiry_days = null,
+        public ?int $defaultExpiryDays = null,
 
         #[Assert\PositiveOrZero]
-        public ?int $min_stock = null,
+        public ?int $minStock = null,
 
         public ?bool $active = null,
 
-        public bool $clear_default_expiry_days = false
+        public bool $clearDefaultExpiryDays = false
     ) {
     }
 }

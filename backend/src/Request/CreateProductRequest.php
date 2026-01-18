@@ -16,17 +16,17 @@ final readonly class CreateProductRequest
 
         #[Assert\NotBlank]
         #[Assert\Uuid]
-        public string $category_id,
+        public string $categoryId,
 
         #[Assert\NotBlank]
         #[Assert\Uuid]
-        public string $default_location_id,
+        public string $defaultLocationId,
 
         #[Assert\Positive]
-        public ?int $default_expiry_days = null,
+        public ?int $defaultExpiryDays = null,
 
         #[Assert\PositiveOrZero]
-        public int $min_stock = 0,
+        public int $minStock = 0,
 
         public bool $active = true
     ) {
