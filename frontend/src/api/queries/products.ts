@@ -9,27 +9,12 @@ import {
 } from '../generated/products/products'
 import type { CreateProductRequest, UpdateProductRequest, ProductResponse } from '../generated/models'
 
-export function useProducts(filters?: ProductFilters) {
+export function useProducts() {
   return useQuery({
-    queryKey: queryKeys.products.list(filters),
+    queryKey: queryKeys.products.all,
     queryFn: async () => {
       const response = await getApiProductsList()
-      // API returns array in data property
-      let products = (response.data as unknown as ProductResponse[]) ?? []
-
-      // Client-side filtering (API doesn't support query params yet)
-      if (filters?.name) {
-        const search = filters.name.toLowerCase()
-        products = products.filter((p) => p.name.toLowerCase().includes(search))
-      }
-      if (filters?.categoryId) {
-        products = products.filter((p) => p.category.id === filters.categoryId)
-      }
-      if (filters?.active !== undefined) {
-        products = products.filter((p) => p.active === filters.active)
-      }
-
-      return products
+      return (response.data as unknown as ProductResponse[]) ?? []
     },
   })
 }

@@ -94,8 +94,8 @@ export function StockPage(): React.ReactElement {
                 <tr key={item.id} className="border-b border-stone-100 hover:bg-stone-50">
                   <td className="px-4 py-3">
                     <div>
-                      <p className="font-medium text-stone-800">{item.product!.name}</p>
-                      <p className="text-sm text-stone-500">{item.product!.category}</p>
+                      <p className="font-medium text-stone-800">{item.product?.name ?? `Товар #${item.productId}`}</p>
+                      <p className="text-sm text-stone-500">{item.product?.category ?? '—'}</p>
                     </div>
                   </td>
                   <td className="px-4 py-3">

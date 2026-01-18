@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import { Icons } from '../../components/Icons'
 import { ProductsGridSkeleton } from '../../components/ProductSkeleton'
@@ -11,15 +11,25 @@ export function ProductsPage(): React.ReactElement {
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [showAddModal, setShowAddModal] = useState(false)
 
-  // Fetch products from API - only show skeleton on initial load
+  // Fetch all products once - filtering is done client-side
   const {
-    data: products = [],
+    data: allProducts = [],
     isLoading: productsLoading,
     isError: productsError,
-  } = useProducts({
-    name: searchTerm || undefined,
-    categoryId: categoryFilter !== 'all' ? categoryFilter : undefined,
-  })
+  } = useProducts()
+
+  // Client-side filtering
+  const products = useMemo(() => {
+    let filtered = allProducts
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase()
+      filtered = filtered.filter((p) => p.name.toLowerCase().includes(search))
+    }
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter((p) => p.category.id === categoryFilter)
+    }
+    return filtered
+  }, [allProducts, searchTerm, categoryFilter])
 
   // Fetch categories and locations for form dropdowns
   const { data: categories = [] } = useCategories()
