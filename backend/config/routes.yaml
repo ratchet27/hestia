@@ -18,6 +18,12 @@ api_internal_v1:
 
 # API Documentation
 api_doc:
+    path: /api/doc
+    methods: GET
+    defaults:
+        _controller: nelmio_api_doc.controller.swagger_ui
+
+api_doc_json:
     path: /api/doc.json
     methods: GET
     defaults:

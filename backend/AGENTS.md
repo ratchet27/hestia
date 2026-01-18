@@ -59,6 +59,14 @@ config/
 
 ## Commands
 
+**IMPORTANT: NEVER run PHP or Composer commands directly on the host machine.** Always use `docker compose exec php` to run commands inside the container.
+
+Use Docker for all composer commands:
+
+```bash
+docker compose exec php composer <command>
+```
+
 ```bash
 # Run inside php container
 docker compose exec php bin/console <command>
