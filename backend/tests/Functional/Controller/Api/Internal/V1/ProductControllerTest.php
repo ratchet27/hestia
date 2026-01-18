@@ -95,7 +95,7 @@ class ProductControllerTest extends WebTestCase
         $this->createProduct(['category' => $category1]);
         $this->createProduct(['category' => $category2]);
 
-        $response = $this->apiGet('/products', ['category_id' => $category1->getId()->toRfc4122()]);
+        $response = $this->apiGet('/products', ['category_id' => $category1->getId()]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertListResponse($data, 2);
@@ -134,7 +134,7 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiGet('/products', [
             'name' => 'Apple',
-            'category_id' => $category->getId()->toRfc4122(),
+            'category_id' => $category->getId(),
             'active' => '1'
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -149,7 +149,7 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['name' => 'Test Product']);
 
-        $response = $this->apiGet('/products/' . $product->getId()->toRfc4122());
+        $response = $this->apiGet('/products/' . $product->getId());
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertArrayHasKey('data', $data);
@@ -158,7 +158,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testShowReturnsNotFoundForMissingProduct(): void
     {
-        $response = $this->apiGet('/products/' . Uuid::v7()->toRfc4122());
+        $response = $this->apiGet('/products/' . Uuid::v7());
         $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
         static::assertArrayHasKey('detail', $data);
@@ -179,7 +179,7 @@ class ProductControllerTest extends WebTestCase
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product]);
         BarcodeFactory::createOne(['barcode' => '9876543210987', 'product' => $product]);
 
-        $response = $this->apiGet('/products/' . $product->getId()->toRfc4122());
+        $response = $this->apiGet('/products/' . $product->getId());
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertArrayHasKey('barcodes', $data['data']);
@@ -199,7 +199,7 @@ class ProductControllerTest extends WebTestCase
             'active' => true
         ]);
 
-        $response = $this->apiGet('/products/' . $product->getId()->toRfc4122());
+        $response = $this->apiGet('/products/' . $product->getId());
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         $productData = $data['data'];
@@ -231,8 +231,8 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
-            'category_id' => $category->getId()->toRfc4122(),
-            'default_location_id' => $location->getId()->toRfc4122()
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId()
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
 
@@ -250,8 +250,8 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
-            'category_id' => $category->getId()->toRfc4122(),
-            'default_location_id' => $location->getId()->toRfc4122(),
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId(),
             'default_expiry_days' => 90,
             'min_stock' => 10,
             'active' => false
@@ -270,8 +270,8 @@ class ProductControllerTest extends WebTestCase
         $location = $this->createLocation();
 
         $response = $this->apiPost('/products', [
-            'category_id' => $category->getId()->toRfc4122(),
-            'default_location_id' => $location->getId()->toRfc4122()
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId()
         ]);
 
         static::assertSame(
@@ -287,7 +287,7 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
-            'default_location_id' => $location->getId()->toRfc4122()
+            'default_location_id' => $location->getId()
         ]);
 
         static::assertSame(
@@ -303,7 +303,7 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
-            'category_id' => $category->getId()->toRfc4122()
+            'category_id' => $category->getId()
         ]);
 
         static::assertSame(
@@ -319,8 +319,8 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
-            'category_id' => Uuid::v7()->toRfc4122(),
-            'default_location_id' => $location->getId()->toRfc4122()
+            'category_id' => Uuid::v7(),
+            'default_location_id' => $location->getId()
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 
@@ -333,8 +333,8 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
-            'category_id' => $category->getId()->toRfc4122(),
-            'default_location_id' => Uuid::v7()->toRfc4122()
+            'category_id' => $category->getId(),
+            'default_location_id' => Uuid::v7()
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_BAD_REQUEST);
 
@@ -349,8 +349,8 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiPost('/products', [
             'name' => 'Existing Product',
-            'category_id' => $category->getId()->toRfc4122(),
-            'default_location_id' => $location->getId()->toRfc4122()
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId()
         ]);
 
         static::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode(), (string) $response->getContent());
@@ -363,8 +363,8 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
-            'category_id' => $category->getId()->toRfc4122(),
-            'default_location_id' => $location->getId()->toRfc4122(),
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId(),
             'min_stock' => -1
         ]);
 
@@ -382,8 +382,8 @@ class ProductControllerTest extends WebTestCase
 
         $response = $this->apiPost('/products', [
             'name' => 'New Product',
-            'category_id' => $category->getId()->toRfc4122(),
-            'default_location_id' => $location->getId()->toRfc4122(),
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId(),
             'default_expiry_days' => 0
         ]);
 
@@ -400,7 +400,7 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['name' => 'Old Name']);
 
-        $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
+        $response = $this->apiPatch('/products/' . $product->getId(), [
             'name' => 'New Name'
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -414,8 +414,8 @@ class ProductControllerTest extends WebTestCase
         $newCategory = $this->createCategory(['name' => 'New Category']);
         $product = $this->createProduct(['category' => $oldCategory]);
 
-        $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
-            'category_id' => $newCategory->getId()->toRfc4122()
+        $response = $this->apiPatch('/products/' . $product->getId(), [
+            'category_id' => $newCategory->getId()
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
@@ -428,8 +428,8 @@ class ProductControllerTest extends WebTestCase
         $newLocation = $this->createLocation(['name' => 'New Location']);
         $product = $this->createProduct(['defaultLocation' => $oldLocation]);
 
-        $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
-            'default_location_id' => $newLocation->getId()->toRfc4122()
+        $response = $this->apiPatch('/products/' . $product->getId(), [
+            'default_location_id' => $newLocation->getId()
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
@@ -440,7 +440,7 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['minStock' => 5]);
 
-        $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
+        $response = $this->apiPatch('/products/' . $product->getId(), [
             'min_stock' => 15
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -452,7 +452,7 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['defaultExpiryDays' => null]);
 
-        $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
+        $response = $this->apiPatch('/products/' . $product->getId(), [
             'default_expiry_days' => 60
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -464,7 +464,7 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['defaultExpiryDays' => 30]);
 
-        $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
+        $response = $this->apiPatch('/products/' . $product->getId(), [
             'clear_default_expiry_days' => true
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -476,7 +476,7 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['active' => true]);
 
-        $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), [
+        $response = $this->apiPatch('/products/' . $product->getId(), [
             'active' => false
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -488,7 +488,7 @@ class ProductControllerTest extends WebTestCase
     {
         $product = $this->createProduct(['name' => 'Original Name']);
 
-        $response = $this->apiPatch('/products/' . $product->getId()->toRfc4122(), []);
+        $response = $this->apiPatch('/products/' . $product->getId(), []);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertSame('Original Name', $data['data']['name']);
@@ -496,7 +496,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductNotFound(): void
     {
-        $response = $this->apiPatch('/products/' . Uuid::v7()->toRfc4122(), [
+        $response = $this->apiPatch('/products/' . Uuid::v7(), [
             'name' => 'New Name'
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
@@ -519,7 +519,7 @@ class ProductControllerTest extends WebTestCase
     public function testDeleteProductSoftDeleteByDefault(): void
     {
         $product = $this->createProduct(['active' => true]);
-        $productId = $product->getId()->toRfc4122();
+        $productId = $product->getId();
 
         $response = $this->apiDelete('/products/' . $productId);
 
@@ -535,7 +535,7 @@ class ProductControllerTest extends WebTestCase
     public function testDeleteProductHardDelete(): void
     {
         $product = $this->createProduct();
-        $productId = $product->getId()->toRfc4122();
+        $productId = $product->getId();
 
         $response = $this->apiDelete('/products/' . $productId, ['hard' => '1']);
 
@@ -548,7 +548,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testDeleteProductNotFound(): void
     {
-        $response = $this->apiDelete('/products/' . Uuid::v7()->toRfc4122());
+        $response = $this->apiDelete('/products/' . Uuid::v7());
         $data = static::assertJsonResponse($response, Response::HTTP_NOT_FOUND);
 
         static::assertArrayHasKey('detail', $data);
