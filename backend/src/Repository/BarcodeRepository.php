@@ -21,8 +21,8 @@ class BarcodeRepository extends ServiceEntityRepository
 
     public function findByCode(string $code): ?Barcode
     {
-        /** @var Barcode|null $result */
-        $result = $this
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
             ->createQueryBuilder('b')
             ->leftJoin('b.product', 'p')
             ->leftJoin('p.category', 'c')
@@ -32,15 +32,13 @@ class BarcodeRepository extends ServiceEntityRepository
             ->setParameter('code', $code)
             ->getQuery()
             ->getOneOrNullResult();
-
-        return $result;
     }
 
     /** @return Barcode[] */
     public function findByProduct(Uuid $productId): array
     {
-        /** @var Barcode[] $result */
-        $result = $this
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
             ->createQueryBuilder('b')
             ->leftJoin('b.product', 'p')
             ->where('p.id = :productId')
@@ -48,14 +46,12 @@ class BarcodeRepository extends ServiceEntityRepository
             ->orderBy('b.createdAt', 'ASC')
             ->getQuery()
             ->getResult();
-
-        return $result;
     }
 
     public function findOneByProductAndCode(Uuid $productId, string $code): ?Barcode
     {
-        /** @var Barcode|null $result */
-        $result = $this
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
             ->createQueryBuilder('b')
             ->leftJoin('b.product', 'p')
             ->where('p.id = :productId')
@@ -64,7 +60,5 @@ class BarcodeRepository extends ServiceEntityRepository
             ->setParameter('code', $code)
             ->getQuery()
             ->getOneOrNullResult();
-
-        return $result;
     }
 }

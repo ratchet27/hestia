@@ -27,9 +27,10 @@ class ProductRepository extends ServiceEntityRepository
     {
         $qb = $this
             ->createQueryBuilder('p')
+            ->leftJoin('p.barcodes', 'b')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.defaultLocation', 'l')
-            ->addSelect('c', 'l')
+            ->addSelect('b', 'c', 'l')
             ->orderBy('p.name', 'ASC');
 
         if (isset($filters['name'])) {
@@ -44,16 +45,14 @@ class ProductRepository extends ServiceEntityRepository
             $qb->andWhere('p.active = :active')->setParameter('active', $filters['active']);
         }
 
-        /** @var Product[] $result */
-        $result = $qb->getQuery()->getResult();
-
-        return $result;
+        // @mago-ignore analysis:mixed-return-statement
+        return $qb->getQuery()->getResult();
     }
 
     public function findOneWithBarcodes(Uuid $id): ?Product
     {
-        /** @var Product|null $result */
-        $result = $this
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
             ->createQueryBuilder('p')
             ->leftJoin('p.barcodes', 'b')
             ->leftJoin('p.category', 'c')
@@ -63,7 +62,5 @@ class ProductRepository extends ServiceEntityRepository
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
-
-        return $result;
     }
 }

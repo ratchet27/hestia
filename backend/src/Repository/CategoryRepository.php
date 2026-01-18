@@ -21,13 +21,11 @@ class CategoryRepository extends ServiceEntityRepository
     /** @return Category[] */
     public function findAllOrderedByName(): array
     {
-        /** @var Category[] $result */
-        $result = $this
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
             ->createQueryBuilder('c')
             ->orderBy('c.name', 'ASC')
             ->getQuery()
             ->getResult();
-
-        return $result;
     }
 }

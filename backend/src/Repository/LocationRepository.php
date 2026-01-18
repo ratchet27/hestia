@@ -21,13 +21,11 @@ class LocationRepository extends ServiceEntityRepository
     /** @return Location[] */
     public function findAllOrderedByName(): array
     {
-        /** @var Location[] $result */
-        $result = $this
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
             ->createQueryBuilder('l')
             ->orderBy('l.name', 'ASC')
             ->getQuery()
             ->getResult();
-
-        return $result;
     }
 }
