@@ -1,0 +1,86 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKeys, type ProductFilters } from './keys'
+import {
+  getApiProductsList,
+  postApiProductsCreate,
+  getApiProductsShow,
+  putApiProductsUpdate,
+  deleteApiProductsDelete,
+} from '../generated/products/products'
+import type { CreateProductRequest, UpdateProductRequest, ProductResponse } from '../generated/models'
+
+export function useProducts(filters?: ProductFilters) {
+  return useQuery({
+    queryKey: queryKeys.products.list(filters),
+    queryFn: async () => {
+      const response = await getApiProductsList()
+      // API returns array in data property
+      let products = (response.data as unknown as ProductResponse[]) ?? []
+
+      // Client-side filtering (API doesn't support query params yet)
+      if (filters?.name) {
+        const search = filters.name.toLowerCase()
+        products = products.filter((p) => p.name.toLowerCase().includes(search))
+      }
+      if (filters?.categoryId) {
+        products = products.filter((p) => p.category.id === filters.categoryId)
+      }
+      if (filters?.active !== undefined) {
+        products = products.filter((p) => p.active === filters.active)
+      }
+
+      return products
+    },
+  })
+}
+
+export function useProduct(id: string) {
+  return useQuery({
+    queryKey: queryKeys.products.detail(id),
+    queryFn: async () => {
+      const response = await getApiProductsShow(id)
+      return response.data as ProductResponse
+    },
+    enabled: !!id,
+  })
+}
+
+export function useCreateProduct() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateProductRequest) => {
+      const response = await postApiProductsCreate(data)
+      return response.data as ProductResponse
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all })
+    },
+  })
+}
+
+export function useUpdateProduct() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateProductRequest }) => {
+      const response = await putApiProductsUpdate(id, data)
+      return response.data as ProductResponse
+    },
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(id) })
+    },
+  })
+}
+
+export function useDeleteProduct() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => deleteApiProductsDelete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all })
+    },
+  })
+}
