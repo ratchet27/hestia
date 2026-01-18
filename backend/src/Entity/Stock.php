@@ -33,7 +33,7 @@ class Stock
     #[ORM\JoinColumn(nullable: false)]
     private Location $location;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::INTEGER, options: ['default' => 0])]
     private int $quantity = 0;
 
     #[ORM\Column]

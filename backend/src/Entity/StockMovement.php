@@ -22,16 +22,16 @@ class StockMovement
     #[ORM\JoinColumn(nullable: false)]
     private Stock $stock;
 
-    #[ORM\Column(type: 'string', enumType: StockMovementType::class)]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::STRING, enumType: StockMovementType::class)]
     private StockMovementType $type;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::INTEGER)]
     private int $quantity;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::STRING, length: 255, nullable: true)]
     private ?string $notes = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
     public function __construct()

@@ -27,7 +27,7 @@ final class StockController extends AbstractController
     ) {
     }
 
-    #[Route('/api/internal/v1/stocks', name: 'api_internal_v1_stocks_list', methods: ['GET'])]
+    #[Route('/stocks', name: 'api_internal_v1_stocks_list', methods: ['GET'])]
     #[OA\Get(
         summary: 'List stock levels',
         description: 'Returns stock levels with optional filtering by location and low stock status.'
@@ -66,7 +66,7 @@ final class StockController extends AbstractController
         ]);
     }
 
-    #[Route('/api/internal/v1/stocks/movements', name: 'api_internal_v1_stocks_movements_create', methods: ['POST'])]
+    #[Route('/stocks/movements', name: 'api_internal_v1_stocks_movements_create', methods: ['POST'])]
     #[OA\Post(
         summary: 'Create stock movement',
         description: 'Creates a stock movement (ADD, REMOVE, or ADJUST) and updates stock quantity.'

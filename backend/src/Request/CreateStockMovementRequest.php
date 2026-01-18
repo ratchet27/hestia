@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace App\Request;
 
-use App\Entity\StockMovementType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class CreateStockMovementRequest
@@ -19,7 +18,7 @@ final readonly class CreateStockMovementRequest
         public string $location_id,
 
         #[Assert\NotBlank(message: 'Movement type is required')]
-        #[Assert\Choice(callback: [StockMovementType::class, 'cases'], message: 'Invalid movement type')]
+        #[Assert\Choice(choices: ['ADD', 'REMOVE', 'ADJUST'], message: 'Invalid movement type')]
         public string $type,
 
         #[Assert\NotNull(message: 'Quantity is required')]
