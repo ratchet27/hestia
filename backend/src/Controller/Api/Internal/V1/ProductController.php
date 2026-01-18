@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
-use App\Exception\Common\InvalidUuidException;
 use App\Request\CreateProductRequest;
 use App\Request\UpdateProductRequest;
 use App\Response\Product\ProductResponse;
@@ -17,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Uid\Uuid;
 
 #[OA\Tag(name: 'Products')]
@@ -56,17 +56,16 @@ final class ProductController extends AbstractController
         ]);
     }
 
-    #[Route('/products/{id}', name: 'api_products_show', methods: ['GET'])]
+    #[Route(
+        '/products/{uuid}',
+        name: 'api_products_show',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['GET']
+    )]
     #[OA\Response(response: 200, description: 'Product details')]
     #[OA\Response(response: 404, description: 'Product not found')]
-    public function show(string $id): JsonResponse
+    public function show(Uuid $uuid): JsonResponse
     {
-        try {
-            $uuid = Uuid::fromString($id);
-        } catch (\InvalidArgumentException) {
-            throw new InvalidUuidException($id);
-        }
-
         $product = $this->productService->getProduct($uuid);
 
         return $this->json([
@@ -88,21 +87,20 @@ final class ProductController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
-    #[Route('/products/{id}', name: 'api_products_update', methods: ['PUT'])]
+    #[Route(
+        '/products/{uuid}',
+        name: 'api_products_update',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['PUT']
+    )]
     #[OA\Response(response: 200, description: 'Product updated')]
     #[OA\Response(response: 400, description: 'Invalid input')]
     #[OA\Response(response: 404, description: 'Product not found')]
     public function update(
-        string $id,
+        Uuid $uuid,
         #[MapRequestPayload]
         UpdateProductRequest $request
     ): JsonResponse {
-        try {
-            $uuid = Uuid::fromString($id);
-        } catch (\InvalidArgumentException) {
-            throw new InvalidUuidException($id);
-        }
-
         $product = $this->productService->updateProduct($uuid, $request);
 
         return $this->json([
@@ -110,17 +108,16 @@ final class ProductController extends AbstractController
         ]);
     }
 
-    #[Route('/products/{id}', name: 'api_products_delete', methods: ['DELETE'])]
+    #[Route(
+        '/products/{uuid}',
+        name: 'api_products_delete',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['DELETE']
+    )]
     #[OA\Response(response: 204, description: 'Product deleted')]
     #[OA\Response(response: 404, description: 'Product not found')]
-    public function delete(string $id, Request $request): JsonResponse
+    public function delete(Uuid $uuid, Request $request): JsonResponse
     {
-        try {
-            $uuid = Uuid::fromString($id);
-        } catch (\InvalidArgumentException) {
-            throw new InvalidUuidException($id);
-        }
-
         if ($request->query->getBoolean('hard', false)) {
             $this->productService->hardDelete($uuid);
 

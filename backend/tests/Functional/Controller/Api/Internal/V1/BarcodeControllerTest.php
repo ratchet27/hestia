@@ -39,10 +39,8 @@ class BarcodeControllerTest extends WebTestCase
     public function testListBarcodesReturnsEmptyWhenNoData(): void
     {
         $product = $this->createProduct();
-
         $response = $this->apiGet('/products/' . $product->getId() . '/barcodes');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
-
         static::assertListResponse($data, 0);
     }
 
@@ -81,13 +79,11 @@ class BarcodeControllerTest extends WebTestCase
         static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
-    public function testListBarcodesInvalidUuid(): void
+    public function testListBarcodesNotFoundForInvalidUuid(): void
     {
         $response = $this->apiGet('/products/not-a-uuid/barcodes');
-        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertSame('Invalid UUID format', $data['title']);
-        static::assertSame('INVALID_UUID', $data['type']);
+        static::assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
     // ========== Add Tests ==========

@@ -46,6 +46,25 @@ config/
 - Use `#[Route]` attributes
 - Return JSON responses via `JsonResponse` or serializer
 
+#### UUID Route Parameters
+
+Use Symfony's `Uuid` type-hint with `Requirement::UUID_V7` for automatic validation:
+
+```php
+use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Uid\Uuid;
+
+#[Route('/products/{uuid}', requirements: ['uuid' => Requirement::UUID_V7], methods: ['GET'])]
+public function show(Uuid $uuid): JsonResponse
+{
+    // $uuid is already a Uuid object - no manual validation needed
+}
+```
+
+**Do NOT** use raw regex patterns or manual `Uuid::fromString()` with try/catch.
+
+Invalid UUIDs return 404 (route not matched) rather than 400.
+
 ### Services
 - Constructor injection (autowired)
 - Interfaces for external dependencies

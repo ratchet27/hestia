@@ -165,13 +165,11 @@ class ProductControllerTest extends WebTestCase
         static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
-    public function testShowReturnsBadRequestForInvalidUuid(): void
+    public function testShowReturnsNotFoundForInvalidUuid(): void
     {
         $response = $this->apiGet('/products/not-a-uuid');
-        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertSame('Invalid UUID format', $data['title']);
-        static::assertSame('INVALID_UUID', $data['type']);
+        static::assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
     public function testShowIncludesBarcodes(): void
@@ -525,7 +523,7 @@ class ProductControllerTest extends WebTestCase
         static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
-    public function testUpdateProductInvalidUuid(): void
+    public function testUpdateProductNotFoundForInvalidUuid(): void
     {
         $category = $this->createCategory();
         $location = $this->createLocation();
@@ -537,10 +535,8 @@ class ProductControllerTest extends WebTestCase
             'min_stock' => 0,
             'active' => true
         ]);
-        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertSame('Invalid UUID format', $data['title']);
-        static::assertSame('INVALID_UUID', $data['type']);
+        static::assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
     // ========== Delete Tests ==========
@@ -584,12 +580,10 @@ class ProductControllerTest extends WebTestCase
         static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
-    public function testDeleteProductInvalidUuid(): void
+    public function testDeleteProductNotFoundForInvalidUuid(): void
     {
         $response = $this->apiDelete('/products/not-a-uuid');
-        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
 
-        static::assertSame('Invalid UUID format', $data['title']);
-        static::assertSame('INVALID_UUID', $data['type']);
+        static::assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 }
