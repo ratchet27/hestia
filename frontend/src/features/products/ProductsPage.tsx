@@ -3,12 +3,10 @@ import toast from 'react-hot-toast'
 import { Icons } from '../../components/Icons'
 import { ProductsGridSkeleton } from '../../components/ProductSkeleton'
 import { ProductForm } from './ProductForm'
-import { useStock } from '../../data/hooks'
 import { useProducts, useCreateProduct, useCategories, useLocations } from '../../api/queries'
 import type { CreateProductRequest, ProductResponse } from '../../api/generated/models'
 
 export function ProductsPage(): React.ReactElement {
-  const { stock } = useStock()
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [showAddModal, setShowAddModal] = useState(false)

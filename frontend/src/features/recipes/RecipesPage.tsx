@@ -1,6 +1,5 @@
 import { Icons } from '../../components/Icons'
 import { useStock, useRecipes } from '../../data/hooks'
-import { useProducts } from '../../api/queries'
 import type { Recipe } from '../../data/types'
 
 interface CheckedIngredient {
@@ -12,9 +11,6 @@ interface CheckedIngredient {
 }
 
 export function RecipesPage(): React.ReactElement {
-  // Note: Recipes use number productId, API products use UUID
-  // Product lookup won't match until recipes API is integrated
-  const { data: products = [] } = useProducts()
   const { stock } = useStock()
   const { recipes } = useRecipes()
 
