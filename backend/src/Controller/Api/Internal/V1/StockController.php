@@ -4,10 +4,14 @@ declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
-use App\Request\CreateStockMovementRequest;
-use App\Response\Stock\StockMovementResponse;
-use App\Response\Stock\StockResponse;
-use App\Service\StockService;
+use App\Request\AddStockRequest;
+use App\Request\ConsumeStockRequest;
+use App\Request\UpdateStockEntryRequest;
+use App\Response\Stock\ConsumeResultResponse;
+use App\Response\Stock\ExpiringEntryResponse;
+use App\Response\Stock\ProductSummaryResponse;
+use App\Response\Stock\StockEntryResponse;
+use App\Service\StockEntryService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,35 +19,29 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Uid\Uuid;
 
 #[OA\Tag(name: 'Stock')]
 final class StockController extends AbstractController
 {
     public function __construct(
-        private readonly StockService $stockService,
-        private readonly ObjectMapperInterface $objectMapper
+        private readonly StockEntryService $stockEntryService
     ) {
     }
 
-    #[Route('/stocks', name: 'api_internal_v1_stocks_list', methods: ['GET'])]
+    #[Route('/stocks', name: 'api_internal_v1_stocks_summary', methods: ['GET'])]
     #[OA\Get(
-        summary: 'List stock levels',
-        description: 'Returns stock levels with optional filtering by location and low stock status.'
-    )]
-    #[OA\Parameter(
-        name: 'location',
-        in: 'query',
-        required: false,
-        schema: new OA\Schema(type: 'string', format: 'uuid')
+        summary: 'Get stock summary',
+        description: 'Returns stock summary aggregated by product with location breakdown.'
     )]
     #[OA\Parameter(name: 'low_stock', in: 'query', required: false, schema: new OA\Schema(type: 'boolean'))]
-    #[OA\Response(response: 200, description: 'List of stock entries', content: new OA\JsonContent(properties: [
+    #[OA\Response(response: 200, description: 'Stock summary', content: new OA\JsonContent(properties: [
         new OA\Property(
             property: 'data',
             type: 'array',
-            items: new OA\Items(ref: new Model(type: StockResponse::class))
+            items: new OA\Items(ref: new Model(type: ProductSummaryResponse::class))
         ),
         new OA\Property(
             property: 'meta',
@@ -51,14 +49,10 @@ final class StockController extends AbstractController
             type: 'object'
         )
     ]))]
-    public function list(Request $request): JsonResponse
+    public function summary(Request $request): JsonResponse
     {
-        $locationId = $request->query->get('location');
         $lowStockOnly = $request->query->getBoolean('low_stock', false);
-
-        $stocks = $this->stockService->listStocks($locationId, $lowStockOnly);
-
-        $data = array_map(fn($stock) => $this->objectMapper->map($stock, StockResponse::class), $stocks);
+        $data = $this->stockEntryService->getStockSummary($lowStockOnly);
 
         return $this->json([
             'data' => $data,
@@ -66,37 +60,180 @@ final class StockController extends AbstractController
         ]);
     }
 
-    #[Route('/stocks/movements', name: 'api_internal_v1_stocks_movements_create', methods: ['POST'])]
-    #[OA\Post(
-        summary: 'Create stock movement',
-        description: 'Creates a stock movement (ADD, REMOVE, or ADJUST) and updates stock quantity.'
+    #[Route('/stocks/entries', name: 'api_internal_v1_stocks_entries_list', methods: ['GET'])]
+    #[OA\Get(summary: 'List stock entries', description: 'Returns individual stock entries with optional filtering.')]
+    #[OA\Parameter(
+        name: 'location',
+        in: 'query',
+        required: false,
+        schema: new OA\Schema(type: 'string', format: 'uuid')
     )]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(required: ['product_id', 'location_id', 'type', 'quantity'], properties: [
-            new OA\Property(property: 'product_id', type: 'string', format: 'uuid'),
-            new OA\Property(property: 'location_id', type: 'string', format: 'uuid'),
-            new OA\Property(property: 'type', type: 'string', enum: ['ADD', 'REMOVE', 'ADJUST']),
-            new OA\Property(property: 'quantity', type: 'integer', minimum: 1),
-            new OA\Property(property: 'notes', type: 'string', nullable: true)
-        ])
+    #[OA\Parameter(
+        name: 'product',
+        in: 'query',
+        required: false,
+        schema: new OA\Schema(type: 'string', format: 'uuid')
     )]
-    #[OA\Response(
-        response: 201,
-        description: 'Movement created',
-        content: new Model(type: StockMovementResponse::class)
-    )]
-    #[OA\Response(response: 400, description: 'Validation error or insufficient stock')]
-    #[OA\Response(response: 404, description: 'Product or location not found')]
-    public function createMovement(
-        #[MapRequestPayload]
-        CreateStockMovementRequest $request
-    ): JsonResponse {
-        $movement = $this->stockService->createMovement($request);
+    #[OA\Response(response: 200, description: 'List of entries', content: new OA\JsonContent(properties: [
+        new OA\Property(
+            property: 'data',
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: StockEntryResponse::class))
+        ),
+        new OA\Property(
+            property: 'meta',
+            properties: [new OA\Property(property: 'total', type: 'integer')],
+            type: 'object'
+        )
+    ]))]
+    public function listEntries(Request $request): JsonResponse
+    {
+        $locationId = $request->query->get('location');
+        $productId = $request->query->get('product');
 
-        return $this->json(['data' => $this->objectMapper->map(
-            $movement,
-            StockMovementResponse::class
-        )], Response::HTTP_CREATED);
+        $data = $this->stockEntryService->getEntries(
+            locationId: $locationId !== null ? Uuid::fromString($locationId) : null,
+            productId: $productId !== null ? Uuid::fromString($productId) : null
+        );
+
+        return $this->json([
+            'data' => $data,
+            'meta' => ['total' => count($data)]
+        ]);
+    }
+
+    #[Route(
+        '/stocks/entries/{uuid}',
+        name: 'api_internal_v1_stocks_entries_show',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['GET']
+    )]
+    #[OA\Get(summary: 'Get stock entry', description: 'Returns a single stock entry by ID.')]
+    #[OA\Response(response: 200, description: 'Stock entry', content: new OA\JsonContent(properties: [
+        new OA\Property(property: 'data', ref: new Model(type: StockEntryResponse::class))
+    ]))]
+    #[OA\Response(response: 404, description: 'Entry not found')]
+    public function showEntry(Uuid $uuid): JsonResponse
+    {
+        $entry = $this->stockEntryService->getEntry($uuid);
+
+        return $this->json(['data' => $entry]);
+    }
+
+    #[Route('/stocks/expiring', name: 'api_internal_v1_stocks_expiring', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Get expiring entries',
+        description: 'Returns entries expiring within N days, including already expired. Ordered by urgency.'
+    )]
+    #[OA\Parameter(name: 'days', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 7))]
+    #[OA\Response(response: 200, description: 'Expiring entries', content: new OA\JsonContent(properties: [
+        new OA\Property(
+            property: 'data',
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: ExpiringEntryResponse::class))
+        ),
+        new OA\Property(
+            property: 'meta',
+            properties: [new OA\Property(property: 'total', type: 'integer')],
+            type: 'object'
+        )
+    ]))]
+    public function expiring(Request $request): JsonResponse
+    {
+        $days = $request->query->getInt('days', 7);
+        $data = $this->stockEntryService->getExpiringEntries($days);
+
+        return $this->json([
+            'data' => $data,
+            'meta' => ['total' => count($data)]
+        ]);
+    }
+
+    #[Route('/stocks/add', name: 'api_internal_v1_stocks_add', methods: ['POST'])]
+    #[OA\Post(summary: 'Add stock', description: 'Creates N stock entries (one per unit).')]
+    #[OA\RequestBody(required: true, content: new Model(type: AddStockRequest::class))]
+    #[OA\Response(response: 201, description: 'Entries created', content: new OA\JsonContent(properties: [
+        new OA\Property(
+            property: 'data',
+            properties: [
+                new OA\Property(property: 'created', type: 'integer'),
+                new OA\Property(
+                    property: 'entries',
+                    type: 'array',
+                    items: new OA\Items(ref: new Model(type: StockEntryResponse::class))
+                )
+            ],
+            type: 'object'
+        )
+    ]))]
+    #[OA\Response(response: 404, description: 'Product or location not found')]
+    #[OA\Response(response: 422, description: 'Validation error')]
+    public function add(#[MapRequestPayload] AddStockRequest $request): JsonResponse
+    {
+        $entries = $this->stockEntryService->addStock($request);
+
+        return $this->json([
+            'data' => [
+                'created' => count($entries),
+                'entries' => array_map(static fn($e) => [
+                    'id' => $e->getId(),
+                    'best_before' => $e->getBestBefore()?->format('Y-m-d')
+                ], $entries)
+            ]
+        ], Response::HTTP_CREATED);
+    }
+
+    #[Route('/stocks/consume', name: 'api_internal_v1_stocks_consume', methods: ['POST'])]
+    #[OA\Post(summary: 'Consume stock', description: 'Deletes N entries in FIFO order from specified location.')]
+    #[OA\RequestBody(required: true, content: new Model(type: ConsumeStockRequest::class))]
+    #[OA\Response(
+        response: 200,
+        description: 'Consumption result',
+        content: new Model(type: ConsumeResultResponse::class)
+    )]
+    #[OA\Response(response: 400, description: 'Insufficient stock')]
+    #[OA\Response(response: 404, description: 'Product or location not found')]
+    #[OA\Response(response: 422, description: 'Validation error')]
+    public function consume(#[MapRequestPayload] ConsumeStockRequest $request): JsonResponse
+    {
+        $result = $this->stockEntryService->consumeStock($request);
+
+        return $this->json(['data' => $result]);
+    }
+
+    #[Route(
+        '/stocks/entries/{uuid}',
+        name: 'api_internal_v1_stocks_entries_update',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['PATCH']
+    )]
+    #[OA\Patch(summary: 'Update stock entry', description: 'Updates entry location and/or best_before.')]
+    #[OA\RequestBody(required: true, content: new Model(type: UpdateStockEntryRequest::class))]
+    #[OA\Response(response: 200, description: 'Updated entry', content: new OA\JsonContent(properties: [
+        new OA\Property(property: 'data', ref: new Model(type: StockEntryResponse::class))
+    ]))]
+    #[OA\Response(response: 404, description: 'Entry or location not found')]
+    #[OA\Response(response: 422, description: 'Validation error')]
+    public function updateEntry(Uuid $uuid, #[MapRequestPayload] UpdateStockEntryRequest $request): JsonResponse
+    {
+        $entry = $this->stockEntryService->updateEntry($uuid, $request);
+
+        return $this->json(['data' => $this->stockEntryService->getEntry($entry->getId())]);
+    }
+
+    #[Route(
+        '/stocks/entries/{uuid}',
+        name: 'api_internal_v1_stocks_entries_delete',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['DELETE']
+    )]
+    #[OA\Delete(summary: 'Delete stock entry', description: 'Removes a single stock entry.')]
+    #[OA\Response(response: 204, description: 'Entry deleted')]
+    #[OA\Response(response: 404, description: 'Entry not found')]
+    public function deleteEntry(Uuid $uuid): JsonResponse
+    {
+        $this->stockEntryService->deleteEntry($uuid);
+
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }
