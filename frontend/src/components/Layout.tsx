@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
-import { Navigation } from './Navigation'
+import { Outlet } from "react-router-dom";
+import { Navigation } from "./Navigation";
 
 export function Layout(): React.ReactElement {
   return (
@@ -9,5 +9,5 @@ export function Layout(): React.ReactElement {
         <Outlet />
       </main>
     </div>
-  )
+  );
 }

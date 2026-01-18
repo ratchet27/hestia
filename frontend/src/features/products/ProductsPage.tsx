@@ -1,55 +1,65 @@
-import { useState, useMemo } from 'react'
-import toast from 'react-hot-toast'
-import { Icons } from '../../components/Icons'
-import { ProductsGridSkeleton } from '../../components/ProductSkeleton'
-import { ProductForm } from './ProductForm'
-import { useProducts, useCreateProduct, useCategories, useLocations } from '../../api/queries'
-import type { CreateProductRequest, ProductResponse } from '../../api/generated/models'
+import { useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import type {
+  CreateProductRequest,
+  ProductResponse,
+} from "../../api/generated/models";
+import {
+  useCategories,
+  useCreateProduct,
+  useLocations,
+  useProducts,
+} from "../../api/queries";
+import { Icons } from "../../components/Icons";
+import { ProductsGridSkeleton } from "../../components/ProductSkeleton";
+import { ProductForm } from "./ProductForm";
 
 export function ProductsPage(): React.ReactElement {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState<string>('all')
-  const [showAddModal, setShowAddModal] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Fetch all products once - filtering is done client-side
   const {
     data: allProducts = [],
     isLoading: productsLoading,
     isError: productsError,
-  } = useProducts()
+  } = useProducts();
 
   // Client-side filtering
   const products = useMemo(() => {
-    let filtered = allProducts
+    let filtered = allProducts;
     if (searchTerm) {
-      const search = searchTerm.toLowerCase()
-      filtered = filtered.filter((p) => p.name.toLowerCase().includes(search))
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter((p) => p.name.toLowerCase().includes(search));
     }
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter((p) => p.category.id === categoryFilter)
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((p) => p.category.id === categoryFilter);
     }
-    return filtered
-  }, [allProducts, searchTerm, categoryFilter])
+    return filtered;
+  }, [allProducts, searchTerm, categoryFilter]);
 
   // Fetch categories and locations for form dropdowns
-  const { data: categories = [] } = useCategories()
-  const { data: locations = [] } = useLocations()
+  const { data: categories = [] } = useCategories();
+  const { data: locations = [] } = useLocations();
 
   // Create product mutation
-  const createProduct = useCreateProduct()
+  const createProduct = useCreateProduct();
 
-  const handleCreateProduct = async (data: CreateProductRequest): Promise<void> => {
-    await createProduct.mutateAsync(data)
-    toast.success('Товар создан')
-    setShowAddModal(false)
-  }
+  const handleCreateProduct = async (
+    data: CreateProductRequest,
+  ): Promise<void> => {
+    await createProduct.mutateAsync(data);
+    toast.success("Товар создан");
+    setShowAddModal(false);
+  };
 
   // Calculate total stock for a product (stock still uses mock data)
   const getTotalStock = (_productId: string): number => {
     // Note: Stock entries still use number IDs, this will need adjustment
     // when stock API is integrated
-    return 0
-  }
+    return 0;
+  };
 
   // Show skeleton only on initial load, not background refetch
   if (productsLoading) {
@@ -58,12 +68,14 @@ export function ProductsPage(): React.ReactElement {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-3xl font-bold text-stone-800">Товары</h2>
-            <p className="text-stone-500 mt-1">Справочник товаров и штрихкодов</p>
+            <p className="text-stone-500 mt-1">
+              Справочник товаров и штрихкодов
+            </p>
           </div>
         </div>
         <ProductsGridSkeleton count={9} />
       </div>
-    )
+    );
   }
 
   if (productsError) {
@@ -72,14 +84,16 @@ export function ProductsPage(): React.ReactElement {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-3xl font-bold text-stone-800">Товары</h2>
-            <p className="text-stone-500 mt-1">Справочник товаров и штрихкодов</p>
+            <p className="text-stone-500 mt-1">
+              Справочник товаров и штрихкодов
+            </p>
           </div>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
           Не удалось загрузить товары. Проверьте подключение к серверу.
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -90,6 +104,7 @@ export function ProductsPage(): React.ReactElement {
           <p className="text-stone-500 mt-1">Справочник товаров и штрихкодов</p>
         </div>
         <button
+          type="button"
           onClick={() => setShowAddModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors"
         >
@@ -127,8 +142,8 @@ export function ProductsPage(): React.ReactElement {
 
       <div className="grid grid-cols-3 gap-4">
         {products.map((product: ProductResponse) => {
-          const totalStock = getTotalStock(product.id)
-          const isLow = product.min_stock > 0 && totalStock < product.min_stock
+          const totalStock = getTotalStock(product.id);
+          const isLow = product.min_stock > 0 && totalStock < product.min_stock;
 
           return (
             <div
@@ -139,23 +154,42 @@ export function ProductsPage(): React.ReactElement {
                 <span className="px-2 py-1 bg-stone-100 rounded text-xs text-stone-600">
                   {product.category.name}
                 </span>
-                {isLow && <span className="px-2 py-1 bg-amber-100 rounded text-xs text-amber-700">Мало!</span>}
+                {isLow && (
+                  <span className="px-2 py-1 bg-amber-100 rounded text-xs text-amber-700">
+                    Мало!
+                  </span>
+                )}
               </div>
-              <h3 className="font-semibold text-stone-800 mb-2">{product.name}</h3>
+              <h3 className="font-semibold text-stone-800 mb-2">
+                {product.name}
+              </h3>
               <div className="space-y-1 text-sm text-stone-500">
-                {product.barcodes && product.barcodes.length > 0 && <p>Штрихкод: {product.barcodes[0].code}</p>}
-                {product.default_expiry_days && <p>Срок годности: {product.default_expiry_days} дн.</p>}
+                {product.barcodes &&
+                  Array.isArray(product.barcodes) &&
+                  product.barcodes.length > 0 &&
+                  product.barcodes[0] && (
+                    <p>Штрихкод: {product.barcodes[0].barcode}</p>
+                  )}
+                {product.default_expiry_days && (
+                  <p>Срок годности: {product.default_expiry_days} дн.</p>
+                )}
                 <p>Место: {product.default_location.name}</p>
-                {product.min_stock > 0 && <p>Мин. запас: {product.min_stock}</p>}
+                {product.min_stock > 0 && (
+                  <p>Мин. запас: {product.min_stock}</p>
+                )}
               </div>
               <div className="mt-3 pt-3 border-t border-stone-100 flex justify-between items-center">
-                <span className="text-lg font-bold text-stone-800">{totalStock} шт.</span>
-                <span className={`text-sm ${product.active ? 'text-green-600' : 'text-stone-400'}`}>
-                  {product.active ? 'Активен' : 'Архив'}
+                <span className="text-lg font-bold text-stone-800">
+                  {totalStock} шт.
+                </span>
+                <span
+                  className={`text-sm ${product.active ? "text-green-600" : "text-stone-400"}`}
+                >
+                  {product.active ? "Активен" : "Архив"}
                 </span>
               </div>
             </div>
-          )
+          );
         })}
       </div>
 
@@ -168,7 +202,9 @@ export function ProductsPage(): React.ReactElement {
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h3 className="text-xl font-bold text-stone-800 mb-4">Новый товар</h3>
+            <h3 className="text-xl font-bold text-stone-800 mb-4">
+              Новый товар
+            </h3>
             <ProductForm
               categories={categories}
               locations={locations}
@@ -181,5 +217,5 @@ export function ProductsPage(): React.ReactElement {
         </div>
       )}
     </div>
-  )
+  );
 }

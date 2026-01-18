@@ -9,187 +9,193 @@ import type {
   ApiProblem,
   BarcodeResponse,
   CreateBarcodeRequest,
-  ProductResponse
-} from '.././models';
+  ProductResponse,
+} from ".././models";
 
-import { apiFetch } from '../../client';
+import { apiFetch } from "../../client";
 
 /**
  * Returns all barcodes associated with a product.
  * @summary List product barcodes
  */
 export type getApiProductsBarcodesListResponse200 = {
-  data: BarcodeResponse
-  status: 200
-}
+  data: BarcodeResponse;
+  status: 200;
+};
 
 export type getApiProductsBarcodesListResponse404 = {
-  data: ApiProblem
-  status: 404
-}
-    
-export type getApiProductsBarcodesListResponseSuccess = (getApiProductsBarcodesListResponse200) & {
-  headers: Headers;
-};
-export type getApiProductsBarcodesListResponseError = (getApiProductsBarcodesListResponse404) & {
-  headers: Headers;
+  data: ApiProblem;
+  status: 404;
 };
 
-export type getApiProductsBarcodesListResponse = (getApiProductsBarcodesListResponseSuccess | getApiProductsBarcodesListResponseError)
+export type getApiProductsBarcodesListResponseSuccess =
+  getApiProductsBarcodesListResponse200 & {
+    headers: Headers;
+  };
+export type getApiProductsBarcodesListResponseError =
+  getApiProductsBarcodesListResponse404 & {
+    headers: Headers;
+  };
 
-export const getGetApiProductsBarcodesListUrl = (uuid: string,) => {
+export type getApiProductsBarcodesListResponse =
+  | getApiProductsBarcodesListResponseSuccess
+  | getApiProductsBarcodesListResponseError;
 
+export const getGetApiProductsBarcodesListUrl = (uuid: string) => {
+  return `/api/internal/v1/products/${uuid}/barcodes`;
+};
 
-  
-
-  return `/api/internal/v1/products/${uuid}/barcodes`
-}
-
-export const getApiProductsBarcodesList = async (uuid: string, options?: RequestInit): Promise<getApiProductsBarcodesListResponse> => {
-  
-  return apiFetch<getApiProductsBarcodesListResponse>(getGetApiProductsBarcodesListUrl(uuid),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
+export const getApiProductsBarcodesList = async (
+  uuid: string,
+  options?: RequestInit,
+): Promise<getApiProductsBarcodesListResponse> => {
+  return apiFetch<getApiProductsBarcodesListResponse>(
+    getGetApiProductsBarcodesListUrl(uuid),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
 
 /**
  * Associates a new barcode with a product.
  * @summary Add barcode to product
  */
 export type postApiProductsBarcodesCreateResponse201 = {
-  data: BarcodeResponse
-  status: 201
-}
+  data: BarcodeResponse;
+  status: 201;
+};
 
 export type postApiProductsBarcodesCreateResponse400 = {
-  data: ApiProblem
-  status: 400
-}
+  data: ApiProblem;
+  status: 400;
+};
 
 export type postApiProductsBarcodesCreateResponse404 = {
-  data: ApiProblem
-  status: 404
-}
-    
-export type postApiProductsBarcodesCreateResponseSuccess = (postApiProductsBarcodesCreateResponse201) & {
-  headers: Headers;
-};
-export type postApiProductsBarcodesCreateResponseError = (postApiProductsBarcodesCreateResponse400 | postApiProductsBarcodesCreateResponse404) & {
-  headers: Headers;
+  data: ApiProblem;
+  status: 404;
 };
 
-export type postApiProductsBarcodesCreateResponse = (postApiProductsBarcodesCreateResponseSuccess | postApiProductsBarcodesCreateResponseError)
+export type postApiProductsBarcodesCreateResponseSuccess =
+  postApiProductsBarcodesCreateResponse201 & {
+    headers: Headers;
+  };
+export type postApiProductsBarcodesCreateResponseError = (
+  | postApiProductsBarcodesCreateResponse400
+  | postApiProductsBarcodesCreateResponse404
+) & {
+  headers: Headers;
+};
 
-export const getPostApiProductsBarcodesCreateUrl = (uuid: string,) => {
+export type postApiProductsBarcodesCreateResponse =
+  | postApiProductsBarcodesCreateResponseSuccess
+  | postApiProductsBarcodesCreateResponseError;
 
+export const getPostApiProductsBarcodesCreateUrl = (uuid: string) => {
+  return `/api/internal/v1/products/${uuid}/barcodes`;
+};
 
-  
-
-  return `/api/internal/v1/products/${uuid}/barcodes`
-}
-
-export const postApiProductsBarcodesCreate = async (uuid: string,
-    createBarcodeRequest: CreateBarcodeRequest, options?: RequestInit): Promise<postApiProductsBarcodesCreateResponse> => {
-  
-  return apiFetch<postApiProductsBarcodesCreateResponse>(getPostApiProductsBarcodesCreateUrl(uuid),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      createBarcodeRequest,)
-  }
-);}
-
+export const postApiProductsBarcodesCreate = async (
+  uuid: string,
+  createBarcodeRequest: CreateBarcodeRequest,
+  options?: RequestInit,
+): Promise<postApiProductsBarcodesCreateResponse> => {
+  return apiFetch<postApiProductsBarcodesCreateResponse>(
+    getPostApiProductsBarcodesCreateUrl(uuid),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(createBarcodeRequest),
+    },
+  );
+};
 
 /**
  * Finds the product associated with a barcode.
  * @summary Lookup barcode
  */
 export type getApiBarcodesLookupResponse200 = {
-  data: ProductResponse
-  status: 200
-}
+  data: ProductResponse;
+  status: 200;
+};
 
 export type getApiBarcodesLookupResponse404 = {
-  data: ApiProblem
-  status: 404
-}
-    
-export type getApiBarcodesLookupResponseSuccess = (getApiBarcodesLookupResponse200) & {
-  headers: Headers;
-};
-export type getApiBarcodesLookupResponseError = (getApiBarcodesLookupResponse404) & {
-  headers: Headers;
+  data: ApiProblem;
+  status: 404;
 };
 
-export type getApiBarcodesLookupResponse = (getApiBarcodesLookupResponseSuccess | getApiBarcodesLookupResponseError)
+export type getApiBarcodesLookupResponseSuccess =
+  getApiBarcodesLookupResponse200 & {
+    headers: Headers;
+  };
+export type getApiBarcodesLookupResponseError =
+  getApiBarcodesLookupResponse404 & {
+    headers: Headers;
+  };
 
-export const getGetApiBarcodesLookupUrl = (code: string,) => {
+export type getApiBarcodesLookupResponse =
+  | getApiBarcodesLookupResponseSuccess
+  | getApiBarcodesLookupResponseError;
 
+export const getGetApiBarcodesLookupUrl = (code: string) => {
+  return `/api/internal/v1/barcodes/${code}`;
+};
 
-  
-
-  return `/api/internal/v1/barcodes/${code}`
-}
-
-export const getApiBarcodesLookup = async (code: string, options?: RequestInit): Promise<getApiBarcodesLookupResponse> => {
-  
-  return apiFetch<getApiBarcodesLookupResponse>(getGetApiBarcodesLookupUrl(code),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
+export const getApiBarcodesLookup = async (
+  code: string,
+  options?: RequestInit,
+): Promise<getApiBarcodesLookupResponse> => {
+  return apiFetch<getApiBarcodesLookupResponse>(
+    getGetApiBarcodesLookupUrl(code),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
 
 /**
  * Removes a barcode from the system.
  * @summary Delete barcode
  */
 export type deleteApiBarcodesDeleteResponse204 = {
-  data: void
-  status: 204
-}
+  data: void;
+  status: 204;
+};
 
 export type deleteApiBarcodesDeleteResponse404 = {
-  data: ApiProblem
-  status: 404
-}
-    
-export type deleteApiBarcodesDeleteResponseSuccess = (deleteApiBarcodesDeleteResponse204) & {
-  headers: Headers;
-};
-export type deleteApiBarcodesDeleteResponseError = (deleteApiBarcodesDeleteResponse404) & {
-  headers: Headers;
+  data: ApiProblem;
+  status: 404;
 };
 
-export type deleteApiBarcodesDeleteResponse = (deleteApiBarcodesDeleteResponseSuccess | deleteApiBarcodesDeleteResponseError)
+export type deleteApiBarcodesDeleteResponseSuccess =
+  deleteApiBarcodesDeleteResponse204 & {
+    headers: Headers;
+  };
+export type deleteApiBarcodesDeleteResponseError =
+  deleteApiBarcodesDeleteResponse404 & {
+    headers: Headers;
+  };
 
-export const getDeleteApiBarcodesDeleteUrl = (code: string,) => {
+export type deleteApiBarcodesDeleteResponse =
+  | deleteApiBarcodesDeleteResponseSuccess
+  | deleteApiBarcodesDeleteResponseError;
 
+export const getDeleteApiBarcodesDeleteUrl = (code: string) => {
+  return `/api/internal/v1/barcodes/${code}`;
+};
 
-  
-
-  return `/api/internal/v1/barcodes/${code}`
-}
-
-export const deleteApiBarcodesDelete = async (code: string, options?: RequestInit): Promise<deleteApiBarcodesDeleteResponse> => {
-  
-  return apiFetch<deleteApiBarcodesDeleteResponse>(getDeleteApiBarcodesDeleteUrl(code),
-  {      
-    ...options,
-    method: 'DELETE'
-    
-    
-  }
-);}
-
-
+export const deleteApiBarcodesDelete = async (
+  code: string,
+  options?: RequestInit,
+): Promise<deleteApiBarcodesDeleteResponse> => {
+  return apiFetch<deleteApiBarcodesDeleteResponse>(
+    getDeleteApiBarcodesDeleteUrl(code),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
+};

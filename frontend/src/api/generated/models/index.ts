@@ -6,13 +6,13 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export * from './apiProblem';
-export * from './apiProblemExtraData';
-export * from './barcodeResponse';
-export * from './categoryResponse';
-export * from './createBarcodeRequest';
-export * from './createProductRequest';
-export * from './locationResponse';
-export * from './productResponse';
-export * from './productResponseBarcodes';
-export * from './updateProductRequest';
+export * from "./apiProblem";
+export * from "./apiProblemExtraData";
+export * from "./barcodeResponse";
+export * from "./categoryResponse";
+export * from "./createBarcodeRequest";
+export * from "./createProductRequest";
+export * from "./locationResponse";
+export * from "./productResponse";
+export * from "./productResponseBarcodes";
+export * from "./updateProductRequest";

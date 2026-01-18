@@ -1,63 +1,63 @@
-import { useContext } from 'react'
+import { useContext } from "react";
 import {
-  StockContext,
-  ShoppingContext,
-  ChoresContext,
-  TasksContext,
-  RecipesContext,
   AuthContext,
-  type StockContextValue,
-  type ShoppingContextValue,
-  type ChoresContextValue,
-  type TasksContextValue,
-  type RecipesContextValue,
   type AuthContextValue,
-} from './context'
+  ChoresContext,
+  type ChoresContextValue,
+  RecipesContext,
+  type RecipesContextValue,
+  ShoppingContext,
+  type ShoppingContextValue,
+  StockContext,
+  type StockContextValue,
+  TasksContext,
+  type TasksContextValue,
+} from "./context";
 
 export function useStock(): StockContextValue {
-  const context = useContext(StockContext)
+  const context = useContext(StockContext);
   if (!context) {
-    throw new Error('useStock must be used within a DataProvider')
+    throw new Error("useStock must be used within a DataProvider");
   }
-  return context
+  return context;
 }
 
 export function useShoppingList(): ShoppingContextValue {
-  const context = useContext(ShoppingContext)
+  const context = useContext(ShoppingContext);
   if (!context) {
-    throw new Error('useShoppingList must be used within a DataProvider')
+    throw new Error("useShoppingList must be used within a DataProvider");
   }
-  return context
+  return context;
 }
 
 export function useChores(): ChoresContextValue {
-  const context = useContext(ChoresContext)
+  const context = useContext(ChoresContext);
   if (!context) {
-    throw new Error('useChores must be used within a DataProvider')
+    throw new Error("useChores must be used within a DataProvider");
   }
-  return context
+  return context;
 }
 
 export function useTasks(): TasksContextValue {
-  const context = useContext(TasksContext)
+  const context = useContext(TasksContext);
   if (!context) {
-    throw new Error('useTasks must be used within a DataProvider')
+    throw new Error("useTasks must be used within a DataProvider");
   }
-  return context
+  return context;
 }
 
 export function useRecipes(): RecipesContextValue {
-  const context = useContext(RecipesContext)
+  const context = useContext(RecipesContext);
   if (!context) {
-    throw new Error('useRecipes must be used within a DataProvider')
+    throw new Error("useRecipes must be used within a DataProvider");
   }
-  return context
+  return context;
 }
 
 export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context
+  return context;
 }

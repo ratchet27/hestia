@@ -10,7 +10,7 @@ export default defineConfig({
       target: './src/api/generated',
       schemas: './src/api/generated/models',
       client: 'fetch',
-      baseUrl: false,
+      baseUrl: undefined,
       override: {
         mutator: {
           path: './src/api/client.ts',

@@ -5,9 +5,9 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
-import type { CategoryResponse } from './categoryResponse';
-import type { LocationResponse } from './locationResponse';
-import type { ProductResponseBarcodes } from './productResponseBarcodes';
+import type { CategoryResponse } from "./categoryResponse";
+import type { LocationResponse } from "./locationResponse";
+import type { ProductResponseBarcodes } from "./productResponseBarcodes";
 
 export interface ProductResponse {
   id: string;

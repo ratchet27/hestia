@@ -5,45 +5,35 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
-import type {
-  LocationResponse
-} from '.././models';
+import type { LocationResponse } from ".././models";
 
-import { apiFetch } from '../../client';
+import { apiFetch } from "../../client";
 
 /**
  * Returns all storage locations.
  * @summary List locations
  */
 export type getApiLocationsListResponse200 = {
-  data: LocationResponse
-  status: 200
-}
-    
-export type getApiLocationsListResponseSuccess = (getApiLocationsListResponse200) & {
-  headers: Headers;
+  data: LocationResponse;
+  status: 200;
 };
-;
 
-export type getApiLocationsListResponse = (getApiLocationsListResponseSuccess)
+export type getApiLocationsListResponseSuccess =
+  getApiLocationsListResponse200 & {
+    headers: Headers;
+  };
+
+export type getApiLocationsListResponse = getApiLocationsListResponseSuccess;
 
 export const getGetApiLocationsListUrl = () => {
+  return `/api/internal/v1/locations`;
+};
 
-
-  
-
-  return `/api/internal/v1/locations`
-}
-
-export const getApiLocationsList = async ( options?: RequestInit): Promise<getApiLocationsListResponse> => {
-  
-  return apiFetch<getApiLocationsListResponse>(getGetApiLocationsListUrl(),
-  {      
+export const getApiLocationsList = async (
+  options?: RequestInit,
+): Promise<getApiLocationsListResponse> => {
+  return apiFetch<getApiLocationsListResponse>(getGetApiLocationsListUrl(), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
-
+    method: "GET",
+  });
+};

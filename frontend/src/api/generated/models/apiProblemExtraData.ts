@@ -6,4 +6,4 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type ApiProblemExtraData = {[key: string]: unknown};
+export type ApiProblemExtraData = { [key: string]: unknown };

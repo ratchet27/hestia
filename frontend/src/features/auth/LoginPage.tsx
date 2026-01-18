@@ -1,37 +1,37 @@
-import { useState, type FormEvent } from 'react'
-import { Navigate } from 'react-router-dom'
-import { useAuth } from '../../data/hooks'
+import { type FormEvent, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../../data/hooks";
 
 export function LoginPage(): React.ReactElement {
-  const { user, login } = useAuth()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
-  const [error, setError] = useState('')
+  const { user, login } = useAuth();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
 
   if (user) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/" replace />;
   }
 
   const handleSubmit = (e: FormEvent): void => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError("");
 
     if (!username.trim()) {
-      setError('Введите имя пользователя')
-      return
+      setError("Введите имя пользователя");
+      return;
     }
 
     if (!password.trim()) {
-      setError('Введите пароль')
-      return
+      setError("Введите пароль");
+      return;
     }
 
-    const success = login(username, password)
+    const success = login(username, password);
     if (!success) {
-      setError('Неверное имя пользователя или пароль')
+      setError("Неверное имя пользователя или пароль");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-stone-900 flex items-center justify-center p-4">
@@ -41,7 +41,10 @@ export function LoginPage(): React.ReactElement {
           <p className="text-stone-500 mt-2">Домашний учёт</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-stone-800 rounded-lg p-6 shadow-lg">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-stone-800 rounded-lg p-6 shadow-lg"
+        >
           <h2 className="text-xl font-semibold text-stone-200 mb-6">Вход</h2>
 
           {error && (
@@ -51,7 +54,10 @@ export function LoginPage(): React.ReactElement {
           )}
 
           <div className="mb-4">
-            <label htmlFor="username" className="block text-sm font-medium text-stone-300 mb-2">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-stone-300 mb-2"
+            >
               Имя пользователя
             </label>
             <input
@@ -67,7 +73,10 @@ export function LoginPage(): React.ReactElement {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-stone-300 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-stone-300 mb-2"
+            >
               Пароль
             </label>
             <input
@@ -103,5 +112,5 @@ export function LoginPage(): React.ReactElement {
         </form>
       </div>
     </div>
-  )
+  );
 }

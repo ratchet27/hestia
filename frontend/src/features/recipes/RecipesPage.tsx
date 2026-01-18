@@ -1,31 +1,33 @@
-import { Icons } from '../../components/Icons'
-import { useStock, useRecipes } from '../../data/hooks'
-import type { Recipe } from '../../data/types'
+import { Icons } from "../../components/Icons";
+import { useRecipes, useStock } from "../../data/hooks";
+import type { Recipe } from "../../data/types";
 
 interface CheckedIngredient {
-  productId: number
-  amount: number
-  product: { name: string } | undefined
-  inStock: number
-  hasEnough: boolean
+  productId: number;
+  amount: number;
+  product: { name: string } | undefined;
+  inStock: number;
+  hasEnough: boolean;
 }
 
 export function RecipesPage(): React.ReactElement {
-  const { stock } = useStock()
-  const { recipes } = useRecipes()
+  const { stock } = useStock();
+  const { recipes } = useRecipes();
 
   const checkIngredients = (recipe: Recipe): CheckedIngredient[] => {
     return recipe.ingredients.map((ing) => {
       // Stock uses number IDs - won't match with UUID products until API integrated
-      const totalStock = stock.filter((e) => e.productId === ing.productId).reduce((sum, e) => sum + e.amount, 0)
+      const totalStock = stock
+        .filter((e) => e.productId === ing.productId)
+        .reduce((sum, e) => sum + e.amount, 0);
       return {
         ...ing,
         product: undefined, // Products have UUID, recipes have number ID
         inStock: totalStock,
         hasEnough: totalStock >= ing.amount,
-      }
-    })
-  }
+      };
+    });
+  };
 
   return (
     <div className="p-8">
@@ -34,7 +36,10 @@ export function RecipesPage(): React.ReactElement {
           <h2 className="text-3xl font-bold text-stone-800">Рецепты</h2>
           <p className="text-stone-500 mt-1">Проверка наличия ингредиентов</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors">
+        <button
+          type="button"
+          className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors"
+        >
           <Icons.Plus />
           Новый рецепт
         </button>
@@ -42,14 +47,19 @@ export function RecipesPage(): React.ReactElement {
 
       <div className="grid grid-cols-2 gap-6">
         {recipes.map((recipe) => {
-          const ingredients = checkIngredients(recipe)
-          const canMake = ingredients.every((i) => i.hasEnough)
-          const missingCount = ingredients.filter((i) => !i.hasEnough).length
+          const ingredients = checkIngredients(recipe);
+          const canMake = ingredients.every((i) => i.hasEnough);
+          const missingCount = ingredients.filter((i) => !i.hasEnough).length;
 
           return (
-            <div key={recipe.id} className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+            <div
+              key={recipe.id}
+              className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden"
+            >
               <div className="p-4 border-b border-stone-100 flex justify-between items-center">
-                <h3 className="font-semibold text-stone-800 text-lg">{recipe.name}</h3>
+                <h3 className="font-semibold text-stone-800 text-lg">
+                  {recipe.name}
+                </h3>
                 {canMake ? (
                   <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                     Можно готовить
@@ -61,16 +71,25 @@ export function RecipesPage(): React.ReactElement {
                 )}
               </div>
               <div className="p-4">
-                <h4 className="text-sm font-medium text-stone-600 mb-3">Ингредиенты:</h4>
+                <h4 className="text-sm font-medium text-stone-600 mb-3">
+                  Ингредиенты:
+                </h4>
                 <div className="space-y-2">
                   {ingredients.map((ing, idx) => (
-                    <div key={idx} className="flex items-center justify-between">
-                      <span className={`${ing.hasEnough ? 'text-stone-800' : 'text-red-600'}`}>
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between"
+                    >
+                      <span
+                        className={`${ing.hasEnough ? "text-stone-800" : "text-red-600"}`}
+                      >
                         {ing.product?.name}
                       </span>
-                      <span className={`text-sm ${ing.hasEnough ? 'text-green-600' : 'text-red-600'}`}>
+                      <span
+                        className={`text-sm ${ing.hasEnough ? "text-green-600" : "text-red-600"}`}
+                      >
                         {ing.inStock} / {ing.amount}
-                        {ing.hasEnough ? ' ✓' : ' ✗'}
+                        {ing.hasEnough ? " ✓" : " ✗"}
                       </span>
                     </div>
                   ))}
@@ -78,21 +97,25 @@ export function RecipesPage(): React.ReactElement {
               </div>
               <div className="p-4 bg-stone-50 border-t border-stone-100 flex gap-2">
                 <button
+                  type="button"
                   className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!canMake}
                 >
                   Приготовить
                 </button>
                 {!canMake && (
-                  <button className="px-4 py-2 border border-stone-300 rounded-lg hover:bg-white transition-colors">
+                  <button
+                    type="button"
+                    className="px-4 py-2 border border-stone-300 rounded-lg hover:bg-white transition-colors"
+                  >
                     В список покупок
                   </button>
                 )}
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

@@ -1,25 +1,25 @@
-import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
-import { ApiError } from './client'
+import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { ApiError } from "./client";
 
 function handleGlobalError(error: unknown): void {
   if (error instanceof ApiError) {
     // 422 validation errors are handled by forms
     if (error.isValidationError) {
-      return
+      return;
     }
 
     // 404 errors are handled locally by components
     if (error.isNotFound) {
-      return
+      return;
     }
 
     // Server errors and other failures get toasts
-    toast.error(error.message)
+    toast.error(error.message);
   } else if (error instanceof Error) {
-    toast.error(error.message)
+    toast.error(error.message);
   } else {
-    toast.error('Произошла ошибка')
+    toast.error("Произошла ошибка");
   }
 }
 
@@ -35,10 +35,14 @@ export const queryClient = new QueryClient({
       staleTime: 5 * 60 * 1000, // 5 minutes
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors
-        if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
-          return false
+        if (
+          error instanceof ApiError &&
+          error.status >= 400 &&
+          error.status < 500
+        ) {
+          return false;
         }
-        return failureCount < 1
+        return failureCount < 1;
       },
       refetchOnWindowFocus: false,
     },
@@ -46,4 +50,4 @@ export const queryClient = new QueryClient({
       retry: 0,
     },
   },
-})
+});

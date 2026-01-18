@@ -15,15 +15,19 @@ export function ProductSkeleton(): React.ReactElement {
         <div className="h-4 w-16 bg-stone-200 rounded" />
       </div>
     </div>
-  )
+  );
 }
 
-export function ProductsGridSkeleton({ count = 6 }: { count?: number }): React.ReactElement {
+export function ProductsGridSkeleton({
+  count = 6,
+}: {
+  count?: number;
+}): React.ReactElement {
   return (
     <div className="grid grid-cols-3 gap-4">
       {Array.from({ length: count }).map((_, i) => (
         <ProductSkeleton key={i} />
       ))}
     </div>
-  )
+  );
 }

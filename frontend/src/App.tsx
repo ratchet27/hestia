@@ -1,21 +1,25 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Layout } from './components/Layout'
-import { DashboardPage } from './features/dashboard/DashboardPage'
-import { StockPage } from './features/stock/StockPage'
-import { ProductsPage } from './features/products/ProductsPage'
-import { ShoppingPage } from './features/shopping/ShoppingPage'
-import { RecipesPage } from './features/recipes/RecipesPage'
-import { TasksPage } from './features/tasks/TasksPage'
-import { SettingsPage } from './features/settings/SettingsPage'
-import { LoginPage } from './features/auth/LoginPage'
-import { useAuth } from './data/hooks'
+import { Navigate, Route, Routes } from "react-router-dom";
+import { Layout } from "./components/Layout";
+import { useAuth } from "./data/hooks";
+import { LoginPage } from "./features/auth/LoginPage";
+import { DashboardPage } from "./features/dashboard/DashboardPage";
+import { ProductsPage } from "./features/products/ProductsPage";
+import { RecipesPage } from "./features/recipes/RecipesPage";
+import { SettingsPage } from "./features/settings/SettingsPage";
+import { ShoppingPage } from "./features/shopping/ShoppingPage";
+import { StockPage } from "./features/stock/StockPage";
+import { TasksPage } from "./features/tasks/TasksPage";
 
-function ProtectedRoute({ children }: { children: React.ReactElement }): React.ReactElement {
-  const { user } = useAuth()
+function ProtectedRoute({
+  children,
+}: {
+  children: React.ReactElement;
+}): React.ReactElement {
+  const { user } = useAuth();
   if (!user) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" replace />;
   }
-  return children
+  return children;
 }
 
 export default function App(): React.ReactElement {
@@ -38,5 +42,5 @@ export default function App(): React.ReactElement {
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
     </Routes>
-  )
+  );
 }
