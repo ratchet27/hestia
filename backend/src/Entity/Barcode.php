@@ -72,4 +72,9 @@ class Barcode
     {
         return $this->createdAt;
     }
+
+    public function getProductId(): string
+    {
+        return (string) $this->product->getId();
+    }
 }
