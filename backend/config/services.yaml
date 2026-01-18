@@ -26,10 +26,6 @@ services:
         arguments:
             $objectMapper: '@Symfony\Component\ObjectMapper\ObjectMapperInterface'
 
-    App\ObjectMapper\Transform\MapStock:
-        arguments:
-            $objectMapper: '@Symfony\Component\ObjectMapper\ObjectMapperInterface'
-
     App\ObjectMapper\Transform\MapProduct:
         arguments:
             $objectMapper: '@Symfony\Component\ObjectMapper\ObjectMapperInterface'

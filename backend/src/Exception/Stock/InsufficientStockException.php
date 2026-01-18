@@ -18,7 +18,11 @@ class InsufficientStockException extends ApiException
             extraData: [
                 'requested' => $requested,
                 'available' => $available,
-                'message' => "Cannot consume {$requested} units, only {$available} available at this location"
+                'message' => sprintf(
+                    'Cannot consume %d units, only %d available at this location',
+                    $requested,
+                    $available
+                )
             ]
         ));
     }

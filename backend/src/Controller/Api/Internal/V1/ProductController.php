@@ -12,7 +12,7 @@ use App\Response\Category\CategoryResponse;
 use App\Response\Location\LocationResponse;
 use App\Response\Product\ProductResponse;
 use App\Service\ProductService;
-use App\Service\StockService;
+use App\Service\StockEntryService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,7 +31,7 @@ final class ProductController extends AbstractController
     public function __construct(
         private readonly ProductService $productService,
         private readonly ObjectMapperInterface $mapper,
-        private readonly StockService $stockService
+        private readonly StockEntryService $stockEntryService
     ) {
     }
 
@@ -78,7 +78,7 @@ final class ProductController extends AbstractController
         $product = $this->productService->getProduct($uuid);
 
         // Get stock summary
-        $stockSummary = $this->stockService->getStockSummaryForProduct($product->getId());
+        $stockSummary = $this->stockEntryService->getStockSummaryForProduct($product->getId());
 
         // Build response manually to include stock_summary
         $response = new ProductResponse(
