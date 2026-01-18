@@ -7,8 +7,12 @@ namespace App\Controller\Api\Internal\V1;
 use App\Exception\ApiProblem;
 use App\Request\CreateProductRequest;
 use App\Request\UpdateProductRequest;
+use App\Response\Barcode\BarcodeResponse;
+use App\Response\Category\CategoryResponse;
+use App\Response\Location\LocationResponse;
 use App\Response\Product\ProductResponse;
 use App\Service\ProductService;
+use App\Service\StockService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,7 +30,8 @@ final class ProductController extends AbstractController
 {
     public function __construct(
         private readonly ProductService $productService,
-        private readonly ObjectMapperInterface $mapper
+        private readonly ObjectMapperInterface $mapper,
+        private readonly StockService $stockService
     ) {
     }
 
@@ -72,9 +77,36 @@ final class ProductController extends AbstractController
     {
         $product = $this->productService->getProduct($uuid);
 
-        return $this->json([
-            'data' => $this->mapper->map($product, ProductResponse::class)
-        ]);
+        // Get stock summary
+        $stockSummary = $this->stockService->getStockSummaryForProduct($product->getId());
+
+        // Build response manually to include stock_summary
+        $response = new ProductResponse(
+            id: $product->getId(),
+            name: $product->getName(),
+            category: new CategoryResponse($product->getCategory()->getId(), $product->getCategory()->getName()),
+            defaultLocation: new LocationResponse(
+                $product->getDefaultLocation()->getId(),
+                $product->getDefaultLocation()->getName()
+            ),
+            defaultExpiryDays: $product->getDefaultExpiryDays(),
+            minStock: $product->getMinStock(),
+            active: $product->isActive(),
+            createdAt: $product->getCreatedAt(),
+            updatedAt: $product->getUpdatedAt(),
+            barcodes: array_map(
+                static fn($barcode) => new BarcodeResponse(
+                    $barcode->getId(),
+                    $barcode->getBarcode(),
+                    $barcode->getProductId(),
+                    $barcode->getCreatedAt()
+                ),
+                $product->getBarcodes()->toArray()
+            ),
+            stock_summary: $stockSummary
+        );
+
+        return $this->json(['data' => $response]);
     }
 
     #[Route('/products', name: 'api_products_create', methods: ['POST'])]
