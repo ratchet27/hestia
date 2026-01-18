@@ -179,7 +179,7 @@ class BarcodeControllerTest extends WebTestCase
         $product = $this->createProduct();
         BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product]);
 
-        $response = $this->apiDelete('/products/' . $product->getId() . '/barcodes/1234567890123');
+        $response = $this->apiDelete('/barcodes/1234567890123');
 
         static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode(), (string) $response->getContent());
 
@@ -192,22 +192,7 @@ class BarcodeControllerTest extends WebTestCase
 
     public function testRemoveBarcodeBarcodeNotFound(): void
     {
-        $product = $this->createProduct();
-
-        $response = $this->apiDelete('/products/' . $product->getId() . '/barcodes/nonexistent');
-        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
-
-        static::assertSame('Barcode not found', $data['title']);
-        static::assertSame('BARCODE_NOT_FOUND', $data['type']);
-    }
-
-    public function testRemoveBarcodeWrongProduct(): void
-    {
-        $product1 = $this->createProduct();
-        $product2 = $this->createProduct();
-        BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $product1]);
-
-        $response = $this->apiDelete('/products/' . $product2->getId() . '/barcodes/1234567890123');
+        $response = $this->apiDelete('/barcodes/nonexistent');
         $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
 
         static::assertSame('Barcode not found', $data['title']);

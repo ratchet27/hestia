@@ -48,17 +48,4 @@ class BarcodeRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findOneByProductAndCode(Uuid $productId, string $code): ?Barcode
-    {
-        // @mago-ignore analysis:mixed-return-statement
-        return $this
-            ->createQueryBuilder('b')
-            ->leftJoin('b.product', 'p')
-            ->where('p.id = :productId')
-            ->andWhere('b.barcode = :code')
-            ->setParameter('productId', $productId)
-            ->setParameter('code', $code)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
 }

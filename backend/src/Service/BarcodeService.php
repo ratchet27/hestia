@@ -38,7 +38,11 @@ class BarcodeService
 
     public function addBarcode(Uuid $productId, string $code): Barcode
     {
-        $product = $this->getProduct($productId);
+        $product = $this->productRepository->find($productId);
+
+        if ($product === null) {
+            throw new ProductNotFoundException($productId);
+        };
 
         $existing = $this->barcodeRepository->findByCode($code);
         if ($existing !== null) {
@@ -60,9 +64,9 @@ class BarcodeService
         return $barcode;
     }
 
-    public function removeBarcode(Uuid $productId, string $code): void
+    public function removeBarcode(string $code): void
     {
-        $barcode = $this->barcodeRepository->findOneByProductAndCode($productId, $code);
+        $barcode = $this->barcodeRepository->findByCode($code);
 
         if ($barcode === null) {
             throw new BarcodeNotFoundException($code);
@@ -81,16 +85,5 @@ class BarcodeService
         }
 
         return $barcode->getProduct();
-    }
-
-    private function getProduct(Uuid $id): Product
-    {
-        $product = $this->productRepository->find($id);
-
-        if ($product === null) {
-            throw new ProductNotFoundException($id);
-        }
-
-        return $product;
     }
 }

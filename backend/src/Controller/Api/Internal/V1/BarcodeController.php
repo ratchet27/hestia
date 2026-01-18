@@ -68,17 +68,12 @@ final class BarcodeController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
-    #[Route(
-        '/products/{uuid}/barcodes/{barcode}',
-        name: 'api_products_barcodes_delete',
-        requirements: ['uuid' => Requirement::UUID_V7],
-        methods: ['DELETE']
-    )]
-    #[OA\Response(response: 204, description: 'Barcode removed from product')]
-    #[OA\Response(response: 404, description: 'Product or barcode not found')]
-    public function removeFromProduct(Uuid $uuid, string $barcode): JsonResponse
+    #[Route('/barcodes/{code}', name: 'api_barcodes_delete', methods: ['DELETE'])]
+    #[OA\Response(response: 204, description: 'Barcode deleted')]
+    #[OA\Response(response: 404, description: 'Barcode not found')]
+    public function delete(string $code): JsonResponse
     {
-        $this->barcodeService->removeBarcode($uuid, $barcode);
+        $this->barcodeService->removeBarcode($code);
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
