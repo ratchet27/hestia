@@ -120,20 +120,37 @@ docker compose exec php bin/phpunit tests/SomeTest.php
 
 ## Code Quality
 
-Mago for linting, formatting, and static analysis. Runs locally (not in container).
+Tools configured: Rector, Mago, PHPStan. Run in this order (file-modifying first, then analysis).
+
+### Rector (refactoring)
 
 ```bash
-# Lint
-mago lint src/
+docker compose exec php vendor/bin/rector
+```
 
-# Format
-mago fmt src/
+### Mago (format, lint, analyze)
 
-# Check (no changes)
-mago fmt --check src/
+Runs locally (not in container). Uses `mago.toml` for configuration.
 
-# Static analysis
-mago analyze src/
+```bash
+mago format           # Auto-format code
+mago format --check   # Check formatting (CI)
+mago lint             # Check for issues
+mago analyze          # Static analysis
+```
+
+### PHPStan (static analysis)
+
+```bash
+docker compose exec php vendor/bin/phpstan analyse
+```
+
+### Quick Check (all tools)
+
+```bash
+docker compose exec php vendor/bin/rector && \
+mago format && mago lint && mago analyze && \
+docker compose exec php vendor/bin/phpstan analyse
 ```
 
 ## Claude Code Notes
