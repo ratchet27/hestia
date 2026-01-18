@@ -1,29 +1,34 @@
 import { useNavigate } from 'react-router-dom'
 import { Icons } from '../../components/Icons'
-import { useProducts, useStock, useShoppingList, useChores, useTasks } from '../../data/hooks'
+import { useStock, useShoppingList, useChores, useTasks } from '../../data/hooks'
+import { useProducts } from '../../api/queries'
 import { getExpiryStatus, getDaysUntil, formatDate, locations } from '../../data/types'
 
 export function DashboardPage(): React.ReactElement {
   const navigate = useNavigate()
-  const { products } = useProducts()
+  const { data: products = [] } = useProducts()
   const { stock } = useStock()
   const { shoppingList } = useShoppingList()
   const { chores } = useChores()
   const { tasks } = useTasks()
 
+  // Note: Stock entries use number IDs, API products use string UUIDs
+  // This lookup won't match until stock API is integrated
   const expiringItems = stock
     .filter((e) => getExpiryStatus(e.bestBefore) !== 'ok')
     .map((e) => ({
       ...e,
-      product: products.find((p) => p.id === e.productId),
+      product: undefined, // Products have UUID, stock has number ID - will integrate when stock API is ready
     }))
     .sort((a, b) => getDaysUntil(a.bestBefore) - getDaysUntil(b.bestBefore))
 
+  // Low stock calculation - will work properly when stock API is integrated
   const lowStockItems = products
-    .filter((p) => p.minStock > 0)
+    .filter((p) => p.min_stock > 0)
     .map((p) => {
-      const totalStock = stock.filter((e) => e.productId === p.id).reduce((sum, e) => sum + e.amount, 0)
-      return { ...p, totalStock, isLow: totalStock < p.minStock }
+      // Stock entries use number IDs, can't match with UUID products yet
+      const totalStock = 0
+      return { ...p, totalStock, isLow: totalStock < p.min_stock }
     })
     .filter((p) => p.isLow)
 

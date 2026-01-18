@@ -1,4 +1,4 @@
-import type { Product, StockEntry, ShoppingItem, Chore, Task, Recipe, User } from './types'
+import type { StockEntry, ShoppingItem, Chore, Task, Recipe, User } from './types'
 
 export const mockUser: User = {
   id: 1,
@@ -6,109 +6,6 @@ export const mockUser: User = {
   username: 'pavel',
   email: 'ratchet270@gmail.com',
 }
-
-export const mockProducts: Product[] = [
-  {
-    id: 1,
-    name: 'Молоко 3.2%',
-    category: 'Молочные',
-    defaultExpiryDays: 7,
-    minStock: 2,
-    defaultLocation: 'fridge',
-    barcode: '4870204301234',
-    active: true,
-  },
-  {
-    id: 2,
-    name: 'Хлеб белый',
-    category: 'Хлеб',
-    defaultExpiryDays: 3,
-    minStock: 1,
-    defaultLocation: 'pantry',
-    barcode: '4870204301235',
-    active: true,
-  },
-  {
-    id: 3,
-    name: 'Яйца С1 (10 шт)',
-    category: 'Молочные',
-    defaultExpiryDays: 21,
-    minStock: 1,
-    defaultLocation: 'fridge',
-    barcode: '4870204301236',
-    active: true,
-  },
-  {
-    id: 4,
-    name: 'Сыр Российский',
-    category: 'Молочные',
-    defaultExpiryDays: 30,
-    minStock: 1,
-    defaultLocation: 'fridge',
-    barcode: '4870204301237',
-    active: true,
-  },
-  {
-    id: 5,
-    name: 'Масло сливочное',
-    category: 'Молочные',
-    defaultExpiryDays: 60,
-    minStock: 1,
-    defaultLocation: 'fridge',
-    barcode: '4870204301238',
-    active: true,
-  },
-  {
-    id: 6,
-    name: 'Курица (филе)',
-    category: 'Мясо',
-    defaultExpiryDays: 3,
-    minStock: 0,
-    defaultLocation: 'fridge',
-    barcode: '4870204301239',
-    active: true,
-  },
-  {
-    id: 7,
-    name: 'Рис длиннозёрный',
-    category: 'Крупы',
-    defaultExpiryDays: 365,
-    minStock: 1,
-    defaultLocation: 'pantry',
-    barcode: '4870204301240',
-    active: true,
-  },
-  {
-    id: 8,
-    name: 'Макароны спагетти',
-    category: 'Крупы',
-    defaultExpiryDays: 365,
-    minStock: 2,
-    defaultLocation: 'pantry',
-    barcode: '4870204301241',
-    active: true,
-  },
-  {
-    id: 9,
-    name: 'Томатная паста',
-    category: 'Консервы',
-    defaultExpiryDays: 180,
-    minStock: 1,
-    defaultLocation: 'pantry',
-    barcode: '4870204301242',
-    active: true,
-  },
-  {
-    id: 10,
-    name: 'Шампунь',
-    category: 'Гигиена',
-    defaultExpiryDays: 730,
-    minStock: 1,
-    defaultLocation: 'bathroom',
-    barcode: '4870204301243',
-    active: true,
-  },
-]
 
 export const mockStockEntries: StockEntry[] = [
   {

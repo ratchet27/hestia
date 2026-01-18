@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { Icons } from '../../components/Icons'
-import { useProducts, useShoppingList } from '../../data/hooks'
+import { useShoppingList } from '../../data/hooks'
+import { useProducts } from '../../api/queries'
 
 export function ShoppingPage(): React.ReactElement {
-  const { products } = useProducts()
+  // Note: Shopping list items use number productId, API products use UUID
+  // Product lookup won't match until shopping API is integrated
+  const { data: products = [] } = useProducts()
   const { shoppingList, setShoppingList } = useShoppingList()
   const [newItem, setNewItem] = useState('')
 
