@@ -23,7 +23,7 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('/categories', name: 'api_categories_list', methods: ['GET'])]
-    #[OA\Get(summary: 'List categories', description: 'Returns all product categories.')]
+    #[OA\Get(description: 'Returns all product categories.', summary: 'List categories')]
     #[OA\Response(response: 200, description: 'List of categories', content: new Model(type: CategoryResponse::class))]
     public function list(): JsonResponse
     {

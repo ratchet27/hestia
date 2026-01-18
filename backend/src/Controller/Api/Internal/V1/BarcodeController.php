@@ -35,7 +35,7 @@ final class BarcodeController extends AbstractController
         requirements: ['uuid' => Requirement::UUID_V7],
         methods: ['GET']
     )]
-    #[OA\Get(summary: 'List product barcodes', description: 'Returns all barcodes associated with a product.')]
+    #[OA\Get(description: 'Returns all barcodes associated with a product.', summary: 'List product barcodes')]
     #[OA\Response(
         response: 200,
         description: 'List of barcodes for a product',
@@ -60,7 +60,7 @@ final class BarcodeController extends AbstractController
         requirements: ['uuid' => Requirement::UUID_V7],
         methods: ['POST']
     )]
-    #[OA\Post(summary: 'Add barcode to product', description: 'Associates a new barcode with a product.')]
+    #[OA\Post(description: 'Associates a new barcode with a product.', summary: 'Add barcode to product')]
     #[OA\Response(
         response: 201,
         description: 'Barcode added to product',
@@ -85,7 +85,7 @@ final class BarcodeController extends AbstractController
     }
 
     #[Route('/barcodes/{code}', name: 'api_barcodes_delete', methods: ['DELETE'])]
-    #[OA\Delete(summary: 'Delete barcode', description: 'Removes a barcode from the system.')]
+    #[OA\Delete(description: 'Removes a barcode from the system.', summary: 'Delete barcode')]
     #[OA\Response(response: 204, description: 'Barcode deleted')]
     #[OA\Response(response: 404, description: 'Barcode not found', content: new Model(type: ApiProblem::class))]
     public function delete(string $code): JsonResponse
@@ -96,7 +96,7 @@ final class BarcodeController extends AbstractController
     }
 
     #[Route('/barcodes/{code}', name: 'api_barcodes_lookup', methods: ['GET'])]
-    #[OA\Get(summary: 'Lookup barcode', description: 'Finds the product associated with a barcode.')]
+    #[OA\Get(description: 'Finds the product associated with a barcode.', summary: 'Lookup barcode')]
     #[OA\Response(
         response: 200,
         description: 'Product found by barcode',

@@ -51,7 +51,7 @@ class ProductRepository extends ServiceEntityRepository
 
     public function exists(Uuid $id): bool
     {
-        return (bool) $this
+        return null !== $this
             ->createQueryBuilder('p')
             ->select('1')
             ->where('p.id = :id')
