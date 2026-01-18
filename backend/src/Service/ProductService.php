@@ -49,12 +49,12 @@ class ProductService
 
     public function createProduct(CreateProductRequest $request): Product
     {
-        $category = $this->categoryRepository->find(Uuid::fromString($request->category_id));
+        $category = $this->categoryRepository->find(Uuid::fromString($request->categoryId));
         if ($category === null) {
             throw new BadRequestHttpException('Category not found');
         }
 
-        $location = $this->locationRepository->find(Uuid::fromString($request->default_location_id));
+        $location = $this->locationRepository->find(Uuid::fromString($request->defaultLocationId));
         if ($location === null) {
             throw new BadRequestHttpException('Location not found');
         }
@@ -63,8 +63,8 @@ class ProductService
         $product->setName($request->name);
         $product->setCategory($category);
         $product->setDefaultLocation($location);
-        $product->setDefaultExpiryDays($request->default_expiry_days);
-        $product->setMinStock($request->min_stock);
+        $product->setDefaultExpiryDays($request->defaultExpiryDays);
+        $product->setMinStock($request->minStock);
         $product->setActive($request->active);
 
         $errors = $this->validator->validate($product);
@@ -86,8 +86,8 @@ class ProductService
             $product->setName($request->name);
         }
 
-        if ($request->category_id !== null) {
-            $category = $this->categoryRepository->find(Uuid::fromString($request->category_id));
+        if ($request->categoryId !== null) {
+            $category = $this->categoryRepository->find(Uuid::fromString($request->categoryId));
             if ($category === null) {
                 throw new BadRequestHttpException('Category not found');
             }
@@ -95,8 +95,8 @@ class ProductService
             $product->setCategory($category);
         }
 
-        if ($request->default_location_id !== null) {
-            $location = $this->locationRepository->find(Uuid::fromString($request->default_location_id));
+        if ($request->defaultLocationId !== null) {
+            $location = $this->locationRepository->find(Uuid::fromString($request->defaultLocationId));
             if ($location === null) {
                 throw new BadRequestHttpException('Location not found');
             }
@@ -104,14 +104,14 @@ class ProductService
             $product->setDefaultLocation($location);
         }
 
-        if ($request->default_expiry_days !== null) {
-            $product->setDefaultExpiryDays($request->default_expiry_days);
-        } elseif ($request->clear_default_expiry_days) {
+        if ($request->defaultExpiryDays !== null) {
+            $product->setDefaultExpiryDays($request->defaultExpiryDays);
+        } elseif ($request->clearDefaultExpiryDays) {
             $product->setDefaultExpiryDays(null);
         }
 
-        if ($request->min_stock !== null) {
-            $product->setMinStock($request->min_stock);
+        if ($request->minStock !== null) {
+            $product->setMinStock($request->minStock);
         }
 
         if ($request->active !== null) {
