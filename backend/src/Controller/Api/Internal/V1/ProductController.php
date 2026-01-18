@@ -31,6 +31,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/products', name: 'api_products_list', methods: ['GET'])]
+    #[OA\Get(summary: 'List products', description: 'Returns a list of all products with optional filtering.')]
     #[OA\Response(response: 200, description: 'List of products', content: new Model(type: ProductResponse::class))]
     public function list(Request $request): JsonResponse
     {
@@ -64,6 +65,7 @@ final class ProductController extends AbstractController
         requirements: ['uuid' => Requirement::UUID_V7],
         methods: ['GET']
     )]
+    #[OA\Get(summary: 'Get product', description: 'Returns a single product by its UUID.')]
     #[OA\Response(response: 200, description: 'Product details', content: new Model(type: ProductResponse::class))]
     #[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
     public function show(Uuid $uuid): JsonResponse
@@ -76,6 +78,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/products', name: 'api_products_create', methods: ['POST'])]
+    #[OA\Post(summary: 'Create product', description: 'Creates a new product in the inventory.')]
     #[OA\Response(response: 201, description: 'Product created', content: new Model(type: ProductResponse::class))]
     #[OA\Response(response: 400, description: 'Invalid input', content: new Model(type: ApiProblem::class))]
     public function create(
@@ -95,6 +98,7 @@ final class ProductController extends AbstractController
         requirements: ['uuid' => Requirement::UUID_V7],
         methods: ['PUT']
     )]
+    #[OA\Put(summary: 'Update product', description: 'Updates an existing product.')]
     #[OA\Response(response: 200, description: 'Product updated', content: new Model(type: ProductResponse::class))]
     #[OA\Response(response: 400, description: 'Invalid input', content: new Model(type: ApiProblem::class))]
     #[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
@@ -116,6 +120,7 @@ final class ProductController extends AbstractController
         requirements: ['uuid' => Requirement::UUID_V7],
         methods: ['DELETE']
     )]
+    #[OA\Delete(summary: 'Delete product', description: 'Soft-deletes a product. Use ?hard=true for permanent deletion.')]
     #[OA\Response(response: 204, description: 'Product deleted')]
     #[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
     public function delete(Uuid $uuid, Request $request): JsonResponse

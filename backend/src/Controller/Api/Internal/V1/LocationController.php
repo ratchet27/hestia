@@ -23,6 +23,7 @@ final class LocationController extends AbstractController
     }
 
     #[Route('/locations', name: 'api_locations_list', methods: ['GET'])]
+    #[OA\Get(summary: 'List locations', description: 'Returns all storage locations.')]
     #[OA\Response(response: 200, description: 'List of locations', content: new Model(type: LocationResponse::class))]
     public function list(): JsonResponse
     {

@@ -23,7 +23,14 @@ final readonly class ApiContentNegotiationListener
 
         $request = $event->getRequest();
 
-        if (!str_starts_with($request->getPathInfo(), '/api/')) {
+        $path = $request->getPathInfo();
+
+        if (!str_starts_with($path, '/api/')) {
+            return;
+        }
+
+        // Skip content negotiation for API documentation endpoints
+        if (str_starts_with($path, '/api/doc')) {
             return;
         }
 

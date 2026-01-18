@@ -67,17 +67,19 @@ Invalid UUIDs return 404 (route not matched) rather than 400.
 
 #### OpenAPI Documentation
 
-Use `#[OA\Response]` with `content` to link responses to schema classes:
+Use HTTP method attributes for operation summary/description, and `#[OA\Response]` with `content` for response schemas:
 
 ```php
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 
+#[OA\Get(summary: 'Get product', description: 'Returns a single product by its UUID.')]
 #[OA\Response(response: 200, description: 'Product details', content: new Model(type: ProductResponse::class))]
 #[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
 public function show(Uuid $uuid): JsonResponse
 ```
 
+- Use `#[OA\Get]`, `#[OA\Post]`, `#[OA\Put]`, `#[OA\Delete]` with `summary` and `description`
 - Use `Model(type: ...)` to reference response/error classes
 - Use `ApiProblem::class` for all error responses (RFC 7807)
 - Path parameters are auto-documented from route - no need for `#[OA\Parameter]`
