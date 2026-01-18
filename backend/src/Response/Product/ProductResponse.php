@@ -8,7 +8,9 @@ use App\Entity\Product;
 use App\Response\Barcode\BarcodeResponse;
 use App\Response\Category\CategoryResponse;
 use App\Response\Location\LocationResponse;
+use Symfony\Component\ObjectMapper\Attribute\Map;
 
+#[Map(source: Product::class)]
 final readonly class ProductResponse
 {
     /**
@@ -19,37 +21,18 @@ final readonly class ProductResponse
         public string $id,
         public string $name,
         public CategoryResponse $category,
+        #[Map(source: 'defaultLocation')]
         public LocationResponse $default_location,
+        #[Map(source: 'defaultExpiryDays')]
         public ?int $default_expiry_days,
+        #[Map(source: 'minStock')]
         public int $min_stock,
         public bool $active,
+        #[Map(source: 'createdAt')]
         public string $created_at,
+        #[Map(source: 'updatedAt')]
         public ?string $updated_at,
         public array $barcodes = []
     ) {
-    }
-
-    public static function fromEntity(Product $product, bool $includeBarcodes = false): self
-    {
-        $barcodes = [];
-
-        if ($includeBarcodes) {
-            foreach ($product->getBarcodes() as $barcode) {
-                $barcodes[] = BarcodeResponse::fromEntity($barcode);
-            }
-        }
-
-        return new self(
-            id: (string) $product->getId(),
-            name: $product->getName(),
-            category: CategoryResponse::fromEntity($product->getCategory()),
-            default_location: LocationResponse::fromEntity($product->getDefaultLocation()),
-            default_expiry_days: $product->getDefaultExpiryDays(),
-            min_stock: $product->getMinStock(),
-            active: $product->isActive(),
-            created_at: $product->getCreatedAt()->format(\DateTimeInterface::ATOM),
-            updated_at: $product->getUpdatedAt()?->format(\DateTimeInterface::ATOM),
-            barcodes: $barcodes
-        );
     }
 }
