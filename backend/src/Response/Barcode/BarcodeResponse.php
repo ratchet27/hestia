@@ -13,10 +13,8 @@ final readonly class BarcodeResponse
     public function __construct(
         public string $id,
         public string $barcode,
-        #[Map(source: 'productId')]
-        public string $product_id,
-        #[Map(source: 'createdAt')]
-        public string $created_at
+        public string $productId,
+        public string $createdAt
     ) {
     }
 }
