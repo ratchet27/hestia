@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Command;
 
@@ -15,14 +15,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand(
-    name: 'app:seed',
-    description: 'Seeds the database with default data (idempotent)',
-)]
+#[AsCommand(name: 'app:seed', description: 'Seeds the database with default data (idempotent)')]
 class SeedCommand extends Command
 {
     /** @var string[] */
-    private const CATEGORIES = [
+    private const array CATEGORIES = [
         'Молочные',
         'Хлеб',
         'Мясо',
@@ -31,21 +28,21 @@ class SeedCommand extends Command
         'Гигиена',
         'Овощи',
         'Фрукты',
-        'Напитки',
+        'Напитки'
     ];
 
     /** @var string[] */
-    private const LOCATIONS = [
+    private const array LOCATIONS = [
         'Холодильник',
         'Кладовая',
         'Ванная',
-        'Другое',
+        'Другое'
     ];
 
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly CategoryRepository $categoryRepository,
-        private readonly LocationRepository $locationRepository,
+        private readonly LocationRepository $locationRepository
     ) {
         parent::__construct();
     }
@@ -55,6 +52,7 @@ class SeedCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $io->section('Seeding Categories');
+
         $categoriesCreated = $this->seedCategories($io);
 
         $io->section('Seeding Locations');

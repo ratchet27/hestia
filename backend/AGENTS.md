@@ -46,6 +46,44 @@ config/
 - Use `#[Route]` attributes
 - Return JSON responses via `JsonResponse` or serializer
 
+#### UUID Route Parameters
+
+Use Symfony's `Uuid` type-hint with `Requirement::UUID_V7` for automatic validation:
+
+```php
+use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Component\Uid\Uuid;
+
+#[Route('/products/{uuid}', requirements: ['uuid' => Requirement::UUID_V7], methods: ['GET'])]
+public function show(Uuid $uuid): JsonResponse
+{
+    // $uuid is already a Uuid object - no manual validation needed
+}
+```
+
+**Do NOT** use raw regex patterns or manual `Uuid::fromString()` with try/catch.
+
+Invalid UUIDs return 404 (route not matched) rather than 400.
+
+#### OpenAPI Documentation
+
+Use HTTP method attributes for operation summary/description, and `#[OA\Response]` with `content` for response schemas:
+
+```php
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
+
+#[OA\Get(summary: 'Get product', description: 'Returns a single product by its UUID.')]
+#[OA\Response(response: 200, description: 'Product details', content: new Model(type: ProductResponse::class))]
+#[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
+public function show(Uuid $uuid): JsonResponse
+```
+
+- Use `#[OA\Get]`, `#[OA\Post]`, `#[OA\Put]`, `#[OA\Delete]` with `summary` and `description`
+- Use `Model(type: ...)` to reference response/error classes
+- Use `ApiProblem::class` for all error responses (RFC 7807)
+- Path parameters are auto-documented from route - no need for `#[OA\Parameter]`
+
 ### Services
 - Constructor injection (autowired)
 - Interfaces for external dependencies
@@ -58,6 +96,14 @@ config/
 - For unique fields: use BOTH `#[UniqueEntity]` (validation) AND `#[ORM\Column(unique: true)]` (database constraint)
 
 ## Commands
+
+**IMPORTANT: NEVER run PHP or Composer commands directly on the host machine.** Always use `docker compose exec php` to run commands inside the container.
+
+Use Docker for all composer commands:
+
+```bash
+docker compose exec php composer <command>
+```
 
 ```bash
 # Run inside php container
@@ -93,20 +139,37 @@ docker compose exec php bin/phpunit tests/SomeTest.php
 
 ## Code Quality
 
-Mago for linting, formatting, and static analysis. Runs locally (not in container).
+Tools configured: Rector, Mago, PHPStan. Run in this order (file-modifying first, then analysis).
+
+### Rector (refactoring)
 
 ```bash
-# Lint
-mago lint src/
+docker compose exec php vendor/bin/rector
+```
 
-# Format
-mago fmt src/
+### Mago (format, lint, analyze)
 
-# Check (no changes)
-mago fmt --check src/
+Runs locally (not in container). Uses `mago.toml` for configuration.
 
-# Static analysis
-mago analyze src/
+```bash
+mago format           # Auto-format code
+mago format --check   # Check formatting (CI)
+mago lint             # Check for issues
+mago analyze          # Static analysis
+```
+
+### PHPStan (static analysis)
+
+```bash
+docker compose exec php vendor/bin/phpstan analyse
+```
+
+### Quick Check (all tools)
+
+```bash
+docker compose exec php vendor/bin/rector && \
+mago format && mago lint && mago analyze && \
+docker compose exec php vendor/bin/phpstan analyse
 ```
 
 ## Claude Code Notes

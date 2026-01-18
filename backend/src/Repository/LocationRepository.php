@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Repository;
 
@@ -21,7 +21,9 @@ class LocationRepository extends ServiceEntityRepository
     /** @return Location[] */
     public function findAllOrderedByName(): array
     {
-        return $this->createQueryBuilder('l')
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
+            ->createQueryBuilder('l')
             ->orderBy('l.name', 'ASC')
             ->getQuery()
             ->getResult();

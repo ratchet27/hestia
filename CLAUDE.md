@@ -25,3 +25,8 @@ git ci -m "<type>(<scope>): <description>"
 Use the `conventional-commits` skill for format reference.
 
 GPG signing is configured automatically for this repo.
+
+## Project Structure
+
+- **Backend**: See `backend/AGENTS.md` for backend-specific instructions
+- **Frontend**: See `frontend/AGENTS.md` for frontend-specific instructions

@@ -1,16 +1,16 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Factory;
 
 use App\Entity\Location;
-use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
+use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentProxyObjectFactory<Location>
+ * @extends PersistentObjectFactory<Location>
  */
-final class LocationFactory extends PersistentProxyObjectFactory
+final class LocationFactory extends PersistentObjectFactory
 {
     public static function class(): string
     {
@@ -21,7 +21,7 @@ final class LocationFactory extends PersistentProxyObjectFactory
     protected function defaults(): array
     {
         return [
-            'name' => self::faker()->unique()->word(),
+            'name' => self::faker()->unique()->word()
         ];
     }
 }

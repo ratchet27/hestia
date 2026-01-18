@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Repository;
 
@@ -21,7 +21,9 @@ class BarcodeRepository extends ServiceEntityRepository
 
     public function findByCode(string $code): ?Barcode
     {
-        return $this->createQueryBuilder('b')
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
+            ->createQueryBuilder('b')
             ->leftJoin('b.product', 'p')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.defaultLocation', 'l')
@@ -35,24 +37,14 @@ class BarcodeRepository extends ServiceEntityRepository
     /** @return Barcode[] */
     public function findByProduct(Uuid $productId): array
     {
-        return $this->createQueryBuilder('b')
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
+            ->createQueryBuilder('b')
             ->leftJoin('b.product', 'p')
             ->where('p.id = :productId')
             ->setParameter('productId', $productId)
             ->orderBy('b.createdAt', 'ASC')
             ->getQuery()
             ->getResult();
-    }
-
-    public function findOneByProductAndCode(Uuid $productId, string $code): ?Barcode
-    {
-        return $this->createQueryBuilder('b')
-            ->leftJoin('b.product', 'p')
-            ->where('p.id = :productId')
-            ->andWhere('b.barcode = :code')
-            ->setParameter('productId', $productId)
-            ->setParameter('code', $code)
-            ->getQuery()
-            ->getOneOrNullResult();
     }
 }

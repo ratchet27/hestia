@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Entity;
 
@@ -8,6 +8,7 @@ use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -19,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Product
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'uuid', unique: true)]
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $id;
 
     #[ORM\Column(length: 255, unique: true)]
@@ -51,11 +52,16 @@ class Product
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column]
-    private \DateTimeImmutable $updatedAt;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     /** @var Collection<int, Barcode> */
-    #[ORM\OneToMany(targetEntity: Barcode::class, mappedBy: 'product', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(
+        targetEntity: Barcode::class,
+        mappedBy: 'product',
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
     private Collection $barcodes;
 
     public function __construct()
@@ -63,7 +69,6 @@ class Product
         $this->id = Uuid::v7();
         $this->barcodes = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): Uuid
@@ -136,9 +141,24 @@ class Product
         return $this->active;
     }
 
+    // @mago-ignore lint:no-boolean-flag-parameter
     public function setActive(bool $active): static
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    public function activate(): static
+    {
+        $this->active = true;
+
+        return $this;
+    }
+
+    public function deactivate(): static
+    {
+        $this->active = false;
 
         return $this;
     }
@@ -148,7 +168,7 @@ class Product
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): \DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }

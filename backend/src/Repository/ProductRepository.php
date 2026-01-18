@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Repository;
 
@@ -25,33 +25,47 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function findByFilters(array $filters): array
     {
-        $qb = $this->createQueryBuilder('p')
+        $qb = $this
+            ->createQueryBuilder('p')
+            ->leftJoin('p.barcodes', 'b')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.defaultLocation', 'l')
-            ->addSelect('c', 'l')
+            ->addSelect('b', 'c', 'l')
             ->orderBy('p.name', 'ASC');
 
         if (isset($filters['name'])) {
-            $qb->andWhere('LOWER(p.name) LIKE LOWER(:name)')
-                ->setParameter('name', '%' . $filters['name'] . '%');
+            $qb->andWhere('LOWER(p.name) LIKE LOWER(:name)')->setParameter('name', '%' . $filters['name'] . '%');
         }
 
         if (isset($filters['category_id'])) {
-            $qb->andWhere('c.id = :categoryId')
-                ->setParameter('categoryId', Uuid::fromString($filters['category_id']));
+            $qb->andWhere('c.id = :categoryId')->setParameter('categoryId', Uuid::fromString($filters['category_id']));
         }
 
         if (isset($filters['active'])) {
-            $qb->andWhere('p.active = :active')
-                ->setParameter('active', $filters['active']);
+            $qb->andWhere('p.active = :active')->setParameter('active', $filters['active']);
         }
 
+        // @mago-ignore analysis:mixed-return-statement
         return $qb->getQuery()->getResult();
+    }
+
+    public function exists(Uuid $id): bool
+    {
+        return null !== $this
+            ->createQueryBuilder('p')
+            ->select('1')
+            ->where('p.id = :id')
+            ->setParameter('id', $id)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     public function findOneWithBarcodes(Uuid $id): ?Product
     {
-        return $this->createQueryBuilder('p')
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
+            ->createQueryBuilder('p')
             ->leftJoin('p.barcodes', 'b')
             ->leftJoin('p.category', 'c')
             ->leftJoin('p.defaultLocation', 'l')

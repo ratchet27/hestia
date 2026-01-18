@@ -1,36 +1,39 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
 use App\Repository\CategoryRepository;
+use App\Response\Category\CategoryResponse;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Categories')]
 final class CategoryController extends AbstractController
 {
     public function __construct(
         private readonly CategoryRepository $categoryRepository,
-    ) {}
+        private readonly ObjectMapperInterface $mapper
+    ) {
+    }
 
     #[Route('/categories', name: 'api_categories_list', methods: ['GET'])]
+    #[OA\Get(description: 'Returns all product categories.', summary: 'List categories')]
+    #[OA\Response(response: 200, description: 'List of categories', content: new Model(type: CategoryResponse::class))]
     public function list(): JsonResponse
     {
         $categories = $this->categoryRepository->findAllOrderedByName();
 
-        $data = array_map(
-            static fn($category) => [
-                'id' => (string) $category->getId(),
-                'name' => $category->getName(),
-            ],
-            $categories
-        );
+        $data = array_map(fn($category) => $this->mapper->map($category, CategoryResponse::class), $categories);
 
         return $this->json([
             'data' => $data,
-            'meta' => ['total' => count($data)],
+            'meta' => ['total' => count($data)]
         ]);
     }
 }

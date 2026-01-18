@@ -1,16 +1,16 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Factory;
 
 use App\Entity\Product;
-use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
+use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentProxyObjectFactory<Product>
+ * @extends PersistentObjectFactory<Product>
  */
-final class ProductFactory extends PersistentProxyObjectFactory
+final class ProductFactory extends PersistentObjectFactory
 {
     public static function class(): string
     {
@@ -26,7 +26,7 @@ final class ProductFactory extends PersistentProxyObjectFactory
             'defaultLocation' => LocationFactory::new(),
             'defaultExpiryDays' => self::faker()->optional(0.3)->numberBetween(1, 365),
             'minStock' => self::faker()->numberBetween(0, 10),
-            'active' => true,
+            'active' => true
         ];
     }
 }

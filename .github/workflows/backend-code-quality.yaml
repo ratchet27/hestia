@@ -3,6 +3,8 @@ name: Backend Code Quality
 
 on:
   push:
+    branches:
+      - master
   pull_request:
 
 permissions:
