@@ -1,0 +1,2 @@
+# Infection config uses JSON5 comments
+backend/infection.json5
