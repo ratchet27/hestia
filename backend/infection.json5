@@ -1,0 +1,23 @@
+{
+    "$schema": "https://raw.githubusercontent.com/infection/infection/0.32/resources/schema.json",
+    "source": {
+        // Start with services - most business logic lives here
+        "directories": [
+            "src/Service"
+        ]
+    },
+    "logs": {
+        "text": "var/infection.log",
+        "html": "var/infection.html"
+    },
+    "mutators": {
+        "@default": true
+    },
+    "phpUnit": {
+        "configDir": "."
+    },
+    // Timeout per test in seconds - functional tests are slower
+    "timeout": 30,
+    // Run tests in parallel using available CPU cores
+    "threads": 16
+}

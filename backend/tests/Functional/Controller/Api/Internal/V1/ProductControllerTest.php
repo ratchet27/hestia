@@ -240,6 +240,8 @@ class ProductControllerTest extends WebTestCase
         static::assertSame(0, $data['data']['min_stock']);
         static::assertTrue($data['data']['active']);
         static::assertNull($data['data']['default_expiry_days']);
+
+        $this->assertDatabaseHas(Product::class, ['name' => 'New Product']);
     }
 
     public function testCreateProductWithAllFields(): void
@@ -427,6 +429,8 @@ class ProductControllerTest extends WebTestCase
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertSame('New Name', $data['data']['name']);
+
+        $this->assertDatabaseHas(Product::class, ['name' => 'New Name']);
     }
 
     public function testUpdateProductCategory(): void
