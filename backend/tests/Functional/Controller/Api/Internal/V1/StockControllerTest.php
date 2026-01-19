@@ -416,4 +416,131 @@ class StockControllerTest extends WebTestCase
         static::assertListResponse($data, 1);
         static::assertArrayHasKey('days_until_expiry', $data['data'][0]);
     }
+
+    public function testExpiringIncludesAlreadyExpiredItems(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        // Already expired (yesterday)
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('yesterday')
+        ]);
+
+        $response = $this->apiGet('/stocks/expiring', ['days' => '7']);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 1);
+        static::assertLessThan(0, $data['data'][0]['days_until_expiry']);
+    }
+
+    // ========== FIFO Edge Cases ==========
+
+    public function testConsumeFifoNullBestBeforeConsumedLast(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        // Entry with NULL best_before
+        $entryNull = $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => null
+        ]);
+        // Entry with a date
+        $entryDated = $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-02-15')
+        ]);
+
+        // Consume 1 - should consume the dated one first
+        $response = $this->apiPost('/stocks/consume', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => (string) $location->getId(),
+            'quantity' => 1
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertSame(1, $data['data']['consumed']);
+        static::assertContains((string) $entryDated->getId(), $data['data']['deleted_entries']);
+        static::assertNotContains((string) $entryNull->getId(), $data['data']['deleted_entries']);
+    }
+
+    public function testConsumeFifoTiebreakByCreatedAt(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        $sameBestBefore = new \DateTimeImmutable('2026-02-15');
+
+        // Create entries with same best_before but different created_at
+        $entryOlder = $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => $sameBestBefore,
+            'createdAt' => new \DateTimeImmutable('2026-01-01 10:00:00')
+        ]);
+        $entryNewer = $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => $sameBestBefore,
+            'createdAt' => new \DateTimeImmutable('2026-01-01 12:00:00')
+        ]);
+
+        // Consume 1 - should consume the older created_at first
+        $response = $this->apiPost('/stocks/consume', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => (string) $location->getId(),
+            'quantity' => 1
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertSame(1, $data['data']['consumed']);
+        static::assertContains((string) $entryOlder->getId(), $data['data']['deleted_entries']);
+        static::assertNotContains((string) $entryNewer->getId(), $data['data']['deleted_entries']);
+    }
+
+    // ========== Auto-calculated Best Before ==========
+
+    public function testAddStockAutoCalculatesBestBeforeFromProduct(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location,
+            'defaultExpiryDays' => 14
+        ]);
+
+        $response = $this->apiPost('/stocks/add', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => (string) $location->getId(),
+            'quantity' => 1
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
+
+        $expectedDate = new \DateTimeImmutable()
+            ->modify('+14 days')
+            ->format('Y-m-d');
+        static::assertSame($expectedDate, $data['data']['entries'][0]['best_before']);
+    }
 }
