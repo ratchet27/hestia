@@ -93,4 +93,25 @@ trait ApiTestTrait
         static::assertSame($expectedTotal, $data['meta']['total']);
         static::assertCount($expectedTotal, $data['data']);
     }
+
+    /**
+     * Assert that an entity exists in the database with the given criteria.
+     *
+     * @param class-string $entityClass
+     * @param array<string, mixed> $criteria
+     */
+    protected function assertDatabaseHas(string $entityClass, array $criteria): void
+    {
+        /** @var \Doctrine\Persistence\ManagerRegistry $doctrine */
+        $doctrine = static::getContainer()->get('doctrine');
+        $doctrine->getManager()->clear();
+
+        $entity = $doctrine->getRepository($entityClass)->findOneBy($criteria);
+
+        static::assertNotNull($entity, sprintf(
+            'Failed asserting that %s exists with criteria: %s',
+            $entityClass,
+            json_encode($criteria)
+        ));
+    }
 }

@@ -131,11 +131,21 @@ PHPUnit 12 via Symfony test-pack.
 
 ```bash
 # Run tests
-docker compose exec php bin/phpunit
+make test
 
 # Run specific test
 docker compose exec php bin/phpunit tests/SomeTest.php
 ```
+
+### Mutation Testing
+
+Infection PHP for mutation testing - verifies tests actually catch code changes.
+
+```bash
+make mutate
+```
+
+Reports saved to `var/infection.log` and `var/infection.html`.
 
 ## Code Quality
 
