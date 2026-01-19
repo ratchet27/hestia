@@ -14,6 +14,7 @@ use App\Factory\ProductFactory;
 use App\Factory\StockEntryFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Clock\Test\ClockSensitiveTrait;
 use Symfony\Component\HttpFoundation\Response;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -22,6 +23,7 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 class StockControllerTest extends WebTestCase
 {
     use ApiTestTrait;
+    use ClockSensitiveTrait;
     use Factories;
     use ResetDatabase;
 
@@ -491,18 +493,19 @@ class StockControllerTest extends WebTestCase
 
         $sameBestBefore = new \DateTimeImmutable('2026-02-15');
 
-        // Create entries with same best_before but different created_at
+        // Create entries with same best_before but different created_at using MockClock
+        static::mockTime(new \DateTimeImmutable('2026-01-01 10:00:00'));
         $entryOlder = $this->createEntry([
             'product' => $product,
             'location' => $location,
-            'bestBefore' => $sameBestBefore,
-            'createdAt' => new \DateTimeImmutable('2026-01-01 10:00:00')
+            'bestBefore' => $sameBestBefore
         ]);
+
+        static::mockTime(new \DateTimeImmutable('2026-01-01 12:00:00'));
         $entryNewer = $this->createEntry([
             'product' => $product,
             'location' => $location,
-            'bestBefore' => $sameBestBefore,
-            'createdAt' => new \DateTimeImmutable('2026-01-01 12:00:00')
+            'bestBefore' => $sameBestBefore
         ]);
 
         // Consume 1 - should consume the older created_at first

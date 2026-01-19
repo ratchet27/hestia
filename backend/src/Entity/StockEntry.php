@@ -8,6 +8,7 @@ use App\Repository\StockEntryRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Clock\DatePoint;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: StockEntryRepository::class)]
@@ -38,7 +39,7 @@ class StockEntry
     public function __construct()
     {
         $this->id = Uuid::v7();
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DatePoint();
     }
 
     public function getId(): Uuid
@@ -85,12 +86,5 @@ class StockEntry
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
     }
 }
