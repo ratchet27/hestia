@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type {
   ExpiringEntryResponse,
   StockEntryResponse,
@@ -20,6 +21,7 @@ import { StockPageHeader } from "./components/StockPageHeader";
 import { StockTable } from "./components/StockTable";
 
 export function StockPage(): React.ReactElement {
+  const { t } = useTranslation();
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null,
   );
@@ -139,11 +141,11 @@ export function StockPage(): React.ReactElement {
 
       <section>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-stone-800 font-semibold">&#x1f4e6; Все запасы</h2>
+          <h2 className="text-stone-800 font-semibold">{t("stock.allStock")}</h2>
           <div className="relative">
             <input
               type="text"
-              placeholder="Поиск по названию..."
+              placeholder={t("stock.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-60 px-3.5 py-2 border border-stone-200 rounded-md text-sm focus:outline-none focus:border-amber-500"

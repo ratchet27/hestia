@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { StockEntryResponse } from "../../../api/generated/models";
 import {
   formatExpiryDate,
@@ -23,9 +24,10 @@ function getDaysUntil(dateStr: string | null | undefined): number {
 }
 
 export function StockRow({ entry, onConsume }: StockRowProps) {
+  const { t } = useTranslation();
   const days = getDaysUntil(entry.best_before);
   const status = entry.best_before ? getExpiryStatus(days) : "ok";
-  const relativeText = entry.best_before ? getRelativeExpiryText(days) : null;
+  const relativeText = entry.best_before ? getRelativeExpiryText(days, t) : null;
   const dateText = entry.best_before
     ? formatExpiryDate(entry.best_before)
     : null;
@@ -63,7 +65,7 @@ export function StockRow({ entry, onConsume }: StockRowProps) {
           type="button"
           onClick={() => onConsume(entry)}
           className="w-7 h-7 rounded border border-stone-200 bg-white text-stone-500 hover:bg-green-50 hover:border-green-200 hover:text-green-600 transition-colors text-sm"
-          title="Использовано"
+          title={t("stock.consumed")}
         >
           &#x2713;
         </button>
