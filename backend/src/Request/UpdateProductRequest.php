@@ -28,6 +28,9 @@ final readonly class UpdateProductRequest
         #[Assert\PositiveOrZero]
         public int $minStock = 0,
 
+        #[Assert\Length(max: 50)]
+        public ?string $unit = null,
+
         public bool $active = true
     ) {
     }

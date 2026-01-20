@@ -69,6 +69,7 @@ class ProductService
         $product->setDefaultLocation($location);
         $product->setDefaultExpiryDays($request->defaultExpiryDays);
         $product->setMinStock($request->minStock);
+        $product->setUnit($request->unit);
 
         $request->active ? $product->activate() : $product->deactivate();
 
@@ -104,6 +105,10 @@ class ProductService
         $product->setDefaultLocation($location);
         $product->setDefaultExpiryDays($request->defaultExpiryDays);
         $product->setMinStock($request->minStock);
+
+        if ($request->unit !== null) {
+            $product->setUnit($request->unit);
+        }
 
         $request->active ? $product->activate() : $product->deactivate();
 

@@ -17,6 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'products')]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['name'], message: 'Product with this name already exists')]
+// @mago-ignore lint:too-many-properties
 class Product
 {
     #[ORM\Id]
@@ -45,6 +46,10 @@ class Product
     #[ORM\Column(options: ['default' => 0])]
     #[Assert\PositiveOrZero]
     private int $minStock = 0;
+
+    #[ORM\Column(length: 50, options: ['default' => 'piece'])]
+    #[Assert\Length(max: 50)]
+    private string $unit = 'piece';
 
     #[ORM\Column(options: ['default' => true])]
     private bool $active = true;
@@ -132,6 +137,18 @@ class Product
     public function setMinStock(int $minStock): static
     {
         $this->minStock = $minStock;
+
+        return $this;
+    }
+
+    public function getUnit(): string
+    {
+        return $this->unit;
+    }
+
+    public function setUnit(string $unit): static
+    {
+        $this->unit = $unit;
 
         return $this;
     }

@@ -11,7 +11,7 @@ lint:
 	mago format
 	mago lint
 	mago analyze
-	docker compose exec php vendor/bin/phpstan analyse
+	docker compose exec php vendor/bin/phpstan analyse --memory-limit=512M
 
 test:
 	docker compose exec php bin/phpunit

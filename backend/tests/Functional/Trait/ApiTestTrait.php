@@ -57,6 +57,21 @@ trait ApiTestTrait
         return $this->client->getResponse();
     }
 
+    /** @param array<string, mixed> $data */
+    protected function apiPatch(string $uri, array $data): Response
+    {
+        $this->client->request(
+            'PATCH',
+            self::API_PREFIX . $uri,
+            [],
+            [],
+            self::JSON_HEADERS,
+            json_encode($data, JSON_THROW_ON_ERROR)
+        );
+
+        return $this->client->getResponse();
+    }
+
     /** @param array<string, mixed> $parameters */
     protected function apiDelete(string $uri, array $parameters = []): Response
     {

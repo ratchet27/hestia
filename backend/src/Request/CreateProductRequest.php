@@ -28,6 +28,9 @@ final readonly class CreateProductRequest
         #[Assert\PositiveOrZero]
         public int $minStock = 0,
 
+        #[Assert\Length(max: 50)]
+        public string $unit = 'piece',
+
         public bool $active = true
     ) {
     }
