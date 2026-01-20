@@ -18,11 +18,8 @@ i18n
       escapeValue: false, // React already escapes
     },
     detection: {
-      order: ["localStorage"],
+      order: ["localStorage", "navigator"],
       caches: ["localStorage"],
-    },
-    react: {
-      useSuspense: false, // Prevent flicker on language change
     },
   });
 
