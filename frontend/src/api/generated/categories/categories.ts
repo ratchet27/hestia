@@ -5,35 +5,45 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
-import type { CategoryResponse } from ".././models";
+import type {
+  CategoryResponse
+} from '.././models';
 
-import { apiFetch } from "../../client";
+import { apiFetch } from '../../client';
 
 /**
  * Returns all product categories.
  * @summary List categories
  */
 export type getApiCategoriesListResponse200 = {
-  data: CategoryResponse;
-  status: 200;
+  data: CategoryResponse
+  status: 200
+}
+    
+export type getApiCategoriesListResponseSuccess = (getApiCategoriesListResponse200) & {
+  headers: Headers;
 };
+;
 
-export type getApiCategoriesListResponseSuccess =
-  getApiCategoriesListResponse200 & {
-    headers: Headers;
-  };
-
-export type getApiCategoriesListResponse = getApiCategoriesListResponseSuccess;
+export type getApiCategoriesListResponse = (getApiCategoriesListResponseSuccess)
 
 export const getGetApiCategoriesListUrl = () => {
-  return `/api/internal/v1/categories`;
-};
 
-export const getApiCategoriesList = async (
-  options?: RequestInit,
-): Promise<getApiCategoriesListResponse> => {
-  return apiFetch<getApiCategoriesListResponse>(getGetApiCategoriesListUrl(), {
+
+  
+
+  return `/api/internal/v1/categories`
+}
+
+export const getApiCategoriesList = async ( options?: RequestInit): Promise<getApiCategoriesListResponse> => {
+  
+  return apiFetch<getApiCategoriesListResponse>(getGetApiCategoriesListUrl(),
+  {      
     ...options,
-    method: "GET",
-  });
-};
+    method: 'GET'
+    
+    
+  }
+);}
+
+

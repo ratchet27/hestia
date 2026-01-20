@@ -18,5 +18,10 @@ export interface UpdateProductRequest {
   default_expiry_days?: number | null;
   /** @minimum 0 */
   min_stock?: number;
+  /**
+   * @maxLength 50
+   * @nullable
+   */
+  unit?: string | null;
   active?: boolean;
 }

@@ -5,6 +5,9 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
-import type { BarcodeResponse } from './barcodeResponse';
+import type { StockEntryResponse } from './stockEntryResponse';
 
-export type ProductResponseBarcodes = BarcodeResponse[] | {[key: string]: BarcodeResponse};
+export type PostApiInternalV1StocksAdd201Data = {
+  created?: number;
+  entries?: StockEntryResponse[];
+};

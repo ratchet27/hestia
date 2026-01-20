@@ -1,5 +1,6 @@
+import { useStockEntries } from "../../api/queries/stocks";
 import { Icons } from "../../components/Icons";
-import { useRecipes, useStock } from "../../data/hooks";
+import { useRecipes } from "../../data/hooks";
 import type { Recipe } from "../../data/types";
 
 interface CheckedIngredient {
@@ -11,18 +12,19 @@ interface CheckedIngredient {
 }
 
 export function RecipesPage(): React.ReactElement {
-  const { stock } = useStock();
+  const { data: stockEntries = [] } = useStockEntries();
   const { recipes } = useRecipes();
 
   const checkIngredients = (recipe: Recipe): CheckedIngredient[] => {
     return recipe.ingredients.map((ing) => {
-      // Stock uses number IDs - won't match with UUID products until API integrated
-      const totalStock = stock
-        .filter((e) => e.productId === ing.productId)
-        .reduce((sum, e) => sum + e.amount, 0);
+      // Note: recipes use number IDs, stock API uses UUIDs
+      // This won't match until recipes are migrated to UUID product IDs
+      const totalStock = stockEntries.filter(
+        (e) => e.product.id === String(ing.productId),
+      ).length;
       return {
         ...ing,
-        product: undefined, // Products have UUID, recipes have number ID
+        product: undefined,
         inStock: totalStock,
         hasEnough: totalStock >= ing.amount,
       };
@@ -83,13 +85,13 @@ export function RecipesPage(): React.ReactElement {
                       <span
                         className={`${ing.hasEnough ? "text-stone-800" : "text-red-600"}`}
                       >
-                        {ing.product?.name}
+                        {ing.product?.name ?? `Продукт #${ing.productId}`}
                       </span>
                       <span
                         className={`text-sm ${ing.hasEnough ? "text-green-600" : "text-red-600"}`}
                       >
                         {ing.inStock} / {ing.amount}
-                        {ing.hasEnough ? " ✓" : " ✗"}
+                        {ing.hasEnough ? " \u2713" : " \u2717"}
                       </span>
                     </div>
                   ))}

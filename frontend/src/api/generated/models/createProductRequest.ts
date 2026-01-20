@@ -18,5 +18,7 @@ export interface CreateProductRequest {
   default_expiry_days?: number | null;
   /** @minimum 0 */
   min_stock?: number;
+  /** @maxLength 50 */
+  unit?: string;
   active?: boolean;
 }

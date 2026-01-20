@@ -4,6 +4,11 @@ export interface ProductFilters {
   active?: boolean;
 }
 
+export interface StockFilters {
+  locationId?: string;
+  productId?: string;
+}
+
 export const queryKeys = {
   // Products
   products: {
@@ -20,5 +25,13 @@ export const queryKeys = {
   // Locations
   locations: {
     all: ["locations"] as const,
+  },
+
+  // Stocks
+  stocks: {
+    all: ["stocks"] as const,
+    entries: (filters?: StockFilters) =>
+      ["stocks", "entries", filters ?? {}] as const,
+    expiring: (days: number) => ["stocks", "expiring", days] as const,
   },
 } as const;
