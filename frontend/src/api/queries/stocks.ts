@@ -24,7 +24,7 @@ export function useStockEntries(filters?: StockFilters) {
         location: filters?.locationId,
         product: filters?.productId,
       });
-      return (response.data.data ?? []) as StockEntryResponse[];
+      return (response.data as unknown as StockEntryResponse[]) ?? [];
     },
   });
 }
@@ -34,7 +34,7 @@ export function useExpiringStock(days: number = 7) {
     queryKey: queryKeys.stocks.expiring(days),
     queryFn: async () => {
       const response = await getApiInternalV1StocksExpiring({ days });
-      return (response.data.data ?? []) as ExpiringEntryResponse[];
+      return (response.data as unknown as ExpiringEntryResponse[]) ?? [];
     },
   });
 }
