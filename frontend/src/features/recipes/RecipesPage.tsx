@@ -37,7 +37,9 @@ export function RecipesPage(): React.ReactElement {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-bold text-stone-800">{t("recipes.title")}</h2>
+          <h2 className="text-3xl font-bold text-stone-800">
+            {t("recipes.title")}
+          </h2>
           <p className="text-stone-500 mt-1">{t("recipes.subtitle")}</p>
         </div>
         <button

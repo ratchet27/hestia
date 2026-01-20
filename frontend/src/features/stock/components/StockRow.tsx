@@ -27,7 +27,9 @@ export function StockRow({ entry, onConsume }: StockRowProps) {
   const { t } = useTranslation();
   const days = getDaysUntil(entry.best_before);
   const status = entry.best_before ? getExpiryStatus(days) : "ok";
-  const relativeText = entry.best_before ? getRelativeExpiryText(days, t) : null;
+  const relativeText = entry.best_before
+    ? getRelativeExpiryText(days, t)
+    : null;
   const dateText = entry.best_before
     ? formatExpiryDate(entry.best_before)
     : null;

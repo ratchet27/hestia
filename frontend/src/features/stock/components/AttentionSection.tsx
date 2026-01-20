@@ -54,7 +54,9 @@ export function AttentionSection({
               onClick={() => setShowAll(!showAll)}
               className="text-[13px] text-stone-500 hover:text-amber-600 transition-colors"
             >
-              {showAll ? t("stock.collapse") : t("stock.showAll", { count: items.length })}
+              {showAll
+                ? t("stock.collapse")
+                : t("stock.showAll", { count: items.length })}
             </button>
           )}
         </div>

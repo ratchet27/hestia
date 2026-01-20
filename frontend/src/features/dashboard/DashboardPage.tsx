@@ -38,10 +38,10 @@ export function DashboardPage(): React.ReactElement {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-stone-800">{t("dashboard.welcome")}</h2>
-        <p className="text-stone-500 mt-1">
-          {t("dashboard.subtitle")}
-        </p>
+        <h2 className="text-3xl font-bold text-stone-800">
+          {t("dashboard.welcome")}
+        </h2>
+        <p className="text-stone-500 mt-1">{t("dashboard.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4 mb-8">
@@ -49,7 +49,9 @@ export function DashboardPage(): React.ReactElement {
           <div className="text-3xl font-bold text-stone-800">
             {stockEntries.length}
           </div>
-          <div className="text-sm text-stone-500">{t("dashboard.stockItems")}</div>
+          <div className="text-sm text-stone-500">
+            {t("dashboard.stockItems")}
+          </div>
         </div>
         <button
           type="button"
@@ -59,19 +61,25 @@ export function DashboardPage(): React.ReactElement {
           <div className="text-3xl font-bold text-amber-600">
             {shoppingCount}
           </div>
-          <div className="text-sm text-stone-500">{t("dashboard.shoppingItems")}</div>
+          <div className="text-sm text-stone-500">
+            {t("dashboard.shoppingItems")}
+          </div>
         </button>
         <div className="bg-white rounded-xl p-5 shadow-sm border border-stone-200">
           <div className="text-3xl font-bold text-red-500">
             {expiringItems.length}
           </div>
-          <div className="text-sm text-stone-500">{t("dashboard.expiringItems")}</div>
+          <div className="text-sm text-stone-500">
+            {t("dashboard.expiringItems")}
+          </div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-sm border border-stone-200">
           <div className="text-3xl font-bold text-blue-500">
             {todayChores.length}
           </div>
-          <div className="text-sm text-stone-500">{t("dashboard.todayTasks")}</div>
+          <div className="text-sm text-stone-500">
+            {t("dashboard.todayTasks")}
+          </div>
         </div>
       </div>
 
@@ -133,7 +141,9 @@ export function DashboardPage(): React.ReactElement {
 
         <div className="bg-white rounded-xl shadow-sm border border-stone-200">
           <div className="p-4 border-b border-stone-100 flex items-center justify-between">
-            <h3 className="font-semibold text-stone-800">{t("dashboard.lowStock")}</h3>
+            <h3 className="font-semibold text-stone-800">
+              {t("dashboard.lowStock")}
+            </h3>
             <button
               type="button"
               onClick={() => navigate("/products")}
@@ -144,7 +154,9 @@ export function DashboardPage(): React.ReactElement {
           </div>
           <div className="p-4">
             {lowStockItems.length === 0 ? (
-              <p className="text-stone-500 text-sm">{t("dashboard.enoughStock")}</p>
+              <p className="text-stone-500 text-sm">
+                {t("dashboard.enoughStock")}
+              </p>
             ) : (
               <div className="space-y-3">
                 {lowStockItems.map((item) => (
@@ -155,11 +167,13 @@ export function DashboardPage(): React.ReactElement {
                     <div>
                       <p className="font-medium text-stone-800">{item.name}</p>
                       <p className="text-sm text-stone-500">
-                        {t("dashboard.min")}{item.min_stock}
+                        {t("dashboard.min")}
+                        {item.min_stock}
                       </p>
                     </div>
                     <span className="px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-700">
-                      {t("dashboard.remaining")}{item.totalStock}
+                      {t("dashboard.remaining")}
+                      {item.totalStock}
                     </span>
                   </div>
                 ))}
@@ -170,7 +184,9 @@ export function DashboardPage(): React.ReactElement {
 
         <div className="bg-white rounded-xl shadow-sm border border-stone-200">
           <div className="p-4 border-b border-stone-100 flex items-center justify-between">
-            <h3 className="font-semibold text-stone-800">{t("dashboard.todayTasksSection")}</h3>
+            <h3 className="font-semibold text-stone-800">
+              {t("dashboard.todayTasksSection")}
+            </h3>
             <button
               type="button"
               onClick={() => navigate("/tasks")}
@@ -181,7 +197,9 @@ export function DashboardPage(): React.ReactElement {
           </div>
           <div className="p-4">
             {todayChores.length === 0 ? (
-              <p className="text-stone-500 text-sm">{t("dashboard.noTasksToday")}</p>
+              <p className="text-stone-500 text-sm">
+                {t("dashboard.noTasksToday")}
+              </p>
             ) : (
               <div className="space-y-3">
                 {todayChores.map((chore) => (
@@ -205,7 +223,9 @@ export function DashboardPage(): React.ReactElement {
 
         <div className="bg-white rounded-xl shadow-sm border border-stone-200">
           <div className="p-4 border-b border-stone-100 flex items-center justify-between">
-            <h3 className="font-semibold text-stone-800">{t("dashboard.upcomingTasks")}</h3>
+            <h3 className="font-semibold text-stone-800">
+              {t("dashboard.upcomingTasks")}
+            </h3>
             <button
               type="button"
               onClick={() => navigate("/tasks")}
@@ -216,7 +236,9 @@ export function DashboardPage(): React.ReactElement {
           </div>
           <div className="p-4">
             {upcomingTasks.length === 0 ? (
-              <p className="text-stone-500 text-sm">{t("dashboard.noActiveTasks")}</p>
+              <p className="text-stone-500 text-sm">
+                {t("dashboard.noActiveTasks")}
+              </p>
             ) : (
               <div className="space-y-3">
                 {upcomingTasks.map((task) => (

@@ -56,7 +56,9 @@ export function AddStockModal({
             </label>
             <select
               id="add-product"
-              {...register("productId", { required: t("addStock.productRequired") })}
+              {...register("productId", {
+                required: t("addStock.productRequired"),
+              })}
               className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
               <option value="">{t("addStock.selectProduct")}</option>
@@ -82,7 +84,9 @@ export function AddStockModal({
             </label>
             <select
               id="add-location"
-              {...register("locationId", { required: t("addStock.locationRequired") })}
+              {...register("locationId", {
+                required: t("addStock.locationRequired"),
+              })}
               className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
               <option value="">{t("addStock.selectLocation")}</option>
