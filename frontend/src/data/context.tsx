@@ -70,35 +70,17 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const AUTH_COOKIE_NAME = "hestia_auth";
-
-function getCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match?.[2] ?? null;
-}
-
-function setCookie(name: string, value: string, days: number): void {
-  const expires = new Date(
-    Date.now() + days * 24 * 60 * 60 * 1000,
-  ).toUTCString();
-  // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store API not widely supported
-  document.cookie = `${name}=${value}; expires=${expires}; path=/`;
-}
-
-function deleteCookie(name: string): void {
-  // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store API not widely supported
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
-}
+const AUTH_STORAGE_KEY = "hestia_auth";
 
 export function AuthProvider({
   children,
 }: AuthProviderProps): React.ReactElement {
   const [user, setUser] = useState<User | null>(null);
 
-  // Check for existing auth cookie on mount
+  // Check for existing auth in localStorage on mount
   useEffect(() => {
-    const authCookie = getCookie(AUTH_COOKIE_NAME);
-    if (authCookie === "remembered") {
+    const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (stored === "remembered") {
       setUser(mockUser);
     }
   }, []);
@@ -111,7 +93,7 @@ export function AuthProvider({
     if (username === "pavel" && password === "password") {
       setUser(mockUser);
       if (rememberMe) {
-        setCookie(AUTH_COOKIE_NAME, "remembered", 30);
+        localStorage.setItem(AUTH_STORAGE_KEY, "remembered");
       }
       return true;
     }
@@ -120,7 +102,7 @@ export function AuthProvider({
 
   const logout = (): void => {
     setUser(null);
-    deleteCookie(AUTH_COOKIE_NAME);
+    localStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
   return (
