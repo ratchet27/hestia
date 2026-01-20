@@ -1,6 +1,8 @@
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../data/hooks";
 
 export function UserProfile(): React.ReactElement | null {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
 
   if (!user) {
@@ -21,7 +23,7 @@ export function UserProfile(): React.ReactElement | null {
           onClick={logout}
           className="ml-2 px-2 py-1 text-xs text-stone-400 hover:text-stone-200 hover:bg-stone-700 rounded transition-colors"
         >
-          Выйти
+          {t("common.logout")}
         </button>
       </div>
     </div>
