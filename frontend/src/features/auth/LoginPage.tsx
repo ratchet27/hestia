@@ -27,7 +27,7 @@ export function LoginPage(): React.ReactElement {
       return;
     }
 
-    const success = login(username, password);
+    const success = login(username, password, rememberMe);
     if (!success) {
       setError("Неверное имя пользователя или пароль");
     }
