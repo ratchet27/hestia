@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ExpiringEntryResponse } from "../../../api/generated/models";
 import { AttentionCard } from "./AttentionCard";
 
@@ -15,6 +16,7 @@ export function AttentionSection({
   onThrow,
   nextExpiryDays,
 }: AttentionSectionProps) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
 
   if (items.length === 0) {
@@ -24,12 +26,12 @@ export function AttentionSection({
           <span className="text-2xl">&#x2705;</span>
           <div className="flex flex-col gap-0.5">
             <span className="font-semibold text-green-700 text-[15px]">
-              Все под контролем
+              {t("stock.allUnderControl")}
             </span>
             <span className="text-stone-600 text-[13px]">
               {nextExpiryDays !== undefined
-                ? `Следующее истекает через ${nextExpiryDays} дней`
-                : "Нет продуктов, требующих внимания"}
+                ? t("stock.nextExpiry", { days: nextExpiryDays })
+                : t("stock.noAttentionNeeded")}
             </span>
           </div>
         </div>
@@ -43,7 +45,7 @@ export function AttentionSection({
     <section className="mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-[15px] font-semibold text-stone-600">
-          &#x1f550; Нужно разобраться сегодня
+          {t("stock.needToHandleToday")}
         </h2>
         <div className="flex items-center gap-4">
           {items.length > 3 && (
@@ -52,7 +54,9 @@ export function AttentionSection({
               onClick={() => setShowAll(!showAll)}
               className="text-[13px] text-stone-500 hover:text-amber-600 transition-colors"
             >
-              {showAll ? "Свернуть" : `Показать все (${items.length})`}
+              {showAll
+                ? t("stock.collapse")
+                : t("stock.showAll", { count: items.length })}
             </button>
           )}
         </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { LocationResponse } from "../../../api/generated/models";
 
 interface LocationTabsProps {
@@ -15,6 +16,8 @@ export function LocationTabs({
   counts,
   totalCount,
 }: LocationTabsProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex gap-2 border-b border-stone-200 mb-4">
       <button
@@ -26,7 +29,7 @@ export function LocationTabs({
             : "text-stone-500 border-transparent hover:text-stone-700"
         }`}
       >
-        Все
+        {t("common.all")}
         <span
           className={`ml-1.5 px-1.5 py-0.5 rounded-full text-xs ${
             selectedLocationId === null

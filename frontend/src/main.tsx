@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { BrowserRouter } from "react-router-dom";
 import { queryClient } from "./api/queryClient";
 import { AuthProvider, DataProvider } from "./data/context";
+import "./i18n";
 import "./index.css";
 import App from "./App";
 

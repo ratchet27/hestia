@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import type {
   LocationResponse,
   ProductResponse,
@@ -26,6 +27,7 @@ export function AddStockModal({
   onClose,
   isSubmitting,
 }: AddStockModalProps) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -41,7 +43,7 @@ export function AddStockModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
         <h3 className="text-xl font-bold text-stone-800 mb-4">
-          Добавить в запасы
+          {t("addStock.title")}
         </h3>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -50,14 +52,16 @@ export function AddStockModal({
               htmlFor="add-product"
               className="block text-sm font-medium text-stone-700 mb-1"
             >
-              Товар
+              {t("addStock.product")}
             </label>
             <select
               id="add-product"
-              {...register("productId", { required: "Выберите товар" })}
+              {...register("productId", {
+                required: t("addStock.productRequired"),
+              })}
               className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
-              <option value="">Выберите товар...</option>
+              <option value="">{t("addStock.selectProduct")}</option>
               {products.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -76,14 +80,16 @@ export function AddStockModal({
               htmlFor="add-location"
               className="block text-sm font-medium text-stone-700 mb-1"
             >
-              Место хранения
+              {t("addStock.location")}
             </label>
             <select
               id="add-location"
-              {...register("locationId", { required: "Выберите место" })}
+              {...register("locationId", {
+                required: t("addStock.locationRequired"),
+              })}
               className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
-              <option value="">Выберите место...</option>
+              <option value="">{t("addStock.selectLocation")}</option>
               {locations.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.name}
@@ -103,15 +109,15 @@ export function AddStockModal({
                 htmlFor="add-quantity"
                 className="block text-sm font-medium text-stone-700 mb-1"
               >
-                Количество
+                {t("addStock.quantity")}
               </label>
               <input
                 id="add-quantity"
                 type="number"
                 min="1"
                 {...register("quantity", {
-                  required: "Укажите количество",
-                  min: { value: 1, message: "Минимум 1" },
+                  required: t("addStock.quantityRequired"),
+                  min: { value: 1, message: t("addStock.quantityMin") },
                   valueAsNumber: true,
                 })}
                 className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -127,7 +133,7 @@ export function AddStockModal({
                 htmlFor="add-expiry"
                 className="block text-sm font-medium text-stone-700 mb-1"
               >
-                Годен до
+                {t("addStock.bestBefore")}
               </label>
               <input
                 id="add-expiry"
@@ -145,14 +151,14 @@ export function AddStockModal({
               disabled={isSubmitting}
               className="flex-1 px-4 py-2 border border-stone-300 rounded-lg hover:bg-stone-50 transition-colors disabled:opacity-50"
             >
-              Отмена
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
             >
-              {isSubmitting ? "Добавление..." : "Добавить"}
+              {isSubmitting ? t("common.adding") : t("common.add")}
             </button>
           </div>
         </form>

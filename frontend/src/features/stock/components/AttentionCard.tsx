@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { ExpiringEntryResponse } from "../../../api/generated/models";
 import {
   formatExpiryDate,
@@ -14,8 +15,9 @@ interface AttentionCardProps {
 }
 
 export function AttentionCard({ entry, onDone, onThrow }: AttentionCardProps) {
+  const { t } = useTranslation();
   const status = getExpiryStatus(entry.days_until_expiry);
-  const relativeText = getRelativeExpiryText(entry.days_until_expiry);
+  const relativeText = getRelativeExpiryText(entry.days_until_expiry, t);
   const dateText = formatExpiryDate(entry.best_before);
 
   return (
@@ -51,14 +53,14 @@ export function AttentionCard({ entry, onDone, onThrow }: AttentionCardProps) {
           onClick={() => onDone(entry)}
           className="flex-1 px-2.5 py-1 rounded text-xs bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors"
         >
-          Готово
+          {t("common.done")}
         </button>
         <button
           type="button"
           onClick={() => onThrow(entry)}
           className="flex-1 px-2.5 py-1 rounded text-xs bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors"
         >
-          Выбросить
+          {t("stock.throw")}
         </button>
       </div>
     </div>

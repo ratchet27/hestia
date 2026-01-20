@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useStockEntries } from "../../api/queries/stocks";
 import { Icons } from "../../components/Icons";
 import { useRecipes } from "../../data/hooks";
@@ -12,6 +13,7 @@ interface CheckedIngredient {
 }
 
 export function RecipesPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { data: stockEntries = [] } = useStockEntries();
   const { recipes } = useRecipes();
 
@@ -35,15 +37,17 @@ export function RecipesPage(): React.ReactElement {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-bold text-stone-800">Рецепты</h2>
-          <p className="text-stone-500 mt-1">Проверка наличия ингредиентов</p>
+          <h2 className="text-3xl font-bold text-stone-800">
+            {t("recipes.title")}
+          </h2>
+          <p className="text-stone-500 mt-1">{t("recipes.subtitle")}</p>
         </div>
         <button
           type="button"
           className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors"
         >
           <Icons.Plus />
-          Новый рецепт
+          {t("recipes.newRecipe")}
         </button>
       </div>
 
@@ -64,17 +68,17 @@ export function RecipesPage(): React.ReactElement {
                 </h3>
                 {canMake ? (
                   <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                    Можно готовить
+                    {t("recipes.canCook")}
                   </span>
                 ) : (
                   <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
-                    Не хватает {missingCount} ингр.
+                    {t("recipes.missingIngredients", { count: missingCount })}
                   </span>
                 )}
               </div>
               <div className="p-4">
                 <h4 className="text-sm font-medium text-stone-600 mb-3">
-                  Ингредиенты:
+                  {t("recipes.ingredients")}
                 </h4>
                 <div className="space-y-2">
                   {ingredients.map((ing, idx) => (
@@ -103,14 +107,14 @@ export function RecipesPage(): React.ReactElement {
                   className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!canMake}
                 >
-                  Приготовить
+                  {t("recipes.cook")}
                 </button>
                 {!canMake && (
                   <button
                     type="button"
                     className="px-4 py-2 border border-stone-300 rounded-lg hover:bg-white transition-colors"
                   >
-                    В список покупок
+                    {t("recipes.addToShoppingList")}
                   </button>
                 )}
               </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { StockEntryResponse } from "../../../api/generated/models";
 import { StockRow } from "./StockRow";
 
@@ -8,10 +9,12 @@ interface StockTableProps {
 }
 
 export function StockTable({ entries, onConsume, isLoading }: StockTableProps) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-8 text-center text-stone-500">
-        Загрузка...
+        {t("common.loading")}
       </div>
     );
   }
@@ -19,7 +22,7 @@ export function StockTable({ entries, onConsume, isLoading }: StockTableProps) {
   if (entries.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-8 text-center text-stone-500">
-        Нет записей
+        {t("common.noItems")}
       </div>
     );
   }
@@ -30,13 +33,13 @@ export function StockTable({ entries, onConsume, isLoading }: StockTableProps) {
         <thead className="bg-stone-50 border-b border-stone-200">
           <tr>
             <th className="text-left px-4 py-3 text-xs font-semibold text-stone-500 uppercase tracking-wide">
-              Товар
+              {t("stock.product")}
             </th>
             <th className="text-left px-4 py-3 text-xs font-semibold text-stone-500 uppercase tracking-wide">
-              Количество
+              {t("stock.quantity")}
             </th>
             <th className="text-left px-4 py-3 text-xs font-semibold text-stone-500 uppercase tracking-wide">
-              Годен до
+              {t("stock.bestBefore")}
             </th>
             <th className="w-16" />
           </tr>
