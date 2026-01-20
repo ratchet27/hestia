@@ -5,7 +5,7 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
-import type { ApiProblemExtraData } from "./apiProblemExtraData";
+import type { ApiProblemExtraData } from './apiProblemExtraData';
 
 export interface ApiProblem {
   title: string;

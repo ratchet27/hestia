@@ -8,19 +8,9 @@ import {
   type RecipesContextValue,
   ShoppingContext,
   type ShoppingContextValue,
-  StockContext,
-  type StockContextValue,
   TasksContext,
   type TasksContextValue,
 } from "./context";
-
-export function useStock(): StockContextValue {
-  const context = useContext(StockContext);
-  if (!context) {
-    throw new Error("useStock must be used within a DataProvider");
-  }
-  return context;
-}
 
 export function useShoppingList(): ShoppingContextValue {
   const context = useContext(ShoppingContext);

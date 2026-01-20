@@ -1,43 +1,30 @@
 import { useNavigate } from "react-router-dom";
 import { useProducts } from "../../api/queries";
+import { useExpiringStock, useStockEntries } from "../../api/queries/stocks";
 import { Icons } from "../../components/Icons";
+import { useChores, useShoppingList, useTasks } from "../../data/hooks";
+import { formatDate, getDaysUntil } from "../../data/types";
 import {
-  useChores,
-  useShoppingList,
-  useStock,
-  useTasks,
-} from "../../data/hooks";
-import {
-  formatDate,
-  getDaysUntil,
   getExpiryStatus,
-  locations,
-} from "../../data/types";
+  getRelativeExpiryText,
+} from "../stock/utils/expiryStatus";
 
 export function DashboardPage(): React.ReactElement {
   const navigate = useNavigate();
   const { data: products = [] } = useProducts();
-  const { stock } = useStock();
+  const { data: stockEntries = [] } = useStockEntries();
+  const { data: expiringItems = [] } = useExpiringStock(7);
   const { shoppingList } = useShoppingList();
   const { chores } = useChores();
   const { tasks } = useTasks();
 
-  // Note: Stock entries use number IDs, API products use string UUIDs
-  // This lookup won't match until stock API is integrated
-  const expiringItems = stock
-    .filter((e) => getExpiryStatus(e.bestBefore) !== "ok")
-    .map((e) => ({
-      ...e,
-      product: products.find((p) => p.id === String(e.productId)),
-    }))
-    .sort((a, b) => getDaysUntil(a.bestBefore) - getDaysUntil(b.bestBefore));
-
-  // Low stock calculation - will work properly when stock API is integrated
+  // Low stock calculation
   const lowStockItems = products
     .filter((p) => p.min_stock > 0)
     .map((p) => {
-      // Stock entries use number IDs, can't match with UUID products yet
-      const totalStock = 0;
+      const totalStock = stockEntries.filter(
+        (e) => e.product.id === p.id,
+      ).length;
       return { ...p, totalStock, isLow: totalStock < p.min_stock };
     })
     .filter((p) => p.isLow);
@@ -58,7 +45,7 @@ export function DashboardPage(): React.ReactElement {
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-xl p-5 shadow-sm border border-stone-200">
           <div className="text-3xl font-bold text-stone-800">
-            {stock.length}
+            {stockEntries.length}
           </div>
           <div className="text-sm text-stone-500">Позиций в запасах</div>
         </div>
@@ -108,9 +95,8 @@ export function DashboardPage(): React.ReactElement {
               <p className="text-stone-500 text-sm">Всё в порядке!</p>
             ) : (
               <div className="space-y-3">
-                {expiringItems.map((item) => {
-                  const status = getExpiryStatus(item.bestBefore);
-                  const days = getDaysUntil(item.bestBefore);
+                {expiringItems.slice(0, 5).map((item) => {
+                  const status = getExpiryStatus(item.days_until_expiry);
                   return (
                     <div
                       key={item.id}
@@ -118,26 +104,22 @@ export function DashboardPage(): React.ReactElement {
                     >
                       <div>
                         <p className="font-medium text-stone-800">
-                          {item.product?.name ?? "Неизвестный товар"}
+                          {item.product.name}
                         </p>
                         <p className="text-sm text-stone-500">
-                          {item.amount} шт · {locations[item.location]}
+                          1 {item.product.unit} · {item.location.name}
                         </p>
                       </div>
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium ${
                           status === "expired"
                             ? "bg-red-100 text-red-700"
-                            : status === "critical"
+                            : status === "today"
                               ? "bg-orange-100 text-orange-700"
                               : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {days < 0
-                          ? `Истекло ${Math.abs(days)} дн. назад`
-                          : days === 0
-                            ? "Сегодня!"
-                            : `${days} дн.`}
+                        {getRelativeExpiryText(item.days_until_expiry)}
                       </span>
                     </div>
                   );

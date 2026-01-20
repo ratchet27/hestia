@@ -1,308 +1,179 @@
-import { useState } from "react";
-import { useProducts } from "../../api/queries";
-import { Icons } from "../../components/Icons";
-import { useStock } from "../../data/hooks";
+import { useMemo, useState } from "react";
+import type {
+  ExpiringEntryResponse,
+  StockEntryResponse,
+} from "../../api/generated/models";
+import { useLocations, useProducts } from "../../api/queries";
 import {
-  formatDate,
-  getDaysUntil,
-  getExpiryStatus,
-  locations,
-} from "../../data/types";
+  useAddStock,
+  useConsumeStock,
+  useExpiringStock,
+  useStockEntries,
+} from "../../api/queries/stocks";
+import {
+  type AddStockFormData,
+  AddStockModal,
+} from "./components/AddStockModal";
+import { AttentionSection } from "./components/AttentionSection";
+import { LocationTabs } from "./components/LocationTabs";
+import { StockPageHeader } from "./components/StockPageHeader";
+import { StockTable } from "./components/StockTable";
 
 export function StockPage(): React.ReactElement {
-  const { data: products = [] } = useProducts();
-  const { stock } = useStock();
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
+    null,
+  );
   const [searchTerm, setSearchTerm] = useState("");
-  const [locationFilter, setLocationFilter] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // Note: Stock entries use number IDs, API products use string UUIDs
-  // This integration will work properly when stock API is ready
-  const enrichedStock = stock
-    .map((e) => ({
-      ...e,
-      // Products have UUID, stock has number ID - won't match until stock API integrated
-      product: undefined as { name: string; category: string } | undefined,
-    }))
-    .filter((e) => locationFilter === "all" || e.location === locationFilter)
-    .sort((a, b) => getDaysUntil(a.bestBefore) - getDaysUntil(b.bestBefore));
+  const { data: locations = [] } = useLocations();
+  const { data: products = [] } = useProducts();
+  const { data: allEntries = [], isLoading: entriesLoading } =
+    useStockEntries();
+  const { data: expiringItems = [] } = useExpiringStock(7);
+
+  const addStock = useAddStock();
+  const consumeStock = useConsumeStock();
+
+  // Filter entries by location and search term (client-side)
+  const filteredEntries = useMemo(() => {
+    let result = allEntries;
+
+    // Filter by location
+    if (selectedLocationId) {
+      result = result.filter((e) => e.location.id === selectedLocationId);
+    }
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter((e) =>
+        e.product.name.toLowerCase().includes(term),
+      );
+    }
+
+    return result;
+  }, [allEntries, selectedLocationId, searchTerm]);
+
+  // Sort by expiry date
+  const sortedEntries = useMemo(() => {
+    return [...filteredEntries].sort((a, b) => {
+      if (!a.best_before) return 1;
+      if (!b.best_before) return -1;
+      return (
+        new Date(a.best_before).getTime() - new Date(b.best_before).getTime()
+      );
+    });
+  }, [filteredEntries]);
+
+  // Count entries per location (from ALL entries, not filtered)
+  const locationCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const entry of allEntries) {
+      counts[entry.location.id] = (counts[entry.location.id] || 0) + 1;
+    }
+    return counts;
+  }, [allEntries]);
+
+  // Count expired and soon-to-expire items
+  const expiredCount = expiringItems.filter(
+    (item) => item.days_until_expiry < 0,
+  ).length;
+  const soonCount = expiringItems.filter(
+    (item) => item.days_until_expiry >= 0,
+  ).length;
+
+  const handleAddStock = (data: AddStockFormData) => {
+    addStock.mutate(
+      {
+        product_id: data.productId,
+        location_id: data.locationId,
+        quantity: data.quantity,
+        best_before: data.bestBefore || null,
+      },
+      {
+        onSuccess: () => setShowAddModal(false),
+      },
+    );
+  };
+
+  const handleConsume = (entry: StockEntryResponse) => {
+    consumeStock.mutate({
+      product_id: entry.product.id,
+      location_id: entry.location.id,
+      quantity: 1,
+    });
+  };
+
+  const handleDone = (entry: ExpiringEntryResponse) => {
+    consumeStock.mutate({
+      product_id: entry.product.id,
+      location_id: entry.location.id,
+      quantity: 1,
+    });
+  };
+
+  const handleThrow = (entry: ExpiringEntryResponse) => {
+    // For now, throw also consumes (removes) the item
+    consumeStock.mutate({
+      product_id: entry.product.id,
+      location_id: entry.location.id,
+      quantity: 1,
+    });
+  };
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-stone-800">Запасы</h2>
-          <p className="text-stone-500 mt-1">Управление домашними запасами</p>
-        </div>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
-          >
-            <Icons.Scan />
-            Сканировать
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors"
-          >
-            <Icons.Plus />
-            Добавить
-          </button>
-        </div>
-      </div>
+    <div className="p-8 max-w-[1200px]">
+      <StockPageHeader
+        expiredCount={expiredCount}
+        soonCount={soonCount}
+        onScanClick={() => setShowAddModal(true)}
+        onAddClick={() => setShowAddModal(true)}
+      />
 
-      <div className="flex gap-4 mb-6">
-        <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
-            <Icons.Search />
-          </span>
-          <input
-            type="text"
-            placeholder="Поиск по названию..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
-        </div>
-        <select
-          value={locationFilter}
-          onChange={(e) => setLocationFilter(e.target.value)}
-          className="px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-        >
-          <option value="all">Все места</option>
-          {Object.entries(locations).map(([key, label]) => (
-            <option key={key} value={key}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <AttentionSection
+        items={expiringItems}
+        onDone={handleDone}
+        onThrow={handleThrow}
+      />
 
-      <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-stone-50 border-b border-stone-200">
-            <tr>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-stone-600">
-                Товар
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-stone-600">
-                Количество
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-stone-600">
-                Место
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-stone-600">
-                Годен до
-              </th>
-              <th className="text-left px-4 py-3 text-sm font-semibold text-stone-600">
-                Заметка
-              </th>
-              <th className="text-right px-4 py-3 text-sm font-semibold text-stone-600">
-                Действия
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {enrichedStock.map((item) => {
-              const status = getExpiryStatus(item.bestBefore);
-              const days = getDaysUntil(item.bestBefore);
-              return (
-                <tr
-                  key={item.id}
-                  className="border-b border-stone-100 hover:bg-stone-50"
-                >
-                  <td className="px-4 py-3">
-                    <div>
-                      <p className="font-medium text-stone-800">
-                        {item.product?.name ?? `Товар #${item.productId}`}
-                      </p>
-                      <p className="text-sm text-stone-500">
-                        {item.product?.category ?? "—"}
-                      </p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="w-8 h-8 flex items-center justify-center rounded bg-stone-100 hover:bg-stone-200 transition-colors"
-                      >
-                        <Icons.Minus />
-                      </button>
-                      <span className="font-medium w-12 text-center">
-                        {item.amount}
-                      </span>
-                      <button
-                        type="button"
-                        className="w-8 h-8 flex items-center justify-center rounded bg-stone-100 hover:bg-stone-200 transition-colors"
-                      >
-                        <Icons.Plus />
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-1 bg-stone-100 rounded text-sm">
-                      {locations[item.location]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded text-sm font-medium ${
-                        status === "expired"
-                          ? "bg-red-100 text-red-700"
-                          : status === "critical"
-                            ? "bg-orange-100 text-orange-700"
-                            : status === "warning"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-green-100 text-green-700"
-                      }`}
-                    >
-                      {formatDate(item.bestBefore)}
-                      {days <= 7 && days >= 0 && ` (${days} дн.)`}
-                      {days < 0 && ` (просрочено)`}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-stone-500">
-                    {item.note || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      className="text-red-500 hover:text-red-700 text-sm"
-                    >
-                      Списать
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h3 className="text-xl font-bold text-stone-800 mb-4">
-              Добавить в запасы
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="stock-barcode"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  Штрихкод
-                </label>
-                <input
-                  id="stock-barcode"
-                  type="text"
-                  placeholder="Сканируйте или введите..."
-                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="stock-product"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  Товар
-                </label>
-                <select
-                  id="stock-product"
-                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                >
-                  <option value="">Выберите товар...</option>
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="stock-amount"
-                    className="block text-sm font-medium text-stone-700 mb-1"
-                  >
-                    Количество
-                  </label>
-                  <input
-                    id="stock-amount"
-                    type="number"
-                    defaultValue="1"
-                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="stock-expiry"
-                    className="block text-sm font-medium text-stone-700 mb-1"
-                  >
-                    Годен до
-                  </label>
-                  <input
-                    id="stock-expiry"
-                    type="date"
-                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  htmlFor="stock-location"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  Место хранения
-                </label>
-                <select
-                  id="stock-location"
-                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                >
-                  {Object.entries(locations).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="stock-note"
-                  className="block text-sm font-medium text-stone-700 mb-1"
-                >
-                  Заметка
-                </label>
-                <input
-                  id="stock-note"
-                  type="text"
-                  placeholder="Необязательно..."
-                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 px-4 py-2 border border-stone-300 rounded-lg hover:bg-stone-50 transition-colors"
-              >
-                Отмена
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
-              >
-                Добавить
-              </button>
-            </div>
+      <section>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-stone-800 font-semibold">&#x1f4e6; Все запасы</h2>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Поиск по названию..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-60 px-3.5 py-2 border border-stone-200 rounded-md text-sm focus:outline-none focus:border-amber-500"
+            />
           </div>
         </div>
+
+        <LocationTabs
+          locations={locations}
+          selectedLocationId={selectedLocationId}
+          onSelect={setSelectedLocationId}
+          counts={locationCounts}
+          totalCount={allEntries.length}
+        />
+
+        <StockTable
+          entries={sortedEntries}
+          onConsume={handleConsume}
+          isLoading={entriesLoading}
+        />
+      </section>
+
+      {showAddModal && (
+        <AddStockModal
+          products={products}
+          locations={locations}
+          onSubmit={handleAddStock}
+          onClose={() => setShowAddModal(false)}
+          isSubmitting={addStock.isPending}
+        />
       )}
     </div>
   );

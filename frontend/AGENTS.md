@@ -14,7 +14,15 @@
 - `bunx <pkg>` instead of npx
 - `bun test` for tests
 
-## Code Quality
+## Code Quality (REQUIRED)
+
+**You MUST run `bun run check` before claiming any work is complete.**
+
+Use the `frontend-lint` skill for full workflow. Quick reference:
+
+```bash
+bun run check   # runs: biome check src && tsc --noEmit
+```
 
 Linting strictness: **5/10** (balanced)
 
@@ -24,3 +32,14 @@ Linting strictness: **5/10** (balanced)
 - No unused variables or imports
 - No `any` without justification
 - Prefer functional components and hooks
+
+## API Client Generation (Orval)
+
+To regenerate the API client from backend OpenAPI spec:
+
+```bash
+# Backend must be running first (https://localhost/api/doc.json)
+NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api
+```
+
+**Note:** The `NODE_TLS_REJECT_UNAUTHORIZED=0` is required because the backend uses a self-signed certificate.

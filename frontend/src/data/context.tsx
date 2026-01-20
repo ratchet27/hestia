@@ -3,23 +3,10 @@ import {
   mockChores,
   mockRecipes,
   mockShoppingList,
-  mockStockEntries,
   mockTasks,
   mockUser,
 } from "./mocks";
-import type {
-  Chore,
-  Recipe,
-  ShoppingItem,
-  StockEntry,
-  Task,
-  User,
-} from "./types";
-
-export interface StockContextValue {
-  stock: StockEntry[];
-  setStock: React.Dispatch<React.SetStateAction<StockEntry[]>>;
-}
+import type { Chore, Recipe, ShoppingItem, Task, User } from "./types";
 
 export interface ShoppingContextValue {
   shoppingList: ShoppingItem[];
@@ -47,7 +34,6 @@ export interface AuthContextValue {
   logout: () => void;
 }
 
-export const StockContext = createContext<StockContextValue | null>(null);
 export const ShoppingContext = createContext<ShoppingContextValue | null>(null);
 export const ChoresContext = createContext<ChoresContextValue | null>(null);
 export const TasksContext = createContext<TasksContextValue | null>(null);
@@ -61,7 +47,6 @@ interface DataProviderProps {
 export function DataProvider({
   children,
 }: DataProviderProps): React.ReactElement {
-  const [stock, setStock] = useState<StockEntry[]>(mockStockEntries);
   const [shoppingList, setShoppingList] =
     useState<ShoppingItem[]>(mockShoppingList);
   const [chores, setChores] = useState<Chore[]>(mockChores);
@@ -69,17 +54,15 @@ export function DataProvider({
   const [recipes, setRecipes] = useState<Recipe[]>(mockRecipes);
 
   return (
-    <StockContext.Provider value={{ stock, setStock }}>
-      <ShoppingContext.Provider value={{ shoppingList, setShoppingList }}>
-        <ChoresContext.Provider value={{ chores, setChores }}>
-          <TasksContext.Provider value={{ tasks, setTasks }}>
-            <RecipesContext.Provider value={{ recipes, setRecipes }}>
-              {children}
-            </RecipesContext.Provider>
-          </TasksContext.Provider>
-        </ChoresContext.Provider>
-      </ShoppingContext.Provider>
-    </StockContext.Provider>
+    <ShoppingContext.Provider value={{ shoppingList, setShoppingList }}>
+      <ChoresContext.Provider value={{ chores, setChores }}>
+        <TasksContext.Provider value={{ tasks, setTasks }}>
+          <RecipesContext.Provider value={{ recipes, setRecipes }}>
+            {children}
+          </RecipesContext.Provider>
+        </TasksContext.Provider>
+      </ChoresContext.Provider>
+    </ShoppingContext.Provider>
   );
 }
 
