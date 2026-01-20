@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Tests\Functional\Controller\Api\Internal\V1;
 
+use App\Entity\Barcode;
 use App\Entity\Product;
 use App\Factory\BarcodeFactory;
 use App\Factory\ProductFactory;
@@ -99,6 +100,8 @@ class BarcodeControllerTest extends WebTestCase
 
         static::assertArrayHasKey('data', $data);
         static::assertSame('1234567890123', $data['data']['barcode']);
+
+        $this->assertDatabaseHas(Barcode::class, ['barcode' => '1234567890123']);
     }
 
     public function testAddBarcodeResponseStructure(): void

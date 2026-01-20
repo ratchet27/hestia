@@ -1,4 +1,4 @@
-.PHONY: up down lint test
+.PHONY: up down lint test mutate
 
 up:
 	docker compose up -d
@@ -15,3 +15,6 @@ lint:
 
 test:
 	docker compose exec php bin/phpunit
+
+mutate:
+	docker compose exec php vendor/bin/infection --show-mutations
