@@ -28,20 +28,32 @@ export function StockPage(): React.ReactElement {
 
   const { data: locations = [] } = useLocations();
   const { data: products = [] } = useProducts();
-  const { data: entries = [], isLoading: entriesLoading } = useStockEntries(
-    selectedLocationId ? { locationId: selectedLocationId } : undefined,
-  );
+  const { data: allEntries = [], isLoading: entriesLoading } =
+    useStockEntries();
   const { data: expiringItems = [] } = useExpiringStock(7);
 
   const addStock = useAddStock();
   const consumeStock = useConsumeStock();
 
-  // Filter entries by search term (client-side)
+  // Filter entries by location and search term (client-side)
   const filteredEntries = useMemo(() => {
-    if (!searchTerm.trim()) return entries;
-    const term = searchTerm.toLowerCase();
-    return entries.filter((e) => e.product.name.toLowerCase().includes(term));
-  }, [entries, searchTerm]);
+    let result = allEntries;
+
+    // Filter by location
+    if (selectedLocationId) {
+      result = result.filter((e) => e.location.id === selectedLocationId);
+    }
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter((e) =>
+        e.product.name.toLowerCase().includes(term),
+      );
+    }
+
+    return result;
+  }, [allEntries, selectedLocationId, searchTerm]);
 
   // Sort by expiry date
   const sortedEntries = useMemo(() => {
@@ -54,14 +66,14 @@ export function StockPage(): React.ReactElement {
     });
   }, [filteredEntries]);
 
-  // Count entries per location
+  // Count entries per location (from ALL entries, not filtered)
   const locationCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const entry of entries) {
+    for (const entry of allEntries) {
       counts[entry.location.id] = (counts[entry.location.id] || 0) + 1;
     }
     return counts;
-  }, [entries]);
+  }, [allEntries]);
 
   // Count expired and soon-to-expire items
   const expiredCount = expiringItems.filter(
@@ -144,7 +156,7 @@ export function StockPage(): React.ReactElement {
           selectedLocationId={selectedLocationId}
           onSelect={setSelectedLocationId}
           counts={locationCounts}
-          totalCount={entries.length}
+          totalCount={allEntries.length}
         />
 
         <StockTable
