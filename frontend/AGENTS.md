@@ -12,7 +12,7 @@
 - `bun install` instead of npm/yarn/pnpm install
 - `bun run <script>` instead of npm run
 - `bunx <pkg>` instead of npx
-- `bun test` for tests
+- `bun run test:run` for tests (uses vitest, NOT bun's native test runner)
 
 ## Code Quality (REQUIRED)
 

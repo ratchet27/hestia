@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useEffect, useState } from "react";
+import { createContext, type ReactNode, useState } from "react";
 import {
   mockChores,
   mockRecipes,
@@ -75,15 +75,11 @@ const AUTH_STORAGE_KEY = "hestia_auth";
 export function AuthProvider({
   children,
 }: AuthProviderProps): React.ReactElement {
-  const [user, setUser] = useState<User | null>(null);
-
-  // Check for existing auth in localStorage on mount
-  useEffect(() => {
+  // Initialize user synchronously from localStorage to prevent redirect flash
+  const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (stored === "remembered") {
-      setUser(mockUser);
-    }
-  }, []);
+    return stored === "remembered" ? mockUser : null;
+  });
 
   const login = (
     username: string,
