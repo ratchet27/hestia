@@ -2,6 +2,20 @@
 
 Symfony 8.0 API backend running on FrankenPHP with PostgreSQL.
 
+## Session Startup (REQUIRED)
+
+**At the start of EVERY session, you MUST:**
+
+1. Check if Docker containers are running: `docker compose ps`
+2. If not running, start them: `make up` (or `docker compose up -d`)
+3. If containers are stuck (e.g., database waiting indefinitely), restart:
+   ```bash
+   make down && make up
+   ```
+4. If port 5432 is in use by host PostgreSQL, ask user to stop it first
+
+**Do NOT proceed with backend work until containers are healthy.**
+
 ## Tech Stack
 
 - PHP 8.4+ with Symfony 8.0
