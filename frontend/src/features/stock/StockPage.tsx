@@ -125,7 +125,7 @@ export function StockPage(): React.ReactElement {
   };
 
   return (
-    <div className="p-8 max-w-[1200px]">
+    <div className="p-8 max-w-screen-2xl">
       <StockPageHeader
         expiredCount={expiredCount}
         soonCount={soonCount}
