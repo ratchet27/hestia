@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useProducts } from "../../api/queries";
 import { useExpiringStock, useStockEntries } from "../../api/queries/stocks";
@@ -10,6 +11,7 @@ import {
 } from "../stock/utils/expiryStatus";
 
 export function DashboardPage(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: products = [] } = useProducts();
   const { data: stockEntries = [] } = useStockEntries();
@@ -36,9 +38,9 @@ export function DashboardPage(): React.ReactElement {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-stone-800">Добро пожаловать!</h2>
+        <h2 className="text-3xl font-bold text-stone-800">{t("dashboard.welcome")}</h2>
         <p className="text-stone-500 mt-1">
-          Обзор домашнего хозяйства на сегодня
+          {t("dashboard.subtitle")}
         </p>
       </div>
 
@@ -47,7 +49,7 @@ export function DashboardPage(): React.ReactElement {
           <div className="text-3xl font-bold text-stone-800">
             {stockEntries.length}
           </div>
-          <div className="text-sm text-stone-500">Позиций в запасах</div>
+          <div className="text-sm text-stone-500">{t("dashboard.stockItems")}</div>
         </div>
         <button
           type="button"
@@ -57,19 +59,19 @@ export function DashboardPage(): React.ReactElement {
           <div className="text-3xl font-bold text-amber-600">
             {shoppingCount}
           </div>
-          <div className="text-sm text-stone-500">В списке покупок</div>
+          <div className="text-sm text-stone-500">{t("dashboard.shoppingItems")}</div>
         </button>
         <div className="bg-white rounded-xl p-5 shadow-sm border border-stone-200">
           <div className="text-3xl font-bold text-red-500">
             {expiringItems.length}
           </div>
-          <div className="text-sm text-stone-500">Истекает/Истекло</div>
+          <div className="text-sm text-stone-500">{t("dashboard.expiringItems")}</div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-sm border border-stone-200">
           <div className="text-3xl font-bold text-blue-500">
             {todayChores.length}
           </div>
-          <div className="text-sm text-stone-500">Дел на сегодня</div>
+          <div className="text-sm text-stone-500">{t("dashboard.todayTasks")}</div>
         </div>
       </div>
 
@@ -80,19 +82,19 @@ export function DashboardPage(): React.ReactElement {
               <span className="text-red-500">
                 <Icons.Warning />
               </span>
-              Истекающие продукты
+              {t("dashboard.expiringProducts")}
             </h3>
             <button
               type="button"
               onClick={() => navigate("/stock")}
               className="text-sm text-amber-600 hover:underline"
             >
-              Все запасы →
+              {t("dashboard.viewAllStock")}
             </button>
           </div>
           <div className="p-4">
             {expiringItems.length === 0 ? (
-              <p className="text-stone-500 text-sm">Всё в порядке!</p>
+              <p className="text-stone-500 text-sm">{t("dashboard.allGood")}</p>
             ) : (
               <div className="space-y-3">
                 {expiringItems.slice(0, 5).map((item) => {
@@ -119,7 +121,7 @@ export function DashboardPage(): React.ReactElement {
                               : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {getRelativeExpiryText(item.days_until_expiry)}
+                        {getRelativeExpiryText(item.days_until_expiry, t)}
                       </span>
                     </div>
                   );
@@ -131,18 +133,18 @@ export function DashboardPage(): React.ReactElement {
 
         <div className="bg-white rounded-xl shadow-sm border border-stone-200">
           <div className="p-4 border-b border-stone-100 flex items-center justify-between">
-            <h3 className="font-semibold text-stone-800">Низкий запас</h3>
+            <h3 className="font-semibold text-stone-800">{t("dashboard.lowStock")}</h3>
             <button
               type="button"
               onClick={() => navigate("/products")}
               className="text-sm text-amber-600 hover:underline"
             >
-              Все товары →
+              {t("dashboard.viewAllProducts")}
             </button>
           </div>
           <div className="p-4">
             {lowStockItems.length === 0 ? (
-              <p className="text-stone-500 text-sm">Всего достаточно!</p>
+              <p className="text-stone-500 text-sm">{t("dashboard.enoughStock")}</p>
             ) : (
               <div className="space-y-3">
                 {lowStockItems.map((item) => (
@@ -153,11 +155,11 @@ export function DashboardPage(): React.ReactElement {
                     <div>
                       <p className="font-medium text-stone-800">{item.name}</p>
                       <p className="text-sm text-stone-500">
-                        Мин: {item.min_stock}
+                        {t("dashboard.min")}{item.min_stock}
                       </p>
                     </div>
                     <span className="px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-700">
-                      Осталось: {item.totalStock}
+                      {t("dashboard.remaining")}{item.totalStock}
                     </span>
                   </div>
                 ))}
@@ -168,18 +170,18 @@ export function DashboardPage(): React.ReactElement {
 
         <div className="bg-white rounded-xl shadow-sm border border-stone-200">
           <div className="p-4 border-b border-stone-100 flex items-center justify-between">
-            <h3 className="font-semibold text-stone-800">Дела на сегодня</h3>
+            <h3 className="font-semibold text-stone-800">{t("dashboard.todayTasksSection")}</h3>
             <button
               type="button"
               onClick={() => navigate("/tasks")}
               className="text-sm text-amber-600 hover:underline"
             >
-              Все задачи →
+              {t("dashboard.viewAllTasks")}
             </button>
           </div>
           <div className="p-4">
             {todayChores.length === 0 ? (
-              <p className="text-stone-500 text-sm">На сегодня дел нет!</p>
+              <p className="text-stone-500 text-sm">{t("dashboard.noTasksToday")}</p>
             ) : (
               <div className="space-y-3">
                 {todayChores.map((chore) => (
@@ -192,7 +194,7 @@ export function DashboardPage(): React.ReactElement {
                       type="button"
                       className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
                     >
-                      Выполнено
+                      {t("dashboard.completed")}
                     </button>
                   </div>
                 ))}
@@ -203,18 +205,18 @@ export function DashboardPage(): React.ReactElement {
 
         <div className="bg-white rounded-xl shadow-sm border border-stone-200">
           <div className="p-4 border-b border-stone-100 flex items-center justify-between">
-            <h3 className="font-semibold text-stone-800">Ближайшие задачи</h3>
+            <h3 className="font-semibold text-stone-800">{t("dashboard.upcomingTasks")}</h3>
             <button
               type="button"
               onClick={() => navigate("/tasks")}
               className="text-sm text-amber-600 hover:underline"
             >
-              Все задачи →
+              {t("dashboard.viewAllTasks")}
             </button>
           </div>
           <div className="p-4">
             {upcomingTasks.length === 0 ? (
-              <p className="text-stone-500 text-sm">Нет активных задач</p>
+              <p className="text-stone-500 text-sm">{t("dashboard.noActiveTasks")}</p>
             ) : (
               <div className="space-y-3">
                 {upcomingTasks.map((task) => (
