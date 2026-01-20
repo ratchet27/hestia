@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+
 export type ExpiryStatus = "expired" | "today" | "soon" | "warning" | "ok";
 
 export function getExpiryStatus(daysUntilExpiry: number): ExpiryStatus {
@@ -8,12 +10,16 @@ export function getExpiryStatus(daysUntilExpiry: number): ExpiryStatus {
   return "ok";
 }
 
-export function getRelativeExpiryText(daysUntilExpiry: number): string {
-  if (daysUntilExpiry < -1) return `${Math.abs(daysUntilExpiry)} дн. назад`;
-  if (daysUntilExpiry === -1) return "вчера";
-  if (daysUntilExpiry === 0) return "сегодня";
-  if (daysUntilExpiry === 1) return "завтра";
-  return `через ${daysUntilExpiry} дн.`;
+export function getRelativeExpiryText(
+  daysUntilExpiry: number,
+  t: TFunction,
+): string {
+  if (daysUntilExpiry < -1)
+    return t("expiry.daysAgo", { count: Math.abs(daysUntilExpiry) });
+  if (daysUntilExpiry === -1) return t("expiry.yesterday");
+  if (daysUntilExpiry === 0) return t("expiry.today");
+  if (daysUntilExpiry === 1) return t("expiry.tomorrow");
+  return t("expiry.inDays", { count: daysUntilExpiry });
 }
 
 export function formatExpiryDate(dateStr: string): string {

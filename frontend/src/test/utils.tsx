@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type RenderOptions, render } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import type { ReactElement, ReactNode } from "react";
+import { I18nextProvider } from "react-i18next";
 import { BrowserRouter } from "react-router-dom";
+import i18n from "@/i18n";
 
 // Create a fresh QueryClient for each test
 function createTestQueryClient() {
@@ -28,9 +30,11 @@ function AllProviders({ children }: WrapperProps) {
   const queryClient = createTestQueryClient();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>{children}</BrowserRouter>
-    </QueryClientProvider>
+    <I18nextProvider i18n={i18n}>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>{children}</BrowserRouter>
+      </QueryClientProvider>
+    </I18nextProvider>
   );
 }
 
