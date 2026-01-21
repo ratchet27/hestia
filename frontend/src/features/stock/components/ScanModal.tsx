@@ -31,11 +31,10 @@ export function ScanModal({
 
     setIsLoading(true);
     try {
-      // apiFetch returns the JSON body directly - backend wraps product in { data: ... }
-      const response = (await getApiBarcodesLookup(trimmed)) as unknown as {
-        data: ProductResponse;
-      };
-      onProductFound(response.data);
+      const response = await getApiBarcodesLookup(trimmed);
+      if (response.status === 200 && response.data.data) {
+        onProductFound(response.data.data);
+      }
     } catch (error) {
       if (error instanceof ApiError && error.isNotFound) {
         onBarcodeNotFound(trimmed);
