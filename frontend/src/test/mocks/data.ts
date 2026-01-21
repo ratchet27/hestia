@@ -2,6 +2,8 @@ import type {
   ExpiringEntryResponse,
   LocationResponse,
   ProductBriefResponse,
+  ShoppingItemResponse,
+  ShoppingListSource,
   StockEntryResponse,
 } from "@/api/generated/models";
 
@@ -57,6 +59,20 @@ export function createExpiringEntry(
     best_before: "2025-01-25",
     days_until_expiry: 2,
     ...rest,
+  };
+}
+
+export function createShoppingItem(
+  overrides: Partial<ShoppingItemResponse> = {},
+): ShoppingItemResponse {
+  return {
+    id: crypto.randomUUID(),
+    name: "Молоко",
+    amount: 1,
+    source: "manual" as ShoppingListSource,
+    done: false,
+    created_at: new Date().toISOString(),
+    ...overrides,
   };
 }
 
