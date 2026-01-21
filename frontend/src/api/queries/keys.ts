@@ -35,4 +35,10 @@ export const queryKeys = {
       ["stocks", "entries", filters ?? {}] as const,
     expiring: (days: number) => ["stocks", "expiring", days] as const,
   },
+
+  // Shopping List
+  shoppingList: {
+    all: ["shopping-list"] as const,
+    list: () => ["shopping-list", "list"] as const,
+  },
 } as const;

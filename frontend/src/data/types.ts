@@ -15,16 +15,6 @@ export interface StockEntry {
   note: string;
 }
 
-export interface ShoppingItem {
-  id: number;
-  productId: number | null;
-  customName?: string;
-  amount: number;
-  note: string;
-  addedBy: "auto" | "manual";
-  done: boolean;
-}
-
 export interface Chore {
   id: number;
   name: string;

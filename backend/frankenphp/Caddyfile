@@ -1,6 +1,10 @@
 {
 	skip_install_trust
 
+	log default {
+		output discard
+	}
+
 	{$CADDY_GLOBAL_OPTIONS}
 
 	frankenphp {

@@ -1,0 +1,9 @@
+---
+# CI-specific overrides
+# Disables services not needed for testing
+
+services:
+  messenger:
+    # Assign to a profile that won't be activated in CI
+    # This prevents the service from starting during tests
+    profiles: ["runtime"]

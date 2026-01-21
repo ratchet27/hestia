@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { useProducts } from "../../api/queries";
+import { useProducts, useShoppingList } from "../../api/queries";
 import { useExpiringStock, useStockEntries } from "../../api/queries/stocks";
 import { Icons } from "../../components/Icons";
-import { useChores, useShoppingList, useTasks } from "../../data/hooks";
+import { useChores, useTasks } from "../../data/hooks";
 import { formatDate, getDaysUntil } from "../../data/types";
 import {
   getExpiryStatus,
@@ -16,7 +16,7 @@ export function DashboardPage(): React.ReactElement {
   const { data: products = [] } = useProducts();
   const { data: stockEntries = [] } = useStockEntries();
   const { data: expiringItems = [] } = useExpiringStock(7);
-  const { shoppingList } = useShoppingList();
+  const { data: shoppingList = [] } = useShoppingList();
   const { chores } = useChores();
   const { tasks } = useTasks();
 

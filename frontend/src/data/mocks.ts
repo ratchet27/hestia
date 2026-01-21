@@ -1,11 +1,4 @@
-import type {
-  Chore,
-  Recipe,
-  ShoppingItem,
-  StockEntry,
-  Task,
-  User,
-} from "./types";
+import type { Chore, Recipe, StockEntry, Task, User } from "./types";
 
 export const mockUser: User = {
   id: 1,
@@ -105,36 +98,6 @@ export const mockStockEntries: StockEntry[] = [
     location: "fridge",
     note: "Скоро истекает!",
   },
-];
-
-export const mockShoppingList: ShoppingItem[] = [
-  {
-    id: 1,
-    productId: 10,
-    amount: 1,
-    note: "Любой бренд",
-    addedBy: "auto",
-    done: false,
-  },
-  {
-    id: 2,
-    productId: null,
-    customName: "Бананы",
-    amount: 1,
-    note: "1 кг",
-    addedBy: "manual",
-    done: false,
-  },
-  {
-    id: 3,
-    productId: null,
-    customName: "Апельсины",
-    amount: 5,
-    note: "",
-    addedBy: "manual",
-    done: true,
-  },
-  { id: 4, productId: 2, amount: 2, note: "", addedBy: "auto", done: false },
 ];
 
 export const mockChores: Chore[] = [

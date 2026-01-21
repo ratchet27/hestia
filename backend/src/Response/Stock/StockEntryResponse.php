@@ -9,6 +9,8 @@ use Symfony\Component\Uid\Uuid;
 
 final readonly class StockEntryResponse
 {
+    public ?int $days_until_expiry;
+
     public function __construct(
         public Uuid $id,
         public ProductBriefResponse $product,
@@ -16,5 +18,21 @@ final readonly class StockEntryResponse
         public ?string $best_before,
         public \DateTimeImmutable $created_at
     ) {
+        $this->days_until_expiry = $this->calculateDaysUntilExpiry($best_before);
+    }
+
+    private function calculateDaysUntilExpiry(?string $bestBefore): ?int
+    {
+        if ($bestBefore === null) {
+            return null;
+        }
+
+        $today = new \DateTimeImmutable('today');
+        $bestBeforeDate = new \DateTimeImmutable($bestBefore);
+        $diff = $today->diff($bestBeforeDate);
+
+        $days = (int) $diff->days;
+
+        return $diff->invert ? -$days : $days;
     }
 }

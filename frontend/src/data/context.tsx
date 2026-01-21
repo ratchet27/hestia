@@ -1,17 +1,6 @@
 import { createContext, type ReactNode, useState } from "react";
-import {
-  mockChores,
-  mockRecipes,
-  mockShoppingList,
-  mockTasks,
-  mockUser,
-} from "./mocks";
-import type { Chore, Recipe, ShoppingItem, Task, User } from "./types";
-
-export interface ShoppingContextValue {
-  shoppingList: ShoppingItem[];
-  setShoppingList: React.Dispatch<React.SetStateAction<ShoppingItem[]>>;
-}
+import { mockChores, mockRecipes, mockTasks, mockUser } from "./mocks";
+import type { Chore, Recipe, Task, User } from "./types";
 
 export interface ChoresContextValue {
   chores: Chore[];
@@ -34,7 +23,6 @@ export interface AuthContextValue {
   logout: () => void;
 }
 
-export const ShoppingContext = createContext<ShoppingContextValue | null>(null);
 export const ChoresContext = createContext<ChoresContextValue | null>(null);
 export const TasksContext = createContext<TasksContextValue | null>(null);
 export const RecipesContext = createContext<RecipesContextValue | null>(null);
@@ -47,22 +35,18 @@ interface DataProviderProps {
 export function DataProvider({
   children,
 }: DataProviderProps): React.ReactElement {
-  const [shoppingList, setShoppingList] =
-    useState<ShoppingItem[]>(mockShoppingList);
   const [chores, setChores] = useState<Chore[]>(mockChores);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [recipes, setRecipes] = useState<Recipe[]>(mockRecipes);
 
   return (
-    <ShoppingContext.Provider value={{ shoppingList, setShoppingList }}>
-      <ChoresContext.Provider value={{ chores, setChores }}>
-        <TasksContext.Provider value={{ tasks, setTasks }}>
-          <RecipesContext.Provider value={{ recipes, setRecipes }}>
-            {children}
-          </RecipesContext.Provider>
-        </TasksContext.Provider>
-      </ChoresContext.Provider>
-    </ShoppingContext.Provider>
+    <ChoresContext.Provider value={{ chores, setChores }}>
+      <TasksContext.Provider value={{ tasks, setTasks }}>
+        <RecipesContext.Provider value={{ recipes, setRecipes }}>
+          {children}
+        </RecipesContext.Provider>
+      </TasksContext.Provider>
+    </ChoresContext.Provider>
   );
 }
 

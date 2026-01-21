@@ -16,12 +16,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 
 // @mago-ignore lint:cyclomatic-complexity
-class ShoppingListService
+readonly class ShoppingListService
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ShoppingListItemRepository $shoppingListItemRepository,
-        private readonly ProductRepository $productRepository
+        private EntityManagerInterface $entityManager,
+        private ShoppingListItemRepository $shoppingListItemRepository,
+        private ProductRepository $productRepository
     ) {
     }
 
@@ -57,7 +57,7 @@ class ShoppingListService
 
     /**
      * Add or update an auto-generated shopping list item.
-     * Amount only goes UP for auto items (never reduced).
+     * Amount tracks current deficit (updates both up and down).
      */
     private function upsertAutoItem(Product $product, int $deficit): void
     {
@@ -69,9 +69,8 @@ class ShoppingListService
                 return;
             }
 
-            // Only increase amount, never decrease for auto items
-            // @infection-ignore-all: Equivalent mutant - `>=` sets same value, Doctrine detects no change
-            if ($deficit > $existing->getAmount()) {
+            // Update amount to current deficit
+            if ($deficit !== $existing->getAmount()) {
                 $existing->setAmount($deficit);
                 $this->entityManager->flush();
             }
@@ -150,12 +149,22 @@ class ShoppingListService
 
     /**
      * Update an existing shopping list item.
+     * Converting AUTO to MANUAL if amount is changed.
      */
     public function updateItem(Uuid $id, UpdateShoppingItemRequest $request): ShoppingListItem
     {
         $item = $this->shoppingListItemRepository->find($id);
         if ($item === null) {
             throw new ShoppingListItemNotFoundException($id);
+        }
+
+        // If user manually changes amount on an AUTO item, convert to MANUAL
+        if (
+            $request->amount !== null
+            && $item->getSource() === ShoppingListSource::AUTO
+            && $request->amount !== $item->getAmount()
+        ) {
+            $item->setSource(ShoppingListSource::MANUAL);
         }
 
         if ($request->amount !== null) {

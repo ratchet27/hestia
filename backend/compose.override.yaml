@@ -13,6 +13,7 @@ services:
       #  from the bind-mount for better performance by enabling the next line:
       #- /app/vendor
     environment:
+      CADDY_SERVER_LOG_OPTIONS: "output discard"
       FRANKENPHP_WORKER_CONFIG: watch
       # See https://xdebug.org/docs/all_settings#mode
       XDEBUG_MODE: "${XDEBUG_MODE:-off}"
@@ -21,6 +22,13 @@ services:
       # Ensure that host.docker.internal is correctly defined on Linux
       - host.docker.internal:host-gateway
     tty: true
+
+  messenger:
+    build:
+      context: .
+      target: frankenphp_dev
+    volumes:
+      - ./:/app
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
 
