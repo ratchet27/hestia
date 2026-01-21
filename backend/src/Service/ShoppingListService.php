@@ -150,12 +150,22 @@ readonly class ShoppingListService
 
     /**
      * Update an existing shopping list item.
+     * Converting AUTO to MANUAL if amount is changed.
      */
     public function updateItem(Uuid $id, UpdateShoppingItemRequest $request): ShoppingListItem
     {
         $item = $this->shoppingListItemRepository->find($id);
         if ($item === null) {
             throw new ShoppingListItemNotFoundException($id);
+        }
+
+        // If user manually changes amount on an AUTO item, convert to MANUAL
+        if (
+            $request->amount !== null
+            && $item->getSource() === ShoppingListSource::AUTO
+            && $request->amount !== $item->getAmount()
+        ) {
+            $item->setSource(ShoppingListSource::MANUAL);
         }
 
         if ($request->amount !== null) {

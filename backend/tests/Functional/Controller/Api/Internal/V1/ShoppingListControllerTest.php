@@ -372,6 +372,62 @@ class ShoppingListControllerTest extends WebTestCase
         static::assertSame('SHOPPING_LIST_ITEM_NOT_FOUND', $data['type']);
     }
 
+    public function testUpdateAmountConvertsAutoToManual(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Auto Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        // Create AUTO item
+        $item = $this->createItem([
+            'product' => $product,
+            'amount' => 5,
+            'source' => ShoppingListSource::AUTO
+        ]);
+
+        // Update amount
+        $response = $this->apiPatch('/shopping-list/' . $item->getId(), [
+            'amount' => 3
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        // Should be converted to MANUAL
+        static::assertSame(3, $data['data']['amount']);
+        static::assertSame('manual', $data['data']['source']);
+    }
+
+    public function testUpdateNoteDoesNotConvertAutoToManual(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Auto Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        // Create AUTO item
+        $item = $this->createItem([
+            'product' => $product,
+            'amount' => 5,
+            'source' => ShoppingListSource::AUTO
+        ]);
+
+        // Update only note
+        $response = $this->apiPatch('/shopping-list/' . $item->getId(), [
+            'note' => 'Buy the organic one'
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        // Should remain AUTO
+        static::assertSame(5, $data['data']['amount']);
+        static::assertSame('auto', $data['data']['source']);
+    }
+
     public function testUpdatePersistsChanges(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
