@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiFetch } from "../client";
 import type {
   CreateProductRequest,
   ProductResponse,
@@ -6,19 +7,27 @@ import type {
 } from "../generated/models";
 import {
   deleteApiProductsDelete,
-  getApiProductsList,
   getApiProductsShow,
   postApiProductsCreate,
   putApiProductsUpdate,
 } from "../generated/products/products";
 import { queryKeys } from "./keys";
 
-export function useProducts() {
+interface UseProductsOptions {
+  includeArchived?: boolean;
+}
+
+export function useProducts(options: UseProductsOptions = {}) {
+  const { includeArchived = false } = options;
+
   return useQuery({
-    queryKey: queryKeys.products.all,
+    queryKey: queryKeys.products.list({ includeArchived }),
     queryFn: async () => {
-      const response = await getApiProductsList();
-      return (response.data as unknown as ProductResponse[]) ?? [];
+      const url = includeArchived
+        ? "/api/internal/v1/products?include_archived=true"
+        : "/api/internal/v1/products";
+      const response = await apiFetch<{ data: ProductResponse[] }>(url);
+      return response.data ?? [];
     },
   });
 }

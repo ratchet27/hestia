@@ -15,6 +15,7 @@ import {
 import { Icons } from "../../components/Icons";
 import { ProductsGridSkeleton } from "../../components/ProductSkeleton";
 import { ProductForm } from "./ProductForm";
+import { getCategoryColor } from "./utils/categoryColors";
 
 export function ProductsPage(): React.ReactElement {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,12 +25,12 @@ export function ProductsPage(): React.ReactElement {
     null,
   );
 
-  // Fetch all products once - filtering is done client-side
+  // Fetch all products including archived - filtering is done client-side
   const {
     data: allProducts = [],
     isLoading: productsLoading,
     isError: productsError,
-  } = useProducts();
+  } = useProducts({ includeArchived: true });
 
   // Client-side filtering
   const products = useMemo(() => {
@@ -144,7 +145,7 @@ export function ProductsPage(): React.ReactElement {
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+          className="pl-4 pr-10 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2357534e%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.75rem_center]"
         >
           <option value="all">Все категории</option>
           {categories.map((cat) => (
@@ -155,15 +156,16 @@ export function ProductsPage(): React.ReactElement {
         </select>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
         {products.map((product: ProductResponse) => (
           <button
             type="button"
             key={product.id}
-            className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 hover:border-amber-400 transition-colors cursor-pointer text-left"
+            className="bg-white rounded-xl p-4 pb-5 shadow-sm border border-stone-200 border-l-4 hover:border-amber-400 hover:border-l-4 transition-colors cursor-pointer text-left flex flex-col"
+            style={{ borderLeftColor: getCategoryColor(product.category.name) }}
             onClick={() => handleEditProduct(product)}
           >
-            <div className="flex justify-between items-start mb-3">
+            <div className="flex justify-between items-start">
               <span className="px-2 py-1 bg-stone-100 rounded text-xs text-stone-600">
                 {product.category.name}
               </span>
@@ -173,10 +175,10 @@ export function ProductsPage(): React.ReactElement {
                 {product.active ? "Активен" : "Архив"}
               </span>
             </div>
-            <h3 className="font-semibold text-stone-800 mb-2">
+            <h3 className="font-semibold text-stone-800 mt-3">
               {product.name}
             </h3>
-            <div className="space-y-1 text-sm text-stone-500">
+            <div className="space-y-1 text-sm text-stone-500 mt-2">
               {product.barcodes &&
                 Array.isArray(product.barcodes) &&
                 product.barcodes.length > 0 &&

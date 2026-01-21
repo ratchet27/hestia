@@ -31,7 +31,16 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/products', name: 'api_products_list', methods: ['GET'])]
-    #[OA\Get(description: 'Returns a list of all products with optional filtering.', summary: 'List products')]
+    #[OA\Get(
+        description: 'Returns a list of products. By default only active products are returned. Use include_archived=true to include inactive products.',
+        summary: 'List products'
+    )]
+    #[OA\Parameter(
+        name: 'include_archived',
+        description: 'Include archived/inactive products',
+        in: 'query',
+        schema: new OA\Schema(type: 'boolean')
+    )]
     #[OA\Response(response: 200, description: 'List of products', content: new Model(type: ProductResponse::class))]
     public function list(Request $request): JsonResponse
     {
@@ -45,8 +54,10 @@ final class ProductController extends AbstractController
             $filters['category_id'] = $request->query->getString('category_id');
         }
 
-        if ($request->query->has('active')) {
-            $filters['active'] = $request->query->getBoolean('active');
+        // Default to active-only unless include_archived=true is specified
+        $includeArchived = $request->query->getBoolean('include_archived', false);
+        if (!$includeArchived) {
+            $filters['active'] = true;
         }
 
         $products = $this->productService->listProducts($filters);
