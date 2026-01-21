@@ -57,7 +57,7 @@ readonly class ShoppingListService
 
     /**
      * Add or update an auto-generated shopping list item.
-     * Amount only goes UP for auto items (never reduced).
+     * Amount tracks current deficit (updates both up and down).
      */
     private function upsertAutoItem(Product $product, int $deficit): void
     {
@@ -69,9 +69,8 @@ readonly class ShoppingListService
                 return;
             }
 
-            // Only increase amount, never decrease for auto items
-            // @infection-ignore-all: Equivalent mutant - `>=` sets same value, Doctrine detects no change
-            if ($deficit > $existing->getAmount()) {
+            // Update amount to current deficit
+            if ($deficit !== $existing->getAmount()) {
                 $existing->setAmount($deficit);
                 $this->entityManager->flush();
             }

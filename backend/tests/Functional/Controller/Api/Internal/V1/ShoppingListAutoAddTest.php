@@ -119,7 +119,7 @@ class ShoppingListAutoAddTest extends WebTestCase
         static::assertSame(7, $data['data'][0]['amount']);
     }
 
-    public function testAutoAddNeverDecreasesAmount(): void
+    public function testAutoAddTracksCurrentDeficit(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -137,13 +137,13 @@ class ShoppingListAutoAddTest extends WebTestCase
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
         static::assertSame(8, $data['data'][0]['amount']);
 
-        // Second change: stock is 5, deficit is 5 (less than current amount)
+        // Second change: stock is 5, deficit is 5 (user bought 3)
         $this->shoppingListService->handleStockChange($product->getId(), 2, 5);
 
         $response = $this->apiGet('/shopping-list');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
-        // Should keep 8, not reduce to 5
-        static::assertSame(8, $data['data'][0]['amount']);
+        // Now tracks current deficit, not historical max
+        static::assertSame(5, $data['data'][0]['amount']);
     }
 
     public function testAutoRemoveWhenStockReachesMinimum(): void
@@ -551,11 +551,7 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
     }
 
-    /**
-     * Kills mutant #5: deficit > existing → deficit >= existing.
-     * When deficit equals existing amount, quantity should NOT update.
-     */
-    public function testAutoAddDoesNotUpdateWhenDeficitEqualsExisting(): void
+    public function testAutoAddUpdatesToCurrentDeficit(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -574,13 +570,13 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
         $itemId = $item->getId();
 
-        // Stock is 5, minStock is 10 - deficit is exactly 5 (same as existing)
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 5);
+        // Stock is 7, minStock is 10 - deficit is 3 (less than current 5)
+        $this->shoppingListService->handleStockChange($product->getId(), 5, 7);
 
-        // Amount should stay at 5, not be updated (> not >=)
+        // Amount should update to 3 (current deficit)
         $this->assertDatabaseHas(ShoppingListItem::class, [
             'id' => $itemId,
-            'amount' => 5
+            'amount' => 3
         ]);
     }
 
