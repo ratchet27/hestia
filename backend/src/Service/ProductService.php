@@ -23,7 +23,6 @@ use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 // @mago-ignore lint:cyclomatic-complexity
-// @mago-ignore lint:kan-defect
 class ProductService
 {
     // @mago-ignore lint:excessive-parameter-list
@@ -167,16 +166,17 @@ class ProductService
     /** @param string[] $newBarcodes */
     private function syncBarcodes(Product $product, array $newBarcodes): void
     {
-        $existingBarcodes = $product->getBarcodes();
-        $existingCodes = [];
+        // Normalize barcodes to strings (JSON may deserialize numeric-looking strings as integers)
+        $newBarcodeStrings = array_map(strval(...), $newBarcodes);
 
-        foreach ($existingBarcodes as $barcode) {
-            $existingCodes[$barcode->getBarcode()] = $barcode;
-        }
+        // Get existing barcode strings
+        $existingBarcodes = $product->getBarcodes()->toArray();
+        $existingCodes = array_map(static fn(Barcode $b): string => $b->getBarcode(), $existingBarcodes);
 
         // Remove barcodes not in the new array
-        foreach ($existingCodes as $code => $barcode) {
-            if (in_array($code, $newBarcodes, true)) {
+        foreach ($existingBarcodes as $barcode) {
+            $code = $barcode->getBarcode();
+            if (in_array($code, $newBarcodeStrings, true)) {
                 continue;
             }
 
@@ -185,8 +185,8 @@ class ProductService
         }
 
         // Add new barcodes
-        foreach ($newBarcodes as $code) {
-            if (isset($existingCodes[$code])) {
+        foreach ($newBarcodeStrings as $code) {
+            if (in_array($code, $existingCodes, true)) {
                 continue;
             }
 
