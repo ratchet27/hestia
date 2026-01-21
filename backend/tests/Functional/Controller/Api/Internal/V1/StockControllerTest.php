@@ -546,4 +546,202 @@ class StockControllerTest extends WebTestCase
             ->format('Y-m-d');
         static::assertSame($expectedDate, $data['data']['entries'][0]['best_before']);
     }
+
+    // ========== Mutation Killing Tests ==========
+
+    /**
+     * Kills mutant #11: Removes default => null arm in match.
+     * Tests that product without defaultExpiryDays and no explicit best_before gets null.
+     */
+    public function testAddStockWithoutExpiryGetsNullBestBefore(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'No Expiry Product',
+            'category' => $category,
+            'defaultLocation' => $location,
+            'defaultExpiryDays' => null
+        ]);
+
+        $response = $this->apiPost('/stocks/add', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => (string) $location->getId(),
+            'quantity' => 1
+            // No best_before provided
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
+
+        // best_before should be null (default arm of match)
+        static::assertNull($data['data']['entries'][0]['best_before']);
+    }
+
+    /**
+     * Kills mutants #12, #13: Removes persist() and flush() in addStock.
+     * Verifies entries are actually saved to database.
+     */
+    public function testAddStockPersistsEntriesToDatabase(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Persistence Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        $response = $this->apiPost('/stocks/add', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => (string) $location->getId(),
+            'quantity' => 3
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
+
+        // Verify all 3 entries exist in database
+        foreach ($data['data']['entries'] as $entry) {
+            $this->assertDatabaseHas(StockEntry::class, [
+                'id' => $entry['id']
+            ]);
+        }
+    }
+
+    /**
+     * Kills mutant #15: available < quantity → available <= quantity.
+     * Tests consuming exactly the available amount succeeds.
+     */
+    public function testConsumeExactlyAvailableQuantitySucceeds(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        // Create exactly 5 entries
+        for ($i = 0; $i < 5; $i++) {
+            $this->createEntry(['product' => $product, 'location' => $location]);
+        }
+
+        // Consume exactly 5 - should succeed (available == quantity)
+        $response = $this->apiPost('/stocks/consume', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => (string) $location->getId(),
+            'quantity' => 5
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertSame(5, $data['data']['consumed']);
+        static::assertSame(0, $data['data']['remaining_at_location']);
+    }
+
+    /**
+     * Kills mutant #16: Removes flush() in updateEntry.
+     * Verifies updates are persisted to database.
+     */
+    public function testUpdateEntryPersistsToDatabase(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location1 = $this->createLocation(['name' => 'Kitchen']);
+        $location2 = $this->createLocation(['name' => 'Pantry']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location1
+        ]);
+
+        $entry = $this->createEntry([
+            'product' => $product,
+            'location' => $location1,
+            'bestBefore' => new \DateTimeImmutable('2026-01-15')
+        ]);
+
+        // Update location and best_before
+        $this->apiPatch('/stocks/entries/' . $entry->getId(), [
+            'location_id' => (string) $location2->getId(),
+            'best_before' => '2026-06-15'
+        ]);
+
+        // Verify changes are persisted in database
+        $this->assertDatabaseHas(StockEntry::class, [
+            'id' => $entry->getId(),
+            'location' => $location2
+        ]);
+    }
+
+    /**
+     * Kills mutant #21: lowStockOnly = false → true.
+     * Tests that default (no param) returns ALL products with stock, not just low stock.
+     */
+    public function testSummaryDefaultReturnsAllProducts(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+
+        // Product with adequate stock (10 entries, minStock = 5)
+        $productOk = $this->createProduct([
+            'name' => 'OK Stock Product',
+            'category' => $category,
+            'defaultLocation' => $location,
+            'minStock' => 5
+        ]);
+        for ($i = 0; $i < 10; $i++) {
+            $this->createEntry(['product' => $productOk, 'location' => $location]);
+        }
+
+        // Product with low stock (2 entries, minStock = 5)
+        $productLow = $this->createProduct([
+            'name' => 'Low Stock Product',
+            'category' => $category,
+            'defaultLocation' => $location,
+            'minStock' => 5
+        ]);
+        $this->createEntry(['product' => $productLow, 'location' => $location]);
+        $this->createEntry(['product' => $productLow, 'location' => $location]);
+
+        // Default call (no low_stock param) should return BOTH products
+        $response = $this->apiGet('/stocks');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 2);
+    }
+
+    /**
+     * Kills mutants #22, #23: array_map unwrap and return slice.
+     * Tests that all products are returned with correct structure.
+     */
+    public function testSummaryReturnsAllProductsWithCorrectStructure(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+
+        // Create 3 products with stock
+        for ($i = 1; $i <= 3; $i++) {
+            $product = $this->createProduct([
+                'name' => 'Product ' . $i,
+                'category' => $category,
+                'defaultLocation' => $location
+            ]);
+            $this->createEntry(['product' => $product, 'location' => $location]);
+        }
+
+        $response = $this->apiGet('/stocks');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        // Should return all 3 products
+        static::assertListResponse($data, 3);
+
+        // Each item should have transformed location structure (not raw array)
+        foreach ($data['data'] as $item) {
+            static::assertArrayHasKey('locations', $item);
+            static::assertIsArray($item['locations']);
+            // If array_map was removed, locations would be raw DB data
+            if ($item['locations'] !== []) {
+                static::assertArrayHasKey('id', $item['locations'][0]);
+                static::assertArrayHasKey('name', $item['locations'][0]);
+                static::assertArrayHasKey('quantity', $item['locations'][0]);
+            }
+        }
+    }
 }
