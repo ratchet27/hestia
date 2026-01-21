@@ -129,4 +129,25 @@ trait ApiTestTrait
             json_encode($criteria)
         ));
     }
+
+    /**
+     * Assert that an entity does NOT exist in the database with the given criteria.
+     *
+     * @param class-string $entityClass
+     * @param array<string, mixed> $criteria
+     */
+    protected function assertDatabaseMissing(string $entityClass, array $criteria): void
+    {
+        /** @var \Doctrine\Persistence\ManagerRegistry $doctrine */
+        $doctrine = static::getContainer()->get('doctrine');
+        $doctrine->getManager()->clear();
+
+        $entity = $doctrine->getRepository($entityClass)->findOneBy($criteria);
+
+        static::assertNull($entity, sprintf(
+            'Failed asserting that %s does NOT exist with criteria: %s',
+            $entityClass,
+            json_encode($criteria)
+        ));
+    }
 }
