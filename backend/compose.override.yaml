@@ -21,6 +21,13 @@ services:
       # Ensure that host.docker.internal is correctly defined on Linux
       - host.docker.internal:host-gateway
     tty: true
+
+  messenger:
+    build:
+      context: .
+      target: frankenphp_dev
+    volumes:
+      - ./:/app
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
 
