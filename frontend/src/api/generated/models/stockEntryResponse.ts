@@ -9,6 +9,8 @@ import type { LocationResponse } from './locationResponse';
 import type { ProductBriefResponse } from './productBriefResponse';
 
 export interface StockEntryResponse {
+  /** @nullable */
+  days_until_expiry?: number | null;
   id: string;
   product: ProductBriefResponse;
   location: LocationResponse;
