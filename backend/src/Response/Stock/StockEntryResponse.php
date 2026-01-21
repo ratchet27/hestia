@@ -31,6 +31,8 @@ final readonly class StockEntryResponse
         $bestBeforeDate = new \DateTimeImmutable($bestBefore);
         $diff = $today->diff($bestBeforeDate);
 
-        return $diff->invert ? -$diff->days : $diff->days;
+        $days = (int) $diff->days;
+
+        return $diff->invert ? -$days : $days;
     }
 }
