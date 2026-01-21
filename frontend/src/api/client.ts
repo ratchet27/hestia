@@ -40,7 +40,7 @@ export async function apiFetch<T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> {
-  const headers: HeadersInit = {
+  const reqHeaders: HeadersInit = {
     "Content-Type": "application/json",
     Accept: "application/json",
     ...options?.headers,
@@ -49,18 +49,22 @@ export async function apiFetch<T>(
   // Add CSRF token if available
   const csrfToken = getCsrfToken();
   if (csrfToken) {
-    (headers as Record<string, string>)["X-CSRF-Token"] = csrfToken;
+    (reqHeaders as Record<string, string>)["X-CSRF-Token"] = csrfToken;
   }
 
   const response = await fetch(`${BASE_URL}${url}`, {
     ...options,
-    headers,
+    headers: reqHeaders,
     credentials: "include", // Include cookies for session auth
   });
 
   // Handle 204 No Content
   if (response.status === 204) {
-    return undefined as T;
+    return {
+      data: undefined,
+      status: response.status,
+      headers: response.headers,
+    } as T;
   }
 
   // Parse response body
@@ -72,10 +76,14 @@ export async function apiFetch<T>(
     if (!response.ok) {
       throw new ApiError(response.status, "Request failed");
     }
-    return undefined as T;
+    return {
+      data: undefined,
+      status: response.status,
+      headers: response.headers,
+    } as T;
   }
 
-  // Handle errors
+  // Handle errors - throw so they don't reach calling code
   if (!response.ok) {
     const errorData = data as {
       detail?: string;
@@ -89,5 +97,10 @@ export async function apiFetch<T>(
     );
   }
 
-  return data as T;
+  // Wrap successful response as Orval expects: { data, status, headers }
+  return {
+    data,
+    status: response.status,
+    headers: response.headers,
+  } as T;
 }

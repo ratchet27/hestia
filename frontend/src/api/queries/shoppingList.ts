@@ -17,7 +17,7 @@ export function useShoppingList() {
     queryKey: queryKeys.shoppingList.list(),
     queryFn: async () => {
       const response = await getApiInternalV1ShoppingListIndex();
-      return (response.data ?? []) as ShoppingItemResponse[];
+      return response.data.data ?? [];
     },
   });
 }
@@ -28,7 +28,10 @@ export function useAddShoppingItem() {
   return useMutation({
     mutationFn: async (data: AddShoppingItemRequest) => {
       const response = await postApiInternalV1ShoppingListCreate(data);
-      return response.data as { data: ShoppingItemResponse };
+      if (response.status === 201) {
+        return response.data.data!;
+      }
+      throw new Error("Failed to add shopping item");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.shoppingList.all });
@@ -48,7 +51,10 @@ export function useUpdateShoppingItem() {
       data: UpdateShoppingItemRequest;
     }) => {
       const response = await patchApiInternalV1ShoppingListUpdate(id, data);
-      return response.data as { data: ShoppingItemResponse };
+      if (response.status === 200) {
+        return response.data.data!;
+      }
+      throw new Error("Failed to update shopping item");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.shoppingList.all });
