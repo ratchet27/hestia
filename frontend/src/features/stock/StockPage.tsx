@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   ExpiringEntryResponse,
+  ProductResponse,
   StockEntryResponse,
 } from "../../api/generated/models";
 import { useLocations, useProducts } from "../../api/queries";
@@ -16,9 +17,17 @@ import {
   AddStockModal,
 } from "./components/AddStockModal";
 import { AttentionSection } from "./components/AttentionSection";
+import { CreateProductModal } from "./components/CreateProductModal";
 import { LocationTabs } from "./components/LocationTabs";
+import { ScanModal } from "./components/ScanModal";
 import { StockPageHeader } from "./components/StockPageHeader";
 import { StockTable } from "./components/StockTable";
+
+type ModalState =
+  | { type: "none" }
+  | { type: "scan" }
+  | { type: "add"; preselectedProduct?: ProductResponse }
+  | { type: "createProduct"; barcode: string };
 
 export function StockPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -26,7 +35,7 @@ export function StockPage(): React.ReactElement {
     null,
   );
   const [searchTerm, setSearchTerm] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>({ type: "none" });
 
   const { data: locations = [] } = useLocations();
   const { data: products = [] } = useProducts();
@@ -94,7 +103,7 @@ export function StockPage(): React.ReactElement {
         best_before: data.bestBefore || null,
       },
       {
-        onSuccess: () => setShowAddModal(false),
+        onSuccess: () => setModalState({ type: "none" }),
       },
     );
   };
@@ -129,8 +138,8 @@ export function StockPage(): React.ReactElement {
       <StockPageHeader
         expiredCount={expiredCount}
         soonCount={soonCount}
-        onScanClick={() => setShowAddModal(true)}
-        onAddClick={() => setShowAddModal(true)}
+        onScanClick={() => setModalState({ type: "scan" })}
+        onAddClick={() => setModalState({ type: "add" })}
       />
 
       <AttentionSection
@@ -170,13 +179,34 @@ export function StockPage(): React.ReactElement {
         />
       </section>
 
-      {showAddModal && (
+      {modalState.type === "scan" && (
+        <ScanModal
+          onProductFound={(product) =>
+            setModalState({ type: "add", preselectedProduct: product })
+          }
+          onBarcodeNotFound={(barcode) =>
+            setModalState({ type: "createProduct", barcode })
+          }
+          onClose={() => setModalState({ type: "none" })}
+        />
+      )}
+
+      {modalState.type === "add" && (
         <AddStockModal
           products={products}
           locations={locations}
+          preselectedProduct={modalState.preselectedProduct}
           onSubmit={handleAddStock}
-          onClose={() => setShowAddModal(false)}
+          onClose={() => setModalState({ type: "none" })}
           isSubmitting={addStock.isPending}
+        />
+      )}
+
+      {modalState.type === "createProduct" && (
+        <CreateProductModal
+          initialBarcode={modalState.barcode}
+          onSuccess={() => setModalState({ type: "scan" })}
+          onCancel={() => setModalState({ type: "none" })}
         />
       )}
     </div>
