@@ -24,7 +24,18 @@ final class CategoryController extends AbstractController
 
     #[Route('/categories', name: 'api_categories_list', methods: ['GET'])]
     #[OA\Get(description: 'Returns all product categories.', summary: 'List categories')]
-    #[OA\Response(response: 200, description: 'List of categories', content: new Model(type: CategoryResponse::class))]
+    #[OA\Response(response: 200, description: 'List of categories', content: new OA\JsonContent(properties: [
+        new OA\Property(
+            property: 'data',
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: CategoryResponse::class))
+        ),
+        new OA\Property(
+            property: 'meta',
+            properties: [new OA\Property(property: 'total', type: 'integer')],
+            type: 'object'
+        )
+    ]))]
     public function list(): JsonResponse
     {
         $categories = $this->categoryRepository->findAllOrderedByName();
