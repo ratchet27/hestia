@@ -5,6 +5,7 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
+import type { UpdateProductRequestBarcodes } from './updateProductRequestBarcodes';
 
 export interface UpdateProductRequest {
   /** @maxLength 255 */
@@ -24,4 +25,5 @@ export interface UpdateProductRequest {
    */
   unit?: string | null;
   active?: boolean;
+  barcodes?: UpdateProductRequestBarcodes;
 }

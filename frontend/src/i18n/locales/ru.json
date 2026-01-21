@@ -11,7 +11,26 @@
     "search": "Поиск",
     "all": "Все",
     "noItems": "Нет записей",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "error": "Произошла ошибка"
+  },
+  "scan": {
+    "title": "Сканировать штрихкод",
+    "placeholder": "Введите штрихкод",
+    "lookup": "Найти",
+    "notFound": "Штрихкод не найден",
+    "createProduct": "Создать товар?"
+  },
+  "barcodes": {
+    "title": "Штрихкоды",
+    "add": "Добавить",
+    "placeholder": "Введите штрихкод",
+    "duplicate": "Уже добавлен",
+    "belongsTo": "Штрихкод уже привязан к «{{product}}»"
+  },
+  "products": {
+    "newProduct": "Новый товар",
+    "created": "Товар создан"
   },
   "nav": {
     "home": "Главная",

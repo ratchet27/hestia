@@ -1,5 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { ApiError } from "../../api/client";
 import type {
   CreateProductRequest,
@@ -8,6 +10,7 @@ import type {
 
 interface ProductFormProps {
   product?: ProductResponse;
+  initialBarcode?: string;
   categories: Array<{ id: string; name: string }>;
   locations: Array<{ id: string; name: string }>;
   onSubmit: (data: CreateProductRequest) => Promise<void>;
@@ -28,6 +31,7 @@ interface FormValues {
 
 export function ProductForm({
   product,
+  initialBarcode,
   categories,
   locations,
   onSubmit,
@@ -35,6 +39,17 @@ export function ProductForm({
   isSubmitting,
   submitError,
 }: ProductFormProps): React.ReactElement {
+  const { t } = useTranslation();
+  const [barcodesExpanded, setBarcodesExpanded] = useState(!!initialBarcode);
+  const [barcodes, setBarcodes] = useState<string[]>(() => {
+    if (initialBarcode) return [initialBarcode];
+    if (product?.barcodes && Array.isArray(product.barcodes)) {
+      return product.barcodes.map((b) => b.barcode);
+    }
+    return [];
+  });
+  const [newBarcode, setNewBarcode] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -53,13 +68,20 @@ export function ProductForm({
     },
   });
 
-  // Map 422 validation errors to form fields
+  // Map API errors to form fields or toast
   useEffect(() => {
-    if (
-      submitError instanceof ApiError &&
-      submitError.isValidationError &&
-      submitError.violations
-    ) {
+    if (!(submitError instanceof ApiError)) return;
+
+    // Handle 409 Conflict - barcode already exists
+    if (submitError.isConflict && submitError.productName) {
+      toast.error(
+        t("barcodes.belongsTo", { product: submitError.productName }),
+      );
+      return;
+    }
+
+    // Map 422 validation errors to form fields
+    if (submitError.isValidationError && submitError.violations) {
       submitError.violations.forEach((violation) => {
         const field = violation.propertyPath as keyof FormValues;
         if (
@@ -77,7 +99,18 @@ export function ProductForm({
         }
       });
     }
-  }, [submitError, setError]);
+  }, [submitError, setError, t]);
+
+  const handleAddBarcode = () => {
+    const trimmed = newBarcode.trim();
+    if (!trimmed) return;
+    if (barcodes.includes(trimmed)) {
+      toast.error(t("barcodes.duplicate"));
+      return;
+    }
+    setBarcodes([...barcodes, trimmed]);
+    setNewBarcode("");
+  };
 
   const onFormSubmit = async (values: FormValues): Promise<void> => {
     const data: CreateProductRequest = {
@@ -90,6 +123,7 @@ export function ProductForm({
         : undefined,
       min_stock: parseInt(values.min_stock, 10) || 0,
       active: values.active,
+      barcodes: barcodes.length > 0 ? barcodes : undefined,
     };
     await onSubmit(data);
   };
@@ -247,6 +281,63 @@ export function ProductForm({
         <label htmlFor="active" className="text-sm font-medium text-stone-700">
           Активен
         </label>
+      </div>
+
+      {/* Barcodes section */}
+      <div className="border-t border-stone-200 pt-4">
+        <button
+          type="button"
+          onClick={() => setBarcodesExpanded(!barcodesExpanded)}
+          className="flex items-center gap-2 text-sm font-medium text-stone-700"
+        >
+          <span>{barcodesExpanded ? "\u25BC" : "\u25B6"}</span>
+          {t("barcodes.title")} ({barcodes.length})
+        </button>
+
+        {barcodesExpanded && (
+          <div className="mt-3 space-y-2">
+            {barcodes.map((code) => (
+              <div
+                key={code}
+                className="flex items-center justify-between bg-stone-50 px-3 py-2 rounded-lg"
+              >
+                <span className="font-mono text-sm">{code}</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setBarcodes(barcodes.filter((b) => b !== code))
+                  }
+                  className="text-stone-400 hover:text-red-500"
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newBarcode}
+                onChange={(e) => setNewBarcode(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddBarcode();
+                  }
+                }}
+                placeholder={t("barcodes.placeholder")}
+                className="flex-1 px-3 py-2 border border-stone-300 rounded-lg text-sm"
+              />
+              <button
+                type="button"
+                onClick={handleAddBarcode}
+                className="px-4 py-2 bg-stone-100 rounded-lg hover:bg-stone-200 text-sm"
+              >
+                {t("barcodes.add")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-3 mt-6">

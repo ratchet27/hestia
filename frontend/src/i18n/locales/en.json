@@ -11,7 +11,26 @@
     "search": "Search",
     "all": "All",
     "noItems": "No items",
-    "logout": "Logout"
+    "logout": "Logout",
+    "error": "An error occurred"
+  },
+  "scan": {
+    "title": "Scan barcode",
+    "placeholder": "Enter barcode",
+    "lookup": "Lookup",
+    "notFound": "Barcode not found",
+    "createProduct": "Create product?"
+  },
+  "barcodes": {
+    "title": "Barcodes",
+    "add": "Add",
+    "placeholder": "Enter barcode",
+    "duplicate": "Already added",
+    "belongsTo": "Barcode already assigned to \"{{product}}\""
+  },
+  "products": {
+    "newProduct": "New product",
+    "created": "Product created"
   },
   "nav": {
     "home": "Home",

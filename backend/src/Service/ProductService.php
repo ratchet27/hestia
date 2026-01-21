@@ -4,10 +4,13 @@ declare(strict_types = 1);
 
 namespace App\Service;
 
+use App\Entity\Barcode;
 use App\Entity\Product;
+use App\Exception\Barcode\BarcodeAlreadyExistsException;
 use App\Exception\Product\CategoryNotFoundException;
 use App\Exception\Product\LocationNotFoundException;
 use App\Exception\Product\ProductNotFoundException;
+use App\Repository\BarcodeRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\LocationRepository;
 use App\Repository\ProductRepository;
@@ -19,6 +22,7 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+// @mago-ignore lint:cyclomatic-complexity
 class ProductService
 {
     // @mago-ignore lint:excessive-parameter-list
@@ -28,6 +32,7 @@ class ProductService
         private readonly CategoryRepository $categoryRepository,
         private readonly LocationRepository $locationRepository,
         private readonly StockEntryRepository $stockEntryRepository,
+        private readonly BarcodeRepository $barcodeRepository,
         private readonly ShoppingListService $shoppingListService,
         private readonly ValidatorInterface $validator
     ) {
@@ -83,6 +88,11 @@ class ProductService
         }
 
         $this->em->persist($product);
+
+        if ($request->barcodes !== null) {
+            $this->syncBarcodes($product, $request->barcodes);
+        }
+
         $this->em->flush();
 
         return $product;
@@ -122,6 +132,10 @@ class ProductService
             throw new ValidationFailedException($product, $errors);
         }
 
+        if ($request->barcodes !== null) {
+            $this->syncBarcodes($product, $request->barcodes);
+        }
+
         $this->em->flush();
 
         // Recalculate shopping list if minStock changed
@@ -147,5 +161,44 @@ class ProductService
 
         $this->em->remove($product);
         $this->em->flush();
+    }
+
+    /** @param string[] $newBarcodes */
+    private function syncBarcodes(Product $product, array $newBarcodes): void
+    {
+        // Normalize barcodes to strings (JSON may deserialize numeric-looking strings as integers)
+        $newBarcodeStrings = array_map(strval(...), $newBarcodes);
+
+        // Get existing barcode strings
+        $existingBarcodes = $product->getBarcodes()->toArray();
+        $existingCodes = array_map(static fn(Barcode $b): string => $b->getBarcode(), $existingBarcodes);
+
+        // Remove barcodes not in the new array
+        foreach ($existingBarcodes as $barcode) {
+            $code = $barcode->getBarcode();
+            if (in_array($code, $newBarcodeStrings, true)) {
+                continue;
+            }
+
+            $product->removeBarcode($barcode);
+            $this->em->remove($barcode);
+        }
+
+        // Add new barcodes
+        foreach ($newBarcodeStrings as $code) {
+            if (in_array($code, $existingCodes, true)) {
+                continue;
+            }
+
+            // Check if barcode exists for another product
+            $existing = $this->barcodeRepository->findByCode($code);
+            if ($existing !== null && $existing->getProduct()->getId() !== $product->getId()) {
+                throw new BarcodeAlreadyExistsException($code, $existing->getProduct()->getName());
+            }
+
+            $barcode = new Barcode();
+            $barcode->setBarcode($code);
+            $product->addBarcode($barcode);
+        }
     }
 }

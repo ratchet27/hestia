@@ -10,13 +10,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class BarcodeAlreadyExistsException extends ApiException
 {
-    public function __construct(string $barcode)
+    public function __construct(string $barcode, ?string $productName = null)
     {
         parent::__construct(new ApiProblem(
             title: 'Barcode already exists',
             type: 'BARCODE_ALREADY_EXISTS',
             code: Response::HTTP_CONFLICT,
-            extraData: ['barcode' => $barcode]
+            extraData: ['barcode' => $barcode, 'productName' => $productName]
         ));
     }
 }

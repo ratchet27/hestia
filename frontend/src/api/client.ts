@@ -11,9 +11,14 @@ export class ApiError extends Error {
     public status: number,
     message: string,
     public violations?: Array<{ propertyPath: string; message: string }>,
+    public productName?: string,
   ) {
     super(message);
     this.name = "ApiError";
+  }
+
+  get isConflict(): boolean {
+    return this.status === 409;
   }
 
   get isValidationError(): boolean {
@@ -88,12 +93,18 @@ export async function apiFetch<T>(
     const errorData = data as {
       detail?: string;
       message?: string;
+      title?: string;
       violations?: Array<{ propertyPath: string; message: string }>;
+      productName?: string;
     };
     throw new ApiError(
       response.status,
-      errorData.detail || errorData.message || "Request failed",
+      errorData.detail ||
+        errorData.message ||
+        errorData.title ||
+        "Request failed",
       errorData.violations,
+      errorData.productName,
     );
   }
 

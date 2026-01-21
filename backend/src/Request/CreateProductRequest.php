@@ -31,7 +31,14 @@ final readonly class CreateProductRequest
         #[Assert\Length(max: 50)]
         public string $unit = 'piece',
 
-        public bool $active = true
+        public bool $active = true,
+
+        /** @var string[]|null */
+        #[Assert\All([
+            new Assert\Type('string'),
+            new Assert\Length(max: 50)
+        ])]
+        public ?array $barcodes = null
     ) {
     }
 }

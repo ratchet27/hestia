@@ -644,4 +644,144 @@ class ProductControllerTest extends WebTestCase
             'unit' => 'kg'
         ]);
     }
+
+    // ========== Barcode Sync Tests ==========
+
+    public function testCreateProductWithBarcodes(): void
+    {
+        $category = $this->createCategory();
+        $location = $this->createLocation();
+
+        $response = $this->apiPost('/products', [
+            'name' => 'Product With Barcodes',
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId(),
+            'barcodes' => ['1234567890123', '9876543210987']
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
+
+        static::assertArrayHasKey('barcodes', $data['data']);
+        static::assertCount(2, $data['data']['barcodes']);
+
+        $barcodeCodes = array_map(static fn($b) => $b['barcode'], $data['data']['barcodes']);
+        static::assertContains('1234567890123', $barcodeCodes);
+        static::assertContains('9876543210987', $barcodeCodes);
+    }
+
+    public function testCreateProductWithEmptyBarcodesArray(): void
+    {
+        $category = $this->createCategory();
+        $location = $this->createLocation();
+
+        $response = $this->apiPost('/products', [
+            'name' => 'Product Without Barcodes',
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId(),
+            'barcodes' => []
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
+
+        static::assertArrayHasKey('barcodes', $data['data']);
+        static::assertCount(0, $data['data']['barcodes']);
+    }
+
+    public function testUpdateProductAddBarcodes(): void
+    {
+        $product = $this->createProduct();
+
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'barcodes' => ['1111111111111', '2222222222222']
+        ]));
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertCount(2, $data['data']['barcodes']);
+    }
+
+    public function testUpdateProductRemoveBarcodes(): void
+    {
+        // Create product WITHOUT barcodes first
+        $product = $this->createProduct();
+
+        // Add barcodes via update
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'barcodes' => ['1111111111111', '2222222222222']
+        ]));
+        $addData = static::assertJsonResponse($response, Response::HTTP_OK);
+        static::assertCount(2, $addData['data']['barcodes'], 'Expected 2 barcodes after adding');
+
+        // Now remove one barcode
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'barcodes' => ['1111111111111']
+        ]));
+        $removeData = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertCount(1, $removeData['data']['barcodes'], 'Remove response: ' . json_encode($removeData));
+        static::assertSame('1111111111111', $removeData['data']['barcodes'][0]['barcode']);
+    }
+
+    public function testUpdateProductRemoveAllBarcodes(): void
+    {
+        $product = $this->createProduct();
+        BarcodeFactory::createOne(['barcode' => '1111111111111', 'product' => $product]);
+
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'barcodes' => []
+        ]));
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertCount(0, $data['data']['barcodes']);
+    }
+
+    public function testUpdateProductKeepsExistingBarcodes(): void
+    {
+        $product = $this->createProduct();
+        BarcodeFactory::createOne(['barcode' => '1111111111111', 'product' => $product]);
+
+        // Update with same barcode - should not error
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'barcodes' => ['1111111111111', '2222222222222']
+        ]));
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertCount(2, $data['data']['barcodes']);
+    }
+
+    public function testCreateProductWithDuplicateBarcodeReturnsConflict(): void
+    {
+        $existingProduct = $this->createProduct(['name' => 'Existing Product']);
+        BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $existingProduct]);
+
+        $category = $this->createCategory();
+        $location = $this->createLocation();
+
+        $response = $this->apiPost('/products', [
+            'name' => 'New Product',
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId(),
+            'barcodes' => ['1234567890123']
+        ]);
+        $data = static::assertErrorResponse($response, Response::HTTP_CONFLICT);
+
+        static::assertSame('Barcode already exists', $data['title']);
+        static::assertSame('BARCODE_ALREADY_EXISTS', $data['type']);
+        static::assertSame('1234567890123', $data['barcode']);
+        static::assertSame('Existing Product', $data['productName']);
+    }
+
+    public function testUpdateProductWithDuplicateBarcodeReturnsConflict(): void
+    {
+        $existingProduct = $this->createProduct(['name' => 'Existing Product']);
+        BarcodeFactory::createOne(['barcode' => '1234567890123', 'product' => $existingProduct]);
+
+        $product = $this->createProduct(['name' => 'Another Product']);
+
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'barcodes' => ['1234567890123']
+        ]));
+        $data = static::assertErrorResponse($response, Response::HTTP_CONFLICT);
+
+        static::assertSame('Barcode already exists', $data['title']);
+        static::assertSame('BARCODE_ALREADY_EXISTS', $data['type']);
+        static::assertSame('Existing Product', $data['productName']);
+    }
 }

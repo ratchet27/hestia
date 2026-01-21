@@ -16,6 +16,7 @@ interface AddStockFormData {
 interface AddStockModalProps {
   products: ProductResponse[];
   locations: LocationResponse[];
+  preselectedProduct?: ProductResponse;
   onSubmit: (data: AddStockFormData) => void;
   onClose: () => void;
   isSubmitting?: boolean;
@@ -24,6 +25,7 @@ interface AddStockModalProps {
 export function AddStockModal({
   products,
   locations,
+  preselectedProduct,
   onSubmit,
   onClose,
   isSubmitting,
@@ -37,6 +39,8 @@ export function AddStockModal({
     formState: { errors },
   } = useForm<AddStockFormData>({
     defaultValues: {
+      productId: preselectedProduct?.id ?? "",
+      locationId: preselectedProduct?.default_location?.id ?? "",
       quantity: 1,
       bestBefore: "",
     },
@@ -44,6 +48,17 @@ export function AddStockModal({
 
   const selectedProductId = watch("productId");
 
+  // Set form values when preselectedProduct is provided
+  useEffect(() => {
+    if (preselectedProduct) {
+      setValue("productId", preselectedProduct.id);
+      if (preselectedProduct.default_location?.id) {
+        setValue("locationId", preselectedProduct.default_location.id);
+      }
+    }
+  }, [preselectedProduct, setValue]);
+
+  // Update location when product selection changes
   useEffect(() => {
     if (selectedProductId) {
       const product = products.find((p) => p.id === selectedProductId);
