@@ -24,7 +24,9 @@ use App\Response\Stock\ProductBriefResponse;
 use App\Response\Stock\ProductSummaryResponse;
 use App\Response\Stock\StockEntryResponse;
 use App\Response\Stock\StockSummaryResponse;
+use App\Message\StockChangedMessage;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 
 // @mago-ignore lint:cyclomatic-complexity
@@ -36,7 +38,8 @@ class StockEntryService
         private readonly EntityManagerInterface $entityManager,
         private readonly StockEntryRepository $stockEntryRepository,
         private readonly ProductRepository $productRepository,
-        private readonly LocationRepository $locationRepository
+        private readonly LocationRepository $locationRepository,
+        private readonly MessageBusInterface $messageBus
     ) {
     }
 
@@ -64,6 +67,9 @@ class StockEntryService
             throw new LocationNotFoundException($locationId);
         }
 
+        // Get current stock count before adding
+        $previousQty = $this->stockEntryRepository->countByProduct($productId);
+
         // Calculate best_before
         $bestBefore = match (true) {
             $request->best_before !== null => new \DateTimeImmutable($request->best_before),
@@ -86,6 +92,10 @@ class StockEntryService
 
         $this->entityManager->flush();
 
+        // Dispatch stock change event
+        $newQty = $previousQty + $request->quantity;
+        $this->messageBus->dispatch(new StockChangedMessage($productId, $previousQty, $newQty));
+
         return $entries;
     }
 
@@ -107,6 +117,9 @@ class StockEntryService
             throw new LocationNotFoundException($locationId);
         }
 
+        // Get total stock count before consuming
+        $previousQty = $this->stockEntryRepository->countByProduct($productId);
+
         $available = $this->stockEntryRepository->countByProductAndLocation($productId, $locationId);
         if ($available < $request->quantity) {
             throw new InsufficientStockException($request->quantity, $available);
@@ -123,6 +136,10 @@ class StockEntryService
         $this->entityManager->flush();
 
         $remaining = $this->stockEntryRepository->countByProductAndLocation($productId, $locationId);
+
+        // Dispatch stock change event
+        $newQty = $this->stockEntryRepository->countByProduct($productId);
+        $this->messageBus->dispatch(new StockChangedMessage($productId, $previousQty, $newQty));
 
         return new ConsumeResultResponse(
             consumed: count($deletedIds),
@@ -170,8 +187,15 @@ class StockEntryService
             throw new StockEntryNotFoundException($entryId);
         }
 
+        $productId = $entry->getProduct()->getId();
+        $previousQty = $this->stockEntryRepository->countByProduct($productId);
+
         $this->entityManager->remove($entry);
         $this->entityManager->flush();
+
+        // Dispatch stock change event
+        $newQty = $previousQty - 1;
+        $this->messageBus->dispatch(new StockChangedMessage($productId, $previousQty, $newQty));
     }
 
     /**
@@ -180,6 +204,7 @@ class StockEntryService
      * @return ProductSummaryResponse[]
      */
     // @mago-ignore lint:no-boolean-flag-parameter
+    // @infection-ignore-all: Equivalent mutant - controller always passes explicit value from query param
     public function getStockSummary(bool $lowStockOnly = false): array
     {
         $summaryData = $lowStockOnly

@@ -186,11 +186,8 @@ class BarcodeControllerTest extends WebTestCase
 
         static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode(), (string) $response->getContent());
 
-        // Verify barcode is removed
-        $response = $this->apiGet('/products/' . $product->getId() . '/barcodes');
-        $data = static::assertJsonResponse($response, Response::HTTP_OK);
-
-        static::assertListResponse($data, 0);
+        // Verify barcode is removed from database
+        $this->assertDatabaseMissing(Barcode::class, ['barcode' => '1234567890123']);
     }
 
     public function testRemoveBarcodeBarcodeNotFound(): void

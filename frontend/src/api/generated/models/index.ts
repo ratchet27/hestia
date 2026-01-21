@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './addShoppingItemRequest';
 export * from './addStockRequest';
 export * from './apiProblem';
 export * from './apiProblemExtraData';
@@ -17,6 +18,9 @@ export * from './consumeStockRequest';
 export * from './createBarcodeRequest';
 export * from './createProductRequest';
 export * from './expiringEntryResponse';
+export * from './getApiInternalV1ShoppingListIndex200';
+export * from './getApiInternalV1ShoppingListIndex200Meta';
+export * from './getApiInternalV1ShoppingListShow200';
 export * from './getApiInternalV1StocksEntriesList200';
 export * from './getApiInternalV1StocksEntriesList200Meta';
 export * from './getApiInternalV1StocksEntriesListParams';
@@ -27,9 +31,14 @@ export * from './getApiInternalV1StocksExpiringParams';
 export * from './getApiInternalV1StocksSummary200';
 export * from './getApiInternalV1StocksSummary200Meta';
 export * from './getApiInternalV1StocksSummaryParams';
+export * from './getApiProductsListParams';
 export * from './locationQuantityResponse';
 export * from './locationResponse';
+export * from './patchApiInternalV1ShoppingListUpdate200';
 export * from './patchApiInternalV1StocksEntriesUpdate200';
+export * from './postApiInternalV1ShoppingListClear200';
+export * from './postApiInternalV1ShoppingListClear200Data';
+export * from './postApiInternalV1ShoppingListCreate201';
 export * from './postApiInternalV1StocksAdd201';
 export * from './postApiInternalV1StocksAdd201Data';
 export * from './productBriefResponse';
@@ -37,6 +46,9 @@ export * from './productResponse';
 export * from './productResponseBarcodes';
 export * from './productSummaryResponse';
 export * from './productSummaryResponseLocations';
+export * from './shoppingItemResponse';
+export * from './shoppingListSource';
 export * from './stockEntryResponse';
 export * from './updateProductRequest';
+export * from './updateShoppingItemRequest';
 export * from './updateStockEntryRequest';

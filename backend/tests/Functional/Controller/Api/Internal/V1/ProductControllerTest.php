@@ -255,6 +255,7 @@ class ProductControllerTest extends WebTestCase
             'default_location_id' => $location->getId(),
             'default_expiry_days' => 90,
             'min_stock' => 10,
+            'unit' => 'kg',
             'active' => false
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
@@ -262,7 +263,35 @@ class ProductControllerTest extends WebTestCase
         static::assertSame('New Product', $data['data']['name']);
         static::assertSame(90, $data['data']['default_expiry_days']);
         static::assertSame(10, $data['data']['min_stock']);
+        static::assertSame('kg', $data['data']['unit']);
         static::assertFalse($data['data']['active']);
+    }
+
+    /**
+     * Kills mutant #1: Removes setUnit() in createProduct.
+     * Verifies unit is set when creating a product.
+     */
+    public function testCreateProductWithUnitPersistsToDatabase(): void
+    {
+        $category = $this->createCategory();
+        $location = $this->createLocation();
+
+        $response = $this->apiPost('/products', [
+            'name' => 'Unit Test Product',
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId(),
+            'unit' => 'liters'
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
+
+        // Verify unit in response
+        static::assertSame('liters', $data['data']['unit']);
+
+        // Verify persisted to database
+        $this->assertDatabaseHas(Product::class, [
+            'id' => Uuid::fromString($data['data']['id']),
+            'unit' => 'liters'
+        ]);
     }
 
     public function testCreateProductValidationErrorMissingName(): void
@@ -589,5 +618,30 @@ class ProductControllerTest extends WebTestCase
         $response = $this->apiDelete('/products/not-a-uuid');
 
         static::assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    // ========== Mutation Killing Tests ==========
+
+    /**
+     * Kills mutant #1: Removes setUnit() in updateProduct.
+     * Verifies unit is actually updated in the response AND database.
+     */
+    public function testUpdateProductPersistsUnitToDatabase(): void
+    {
+        $product = $this->createProduct(['unit' => 'piece']);
+
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'unit' => 'kg'
+        ]));
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        // Verify unit is updated in response
+        static::assertSame('kg', $data['data']['unit']);
+
+        // Verify persisted to database
+        $this->assertDatabaseHas(Product::class, [
+            'id' => $product->getId(),
+            'unit' => 'kg'
+        ]);
     }
 }

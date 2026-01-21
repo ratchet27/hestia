@@ -8,6 +8,7 @@
 import type {
   ApiProblem,
   CreateProductRequest,
+  GetApiProductsListParams,
   ProductResponse,
   UpdateProductRequest
 } from '.././models';
@@ -15,7 +16,7 @@ import type {
 import { apiFetch } from '../../client';
 
 /**
- * Returns a list of all products with optional filtering.
+ * Returns a list of products. By default only active products are returned. Use include_archived=true to include inactive products.
  * @summary List products
  */
 export type getApiProductsListResponse200 = {
@@ -30,17 +31,24 @@ export type getApiProductsListResponseSuccess = (getApiProductsListResponse200) 
 
 export type getApiProductsListResponse = (getApiProductsListResponseSuccess)
 
-export const getGetApiProductsListUrl = () => {
+export const getGetApiProductsListUrl = (params?: GetApiProductsListParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
-  
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/internal/v1/products`
+  return stringifiedParams.length > 0 ? `/api/internal/v1/products?${stringifiedParams}` : `/api/internal/v1/products`
 }
 
-export const getApiProductsList = async ( options?: RequestInit): Promise<getApiProductsListResponse> => {
+export const getApiProductsList = async (params?: GetApiProductsListParams, options?: RequestInit): Promise<getApiProductsListResponse> => {
   
-  return apiFetch<getApiProductsListResponse>(getGetApiProductsListUrl(),
+  return apiFetch<getApiProductsListResponse>(getGetApiProductsListUrl(params),
   {      
     ...options,
     method: 'GET'
