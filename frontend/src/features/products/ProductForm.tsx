@@ -18,6 +18,7 @@ interface ProductFormProps {
 
 interface FormValues {
   name: string;
+  unit: string;
   category_id: string;
   default_location_id: string;
   default_expiry_days: string;
@@ -42,6 +43,7 @@ export function ProductForm({
   } = useForm<FormValues>({
     defaultValues: {
       name: product?.name ?? "",
+      unit: product?.unit ?? "шт",
       category_id: product?.category.id ?? categories[0]?.id ?? "",
       default_location_id:
         product?.default_location.id ?? locations[0]?.id ?? "",
@@ -63,6 +65,7 @@ export function ProductForm({
         if (
           [
             "name",
+            "unit",
             "category_id",
             "default_location_id",
             "default_expiry_days",
@@ -79,6 +82,7 @@ export function ProductForm({
   const onFormSubmit = async (values: FormValues): Promise<void> => {
     const data: CreateProductRequest = {
       name: values.name,
+      unit: values.unit,
       category_id: values.category_id,
       default_location_id: values.default_location_id,
       default_expiry_days: values.default_expiry_days
@@ -108,6 +112,30 @@ export function ProductForm({
         />
         {errors.name && (
           <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="product-unit"
+          className="block text-sm font-medium text-stone-700 mb-1"
+        >
+          Единица измерения
+        </label>
+        <select
+          id="product-unit"
+          {...register("unit", { required: "Единица измерения обязательна" })}
+          className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+        >
+          <option value="шт">шт (штуки)</option>
+          <option value="кг">кг (килограммы)</option>
+          <option value="г">г (граммы)</option>
+          <option value="л">л (литры)</option>
+          <option value="мл">мл (миллилитры)</option>
+          <option value="уп">уп (упаковки)</option>
+        </select>
+        {errors.unit && (
+          <p className="mt-1 text-sm text-red-600">{errors.unit.message}</p>
         )}
       </div>
 
