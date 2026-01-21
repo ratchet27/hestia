@@ -16,12 +16,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 
 // @mago-ignore lint:cyclomatic-complexity
-class ShoppingListService
+readonly class ShoppingListService
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ShoppingListItemRepository $shoppingListItemRepository,
-        private readonly ProductRepository $productRepository
+        private  EntityManagerInterface $entityManager,
+        private  ShoppingListItemRepository $shoppingListItemRepository,
+        private  ProductRepository $productRepository
     ) {
     }
 
