@@ -8,8 +8,11 @@
 import type {
   ApiProblem,
   CreateProductRequest,
+  GetApiProductsList200,
   GetApiProductsListParams,
-  ProductResponse,
+  GetApiProductsShow200,
+  PostApiProductsCreate201,
+  PutApiProductsUpdate200,
   UpdateProductRequest
 } from '.././models';
 
@@ -20,7 +23,7 @@ import { apiFetch } from '../../client';
  * @summary List products
  */
 export type getApiProductsListResponse200 = {
-  data: ProductResponse
+  data: GetApiProductsList200
   status: 200
 }
     
@@ -63,7 +66,7 @@ export const getApiProductsList = async (params?: GetApiProductsListParams, opti
  * @summary Create product
  */
 export type postApiProductsCreateResponse201 = {
-  data: ProductResponse
+  data: PostApiProductsCreate201
   status: 201
 }
 
@@ -107,7 +110,7 @@ export const postApiProductsCreate = async (createProductRequest: CreateProductR
  * @summary Get product
  */
 export type getApiProductsShowResponse200 = {
-  data: ProductResponse
+  data: GetApiProductsShow200
   status: 200
 }
 
@@ -150,7 +153,7 @@ export const getApiProductsShow = async (uuid: string, options?: RequestInit): P
  * @summary Update product
  */
 export type putApiProductsUpdateResponse200 = {
-  data: ProductResponse
+  data: PutApiProductsUpdate200
   status: 200
 }
 

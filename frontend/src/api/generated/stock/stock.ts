@@ -7,7 +7,6 @@
  */
 import type {
   AddStockRequest,
-  ConsumeResultResponse,
   ConsumeStockRequest,
   GetApiInternalV1StocksEntriesList200,
   GetApiInternalV1StocksEntriesListParams,
@@ -18,6 +17,7 @@ import type {
   GetApiInternalV1StocksSummaryParams,
   PatchApiInternalV1StocksEntriesUpdate200,
   PostApiInternalV1StocksAdd201,
+  PostApiInternalV1StocksConsume200,
   UpdateStockEntryRequest
 } from '.././models';
 
@@ -342,7 +342,7 @@ export const postApiInternalV1StocksAdd = async (addStockRequest: AddStockReques
  * @summary Consume stock
  */
 export type postApiInternalV1StocksConsumeResponse200 = {
-  data: ConsumeResultResponse
+  data: PostApiInternalV1StocksConsume200
   status: 200
 }
 

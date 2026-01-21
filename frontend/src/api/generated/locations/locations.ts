@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type {
-  LocationResponse
+  GetApiLocationsList200
 } from '.././models';
 
 import { apiFetch } from '../../client';
@@ -16,7 +16,7 @@ import { apiFetch } from '../../client';
  * @summary List locations
  */
 export type getApiLocationsListResponse200 = {
-  data: LocationResponse
+  data: GetApiLocationsList200
   status: 200
 }
     
