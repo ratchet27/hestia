@@ -25,10 +25,10 @@ export function AttentionSection({
         <div className="flex items-center gap-3.5 bg-green-50 border border-green-200 rounded-lg px-5 py-4">
           <span className="text-2xl">&#x2705;</span>
           <div className="flex flex-col gap-0.5">
-            <span className="font-semibold text-green-700 text-[15px]">
+            <span className="font-semibold text-green-700 text-lg">
               {t("stock.allUnderControl")}
             </span>
-            <span className="text-stone-600 text-[13px]">
+            <span className="text-stone-600 text-sm">
               {nextExpiryDays !== undefined
                 ? t("stock.nextExpiry", { days: nextExpiryDays })
                 : t("stock.noAttentionNeeded")}
