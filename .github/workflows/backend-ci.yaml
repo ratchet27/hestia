@@ -42,7 +42,7 @@ jobs:
             --pull \
             --load
       - name: Start services
-        run: docker compose up --wait --no-build
+        run: docker compose -f compose.yaml -f compose.override.yaml -f compose.ci.yaml up --wait --no-build
       - name: Check HTTP reachability
         run: curl -v --fail-with-body http://localhost
       - name: Create test database
