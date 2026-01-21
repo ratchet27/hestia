@@ -756,7 +756,7 @@ class ShoppingListAutoAddTest extends WebTestCase
             'category_id' => (string) $category->getId(),
             'default_location_id' => (string) $location->getId(),
             'min_stock' => 5,
-            'active' => true,
+            'active' => true
         ]);
 
         // Should now have auto item with amount 2
@@ -798,7 +798,7 @@ class ShoppingListAutoAddTest extends WebTestCase
             'category_id' => (string) $category->getId(),
             'default_location_id' => (string) $location->getId(),
             'min_stock' => 3,
-            'active' => true,
+            'active' => true
         ]);
 
         // Auto item should be removed
