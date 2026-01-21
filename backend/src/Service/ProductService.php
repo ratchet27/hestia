@@ -166,26 +166,23 @@ class ProductService
     /** @param string[] $newBarcodes */
     private function syncBarcodes(Product $product, array $newBarcodes): void
     {
-        // Normalize barcodes to strings (JSON may deserialize numeric-looking strings as integers)
-        $newBarcodeStrings = array_map(strval(...), $newBarcodes);
-
         // Get existing barcode strings
         $existingBarcodes = $product->getBarcodes()->toArray();
         $existingCodes = array_map(static fn(Barcode $b): string => $b->getBarcode(), $existingBarcodes);
 
         // Remove barcodes not in the new array
+        // Note: orphanRemoval=true on Product->barcodes handles DB deletion automatically
         foreach ($existingBarcodes as $barcode) {
             $code = $barcode->getBarcode();
-            if (in_array($code, $newBarcodeStrings, true)) {
+            if (in_array($code, $newBarcodes, true)) {
                 continue;
             }
 
             $product->removeBarcode($barcode);
-            $this->em->remove($barcode);
         }
 
         // Add new barcodes
-        foreach ($newBarcodeStrings as $code) {
+        foreach ($newBarcodes as $code) {
             if (in_array($code, $existingCodes, true)) {
                 continue;
             }

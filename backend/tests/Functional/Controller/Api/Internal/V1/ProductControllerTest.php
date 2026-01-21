@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Tests\Functional\Controller\Api\Internal\V1;
 
+use App\Entity\Barcode;
 use App\Entity\Category;
 use App\Entity\Location;
 use App\Entity\Product;
@@ -783,5 +784,30 @@ class ProductControllerTest extends WebTestCase
         static::assertSame('Barcode already exists', $data['title']);
         static::assertSame('BARCODE_ALREADY_EXISTS', $data['type']);
         static::assertSame('Existing Product', $data['productName']);
+    }
+
+    /**
+     * Kills mutant: Removes $product->removeBarcode($barcode) in syncBarcodes.
+     * Verifies barcode is actually deleted from database when removed via update.
+     */
+    public function testUpdateProductRemovesBarcodeFromDatabase(): void
+    {
+        $product = $this->createProduct();
+        BarcodeFactory::createOne(['barcode' => '1111111111111', 'product' => $product]);
+        BarcodeFactory::createOne(['barcode' => '2222222222222', 'product' => $product]);
+
+        // Update product keeping only one barcode
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'barcodes' => ['1111111111111']
+        ]));
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        // Verify response shows only the kept barcode
+        static::assertCount(1, $data['data']['barcodes']);
+        static::assertSame('1111111111111', $data['data']['barcodes'][0]['barcode']);
+
+        // Verify database: kept barcode exists, removed barcode is deleted
+        $this->assertDatabaseHas(Barcode::class, ['barcode' => '1111111111111']);
+        $this->assertDatabaseMissing(Barcode::class, ['barcode' => '2222222222222']);
     }
 }

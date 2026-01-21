@@ -577,6 +577,30 @@ class StockControllerTest extends WebTestCase
     }
 
     /**
+     * Kills mutant: Removes ?-> null-safe operator in mapEntryToResponse.
+     * Verifies entries with null best_before are returned correctly via list endpoint.
+     */
+    public function testListEntriesReturnsNullBestBeforeCorrectly(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'No Expiry Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        // Create entry with explicit null bestBefore
+        $this->createEntry(['product' => $product, 'location' => $location, 'bestBefore' => null]);
+
+        $response = $this->apiGet('/stocks/entries');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 1);
+        static::assertNull($data['data'][0]['best_before']);
+    }
+
+    /**
      * Kills mutants #12, #13: Removes persist() and flush() in addStock.
      * Verifies entries are actually saved to database.
      */
