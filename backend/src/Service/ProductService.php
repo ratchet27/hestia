@@ -11,6 +11,7 @@ use App\Exception\Product\ProductNotFoundException;
 use App\Repository\CategoryRepository;
 use App\Repository\LocationRepository;
 use App\Repository\ProductRepository;
+use App\Repository\StockEntryRepository;
 use App\Request\CreateProductRequest;
 use App\Request\UpdateProductRequest;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,11 +21,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProductService
 {
+    // @mago-ignore lint:excessive-parameter-list
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly ProductRepository $productRepository,
         private readonly CategoryRepository $categoryRepository,
         private readonly LocationRepository $locationRepository,
+        private readonly StockEntryRepository $stockEntryRepository,
+        private readonly ShoppingListService $shoppingListService,
         private readonly ValidatorInterface $validator
     ) {
     }
@@ -87,6 +91,7 @@ class ProductService
     public function updateProduct(Uuid $id, UpdateProductRequest $request): Product
     {
         $product = $this->getProduct($id);
+        $oldMinStock = $product->getMinStock();
 
         $categoryId = Uuid::fromString($request->categoryId);
         $category = $this->categoryRepository->find($categoryId);
@@ -118,6 +123,12 @@ class ProductService
         }
 
         $this->em->flush();
+
+        // Recalculate shopping list if minStock changed
+        if ($request->minStock !== $oldMinStock) {
+            $currentStock = $this->stockEntryRepository->countByProduct($id);
+            $this->shoppingListService->handleStockChange($id, $currentStock, $currentStock);
+        }
 
         return $product;
     }

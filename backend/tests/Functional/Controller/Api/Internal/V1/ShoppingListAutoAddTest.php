@@ -726,4 +726,84 @@ class ShoppingListAutoAddTest extends WebTestCase
         static::assertCount(1, $messages);
         static::assertInstanceOf(StockChangedMessage::class, $messages[0]->getMessage());
     }
+
+    // ========== minStock Change Tests ==========
+
+    public function testMinStockIncreaseCreatesAutoItem(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location,
+            'minStock' => 2
+        ]);
+
+        // Create 3 stock entries - above minStock, no deficit
+        for ($i = 0; $i < 3; $i++) {
+            StockEntryFactory::createOne(['product' => $product, 'location' => $location]);
+        }
+
+        // Verify no shopping list item exists
+        $response = $this->apiGet('/shopping-list');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+        static::assertListResponse($data, 0);
+
+        // Update minStock to 5 - now deficit is 2
+        $this->apiPut('/products/' . $product->getId(), [
+            'name' => 'Test Product',
+            'category_id' => (string) $category->getId(),
+            'default_location_id' => (string) $location->getId(),
+            'min_stock' => 5,
+            'active' => true,
+        ]);
+
+        // Should now have auto item with amount 2
+        $response = $this->apiGet('/shopping-list');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+        static::assertListResponse($data, 1);
+        static::assertSame(2, $data['data'][0]['amount']);
+        static::assertSame('auto', $data['data'][0]['source']);
+    }
+
+    public function testMinStockDecreaseRemovesAutoItem(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location,
+            'minStock' => 5
+        ]);
+
+        // Create 3 stock entries - below minStock, deficit is 2
+        for ($i = 0; $i < 3; $i++) {
+            StockEntryFactory::createOne(['product' => $product, 'location' => $location]);
+        }
+
+        // Trigger initial shopping list calculation
+        $this->shoppingListService->handleStockChange($product->getId(), 0, 3);
+
+        // Verify auto item exists with amount 2
+        $response = $this->apiGet('/shopping-list');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+        static::assertListResponse($data, 1);
+        static::assertSame(2, $data['data'][0]['amount']);
+
+        // Update minStock to 3 - now stock equals minStock, no deficit
+        $this->apiPut('/products/' . $product->getId(), [
+            'name' => 'Test Product',
+            'category_id' => (string) $category->getId(),
+            'default_location_id' => (string) $location->getId(),
+            'min_stock' => 3,
+            'active' => true,
+        ]);
+
+        // Auto item should be removed
+        $response = $this->apiGet('/shopping-list');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+        static::assertListResponse($data, 0);
+    }
 }
