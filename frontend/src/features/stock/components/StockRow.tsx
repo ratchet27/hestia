@@ -49,14 +49,12 @@ export function StockRow({ entry, onConsume }: StockRowProps) {
       <td className="px-4 py-3.5">
         {entry.best_before ? (
           <div className="flex flex-col">
-            <span className={`font-medium text-[13px] ${statusColors[status]}`}>
+            <span className={`font-medium text-base ${statusColors[status]}`}>
               {status === "expired" && "\u26a0\ufe0f "}
               {status === "today" && "\u23f0 "}
               {relativeText}
             </span>
-            <span className="text-[11px] text-stone-400 mt-0.5">
-              ({dateText})
-            </span>
+            <span className="text-sm text-stone-400 mt-0.5">({dateText})</span>
           </div>
         ) : (
           <span className="text-stone-400">&mdash;</span>

@@ -28,25 +28,25 @@ export function formatExpiryDate(dateStr: string): string {
 }
 
 export const statusColors: Record<ExpiryStatus, string> = {
-  expired: "text-red-600",
-  today: "text-orange-600",
-  soon: "text-amber-600",
-  warning: "text-yellow-600",
-  ok: "text-green-600",
+  expired: "text-red-700",
+  today: "text-orange-700",
+  soon: "text-amber-700",
+  warning: "text-yellow-700",
+  ok: "text-green-700",
 };
 
 export const statusBorderColors: Record<ExpiryStatus, string> = {
-  expired: "border-l-red-500",
-  today: "border-l-orange-500",
-  soon: "border-l-yellow-500",
-  warning: "border-l-yellow-400",
-  ok: "border-l-green-500",
+  expired: "border-l-red-600",
+  today: "border-l-orange-600",
+  soon: "border-l-amber-500",
+  warning: "border-l-yellow-500",
+  ok: "border-l-green-600",
 };
 
 export const statusRowBg: Record<ExpiryStatus, string> = {
-  expired: "bg-red-50",
-  today: "bg-orange-50",
-  soon: "bg-amber-50",
-  warning: "",
+  expired: "bg-red-100",
+  today: "bg-orange-100",
+  soon: "bg-amber-100",
+  warning: "bg-yellow-50",
   ok: "",
 };

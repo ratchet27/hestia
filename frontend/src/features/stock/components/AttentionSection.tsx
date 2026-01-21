@@ -39,16 +39,16 @@ export function AttentionSection({
     );
   }
 
-  const displayedItems = showAll ? items : items.slice(0, 3);
+  const displayedItems = showAll ? items : items.slice(0, 4);
 
   return (
     <section className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-[15px] font-semibold text-stone-600">
+        <h2 className="text-xl font-semibold text-stone-600">
           {t("stock.needToHandleToday")}
         </h2>
         <div className="flex items-center gap-4">
-          {items.length > 3 && (
+          {items.length > 4 && (
             <button
               type="button"
               onClick={() => setShowAll(!showAll)}
@@ -62,7 +62,7 @@ export function AttentionSection({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {displayedItems.map((item) => (
           <AttentionCard
             key={item.id}
@@ -72,6 +72,7 @@ export function AttentionSection({
           />
         ))}
       </div>
+      <hr className="mt-8 border-stone-200" />
     </section>
   );
 }
