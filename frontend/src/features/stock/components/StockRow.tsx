@@ -17,7 +17,13 @@ function getDaysUntil(dateStr: string | null | undefined): number {
   if (!dateStr) return Infinity;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const target = new Date(dateStr);
+  // Parse as local date (not UTC) to match today's timezone
+  const [year, month, day] = dateStr.split("-").map(Number) as [
+    number,
+    number,
+    number,
+  ];
+  const target = new Date(year, month - 1, day);
   return Math.ceil(
     (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
   );

@@ -23,7 +23,13 @@ export function getRelativeExpiryText(
 }
 
 export function formatExpiryDate(dateStr: string): string {
-  const date = new Date(dateStr);
+  // Parse as local date (not UTC) to avoid timezone shifts
+  const [year, month, day] = dateStr.split("-").map(Number) as [
+    number,
+    number,
+    number,
+  ];
+  const date = new Date(year, month - 1, day);
   return date.toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
 }
 
