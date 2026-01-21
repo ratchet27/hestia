@@ -19,9 +19,9 @@ use Symfony\Component\Uid\Uuid;
 readonly class ShoppingListService
 {
     public function __construct(
-        private  EntityManagerInterface $entityManager,
-        private  ShoppingListItemRepository $shoppingListItemRepository,
-        private  ProductRepository $productRepository
+        private EntityManagerInterface $entityManager,
+        private ShoppingListItemRepository $shoppingListItemRepository,
+        private ProductRepository $productRepository
     ) {
     }
 
