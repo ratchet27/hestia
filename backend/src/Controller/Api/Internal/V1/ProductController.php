@@ -41,7 +41,18 @@ final class ProductController extends AbstractController
         in: 'query',
         schema: new OA\Schema(type: 'boolean')
     )]
-    #[OA\Response(response: 200, description: 'List of products', content: new Model(type: ProductResponse::class))]
+    #[OA\Response(response: 200, description: 'List of products', content: new OA\JsonContent(properties: [
+        new OA\Property(
+            property: 'data',
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: ProductResponse::class))
+        ),
+        new OA\Property(
+            property: 'meta',
+            properties: [new OA\Property(property: 'total', type: 'integer')],
+            type: 'object'
+        )
+    ]))]
     public function list(Request $request): JsonResponse
     {
         $filters = [];
@@ -77,7 +88,9 @@ final class ProductController extends AbstractController
         methods: ['GET']
     )]
     #[OA\Get(description: 'Returns a single product by its UUID.', summary: 'Get product')]
-    #[OA\Response(response: 200, description: 'Product details', content: new Model(type: ProductResponse::class))]
+    #[OA\Response(response: 200, description: 'Product details', content: new OA\JsonContent(properties: [
+        new OA\Property(property: 'data', ref: new Model(type: ProductResponse::class))
+    ]))]
     #[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
     public function show(Uuid $uuid): JsonResponse
     {
@@ -88,7 +101,9 @@ final class ProductController extends AbstractController
 
     #[Route('/products', name: 'api_products_create', methods: ['POST'])]
     #[OA\Post(description: 'Creates a new product in the inventory.', summary: 'Create product')]
-    #[OA\Response(response: 201, description: 'Product created', content: new Model(type: ProductResponse::class))]
+    #[OA\Response(response: 201, description: 'Product created', content: new OA\JsonContent(properties: [
+        new OA\Property(property: 'data', ref: new Model(type: ProductResponse::class))
+    ]))]
     #[OA\Response(response: 400, description: 'Invalid input', content: new Model(type: ApiProblem::class))]
     public function create(
         #[MapRequestPayload]
@@ -108,7 +123,9 @@ final class ProductController extends AbstractController
         methods: ['PUT']
     )]
     #[OA\Put(description: 'Updates an existing product.', summary: 'Update product')]
-    #[OA\Response(response: 200, description: 'Product updated', content: new Model(type: ProductResponse::class))]
+    #[OA\Response(response: 200, description: 'Product updated', content: new OA\JsonContent(properties: [
+        new OA\Property(property: 'data', ref: new Model(type: ProductResponse::class))
+    ]))]
     #[OA\Response(response: 400, description: 'Invalid input', content: new Model(type: ApiProblem::class))]
     #[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
     public function update(

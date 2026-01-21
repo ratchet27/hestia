@@ -2,8 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   AddStockRequest,
   ConsumeStockRequest,
-  ExpiringEntryResponse,
-  StockEntryResponse,
   UpdateStockEntryRequest,
 } from "../generated/models";
 import {
@@ -24,7 +22,7 @@ export function useStockEntries(filters?: StockFilters) {
         location: filters?.locationId,
         product: filters?.productId,
       });
-      return (response.data as unknown as StockEntryResponse[]) ?? [];
+      return response.data.data ?? [];
     },
   });
 }
@@ -34,7 +32,7 @@ export function useExpiringStock(days: number = 7) {
     queryKey: queryKeys.stocks.expiring(days),
     queryFn: async () => {
       const response = await getApiInternalV1StocksExpiring({ days });
-      return (response.data as unknown as ExpiringEntryResponse[]) ?? [];
+      return response.data.data ?? [];
     },
   });
 }
@@ -45,7 +43,10 @@ export function useAddStock() {
   return useMutation({
     mutationFn: async (data: AddStockRequest) => {
       const response = await postApiInternalV1StocksAdd(data);
-      return response.data;
+      if (response.status === 201) {
+        return response.data.data!;
+      }
+      throw new Error("Failed to add stock");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all });
@@ -59,7 +60,10 @@ export function useConsumeStock() {
   return useMutation({
     mutationFn: async (data: ConsumeStockRequest) => {
       const response = await postApiInternalV1StocksConsume(data);
-      return response.data;
+      if (response.status === 200) {
+        return response.data.data!;
+      }
+      throw new Error("Failed to consume stock");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all });
@@ -79,7 +83,10 @@ export function useUpdateStockEntry() {
       data: UpdateStockEntryRequest;
     }) => {
       const response = await patchApiInternalV1StocksEntriesUpdate(id, data);
-      return response.data;
+      if (response.status === 200) {
+        return response.data.data!;
+      }
+      throw new Error("Failed to update stock entry");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all });

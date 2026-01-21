@@ -39,7 +39,18 @@ final class BarcodeController extends AbstractController
     #[OA\Response(
         response: 200,
         description: 'List of barcodes for a product',
-        content: new Model(type: BarcodeResponse::class)
+        content: new OA\JsonContent(properties: [
+            new OA\Property(
+                property: 'data',
+                type: 'array',
+                items: new OA\Items(ref: new Model(type: BarcodeResponse::class))
+            ),
+            new OA\Property(
+                property: 'meta',
+                properties: [new OA\Property(property: 'total', type: 'integer')],
+                type: 'object'
+            )
+        ])
     )]
     #[OA\Response(response: 404, description: 'Product not found', content: new Model(type: ApiProblem::class))]
     public function listForProduct(Uuid $uuid): JsonResponse
@@ -61,11 +72,9 @@ final class BarcodeController extends AbstractController
         methods: ['POST']
     )]
     #[OA\Post(description: 'Associates a new barcode with a product.', summary: 'Add barcode to product')]
-    #[OA\Response(
-        response: 201,
-        description: 'Barcode added to product',
-        content: new Model(type: BarcodeResponse::class)
-    )]
+    #[OA\Response(response: 201, description: 'Barcode added to product', content: new OA\JsonContent(properties: [
+        new OA\Property(property: 'data', ref: new Model(type: BarcodeResponse::class))
+    ]))]
     #[OA\Response(
         response: 400,
         description: 'Invalid input or barcode already exists',
@@ -97,11 +106,9 @@ final class BarcodeController extends AbstractController
 
     #[Route('/barcodes/{code}', name: 'api_barcodes_lookup', methods: ['GET'])]
     #[OA\Get(description: 'Finds the product associated with a barcode.', summary: 'Lookup barcode')]
-    #[OA\Response(
-        response: 200,
-        description: 'Product found by barcode',
-        content: new Model(type: ProductResponse::class)
-    )]
+    #[OA\Response(response: 200, description: 'Product found by barcode', content: new OA\JsonContent(properties: [
+        new OA\Property(property: 'data', ref: new Model(type: ProductResponse::class))
+    ]))]
     #[OA\Response(response: 404, description: 'Barcode not found', content: new Model(type: ApiProblem::class))]
     public function lookup(string $code): JsonResponse
     {

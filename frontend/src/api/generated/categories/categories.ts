@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type {
-  CategoryResponse
+  GetApiCategoriesList200
 } from '.././models';
 
 import { apiFetch } from '../../client';
@@ -16,7 +16,7 @@ import { apiFetch } from '../../client';
  * @summary List categories
  */
 export type getApiCategoriesListResponse200 = {
-  data: CategoryResponse
+  data: GetApiCategoriesList200
   status: 200
 }
     

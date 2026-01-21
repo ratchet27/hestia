@@ -186,11 +186,9 @@ final class StockController extends AbstractController
     #[Route('/stocks/consume', name: 'api_internal_v1_stocks_consume', methods: ['POST'])]
     #[OA\Post(summary: 'Consume stock', description: 'Deletes N entries in FIFO order from specified location.')]
     #[OA\RequestBody(required: true, content: new Model(type: ConsumeStockRequest::class))]
-    #[OA\Response(
-        response: 200,
-        description: 'Consumption result',
-        content: new Model(type: ConsumeResultResponse::class)
-    )]
+    #[OA\Response(response: 200, description: 'Consumption result', content: new OA\JsonContent(properties: [
+        new OA\Property(property: 'data', ref: new Model(type: ConsumeResultResponse::class))
+    ]))]
     #[OA\Response(response: 400, description: 'Insufficient stock')]
     #[OA\Response(response: 404, description: 'Product or location not found')]
     #[OA\Response(response: 422, description: 'Validation error')]

@@ -7,9 +7,10 @@
  */
 import type {
   ApiProblem,
-  BarcodeResponse,
   CreateBarcodeRequest,
-  ProductResponse
+  GetApiBarcodesLookup200,
+  GetApiProductsBarcodesList200,
+  PostApiProductsBarcodesCreate201
 } from '.././models';
 
 import { apiFetch } from '../../client';
@@ -19,7 +20,7 @@ import { apiFetch } from '../../client';
  * @summary List product barcodes
  */
 export type getApiProductsBarcodesListResponse200 = {
-  data: BarcodeResponse
+  data: GetApiProductsBarcodesList200
   status: 200
 }
 
@@ -62,7 +63,7 @@ export const getApiProductsBarcodesList = async (uuid: string, options?: Request
  * @summary Add barcode to product
  */
 export type postApiProductsBarcodesCreateResponse201 = {
-  data: BarcodeResponse
+  data: PostApiProductsBarcodesCreate201
   status: 201
 }
 
@@ -112,7 +113,7 @@ export const postApiProductsBarcodesCreate = async (uuid: string,
  * @summary Lookup barcode
  */
 export type getApiBarcodesLookupResponse200 = {
-  data: ProductResponse
+  data: GetApiBarcodesLookup200
   status: 200
 }
 

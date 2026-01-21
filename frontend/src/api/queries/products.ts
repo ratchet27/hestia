@@ -26,8 +26,12 @@ export function useProducts(options: UseProductsOptions = {}) {
       const url = includeArchived
         ? "/api/internal/v1/products?include_archived=true"
         : "/api/internal/v1/products";
-      const response = await apiFetch<{ data: ProductResponse[] }>(url);
-      return response.data ?? [];
+      const response = await apiFetch<{
+        data: { data: ProductResponse[]; meta?: { total: number } };
+        status: number;
+        headers: Headers;
+      }>(url);
+      return response.data.data ?? [];
     },
   });
 }
@@ -37,7 +41,10 @@ export function useProduct(id: string) {
     queryKey: queryKeys.products.detail(id),
     queryFn: async () => {
       const response = await getApiProductsShow(id);
-      return response.data as ProductResponse;
+      if (response.status === 200) {
+        return response.data.data!;
+      }
+      throw new Error("Failed to fetch product");
     },
     enabled: !!id,
   });
@@ -49,7 +56,10 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: async (data: CreateProductRequest) => {
       const response = await postApiProductsCreate(data);
-      return response.data as ProductResponse;
+      if (response.status === 201) {
+        return response.data.data!;
+      }
+      throw new Error("Failed to create product");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
@@ -69,7 +79,10 @@ export function useUpdateProduct() {
       data: UpdateProductRequest;
     }) => {
       const response = await putApiProductsUpdate(id, data);
-      return response.data as ProductResponse;
+      if (response.status === 200) {
+        return response.data.data!;
+      }
+      throw new Error("Failed to update product");
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products.all });

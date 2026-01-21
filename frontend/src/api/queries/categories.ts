@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { getApiCategoriesList } from "../generated/categories/categories";
-import type { CategoryResponse } from "../generated/models";
 import { queryKeys } from "./keys";
 
 export function useCategories() {
@@ -8,7 +7,7 @@ export function useCategories() {
     queryKey: queryKeys.categories.all,
     queryFn: async () => {
       const response = await getApiCategoriesList();
-      return (response.data as unknown as CategoryResponse[]) ?? [];
+      return response.data.data ?? [];
     },
     staleTime: 10 * 60 * 1000, // Categories rarely change - 10 min cache
   });

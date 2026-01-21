@@ -24,7 +24,18 @@ final class LocationController extends AbstractController
 
     #[Route('/locations', name: 'api_locations_list', methods: ['GET'])]
     #[OA\Get(description: 'Returns all storage locations.', summary: 'List locations')]
-    #[OA\Response(response: 200, description: 'List of locations', content: new Model(type: LocationResponse::class))]
+    #[OA\Response(response: 200, description: 'List of locations', content: new OA\JsonContent(properties: [
+        new OA\Property(
+            property: 'data',
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: LocationResponse::class))
+        ),
+        new OA\Property(
+            property: 'meta',
+            properties: [new OA\Property(property: 'total', type: 'integer')],
+            type: 'object'
+        )
+    ]))]
     public function list(): JsonResponse
     {
         $locations = $this->locationRepository->findAllOrderedByName();
