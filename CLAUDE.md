@@ -30,3 +30,22 @@ GPG signing is configured automatically for this repo.
 
 - **Backend**: See `backend/AGENTS.md` for backend-specific instructions
 - **Frontend**: See `frontend/AGENTS.md` for frontend-specific instructions
+
+## Quick Commands
+
+Always run from the correct directory. Use full paths to avoid mistakes.
+
+| Task | Command |
+|------|---------|
+| Frontend check | `cd /home/pavel/projects/hestia/frontend && bun run check` |
+| Frontend test | `cd /home/pavel/projects/hestia/frontend && bun run test:run` |
+| Backend check | `cd /home/pavel/projects/hestia/backend && mago format && mago lint` |
+| Backend test | `cd /home/pavel/projects/hestia/backend && make test` |
+| Regenerate API | `cd /home/pavel/projects/hestia/frontend && NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api` |
+
+### Common Mistakes to Avoid
+
+- **NEVER** use `npm` in frontend → use `bun`
+- **NEVER** run `mago` inside Docker → it runs locally on host
+- **NEVER** run `bun run check` without `cd frontend` first
+- **NEVER** run `php` or `composer` on host → use `docker compose exec php`
