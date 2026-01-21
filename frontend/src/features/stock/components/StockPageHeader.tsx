@@ -32,7 +32,7 @@ export function StockPageHeader({
         <h1 className="text-[28px] font-semibold text-stone-800 mb-1">
           {t("stock.title")}
         </h1>
-        <p className="text-[15px] text-stone-500">{getSubtitle()}</p>
+        <p className="text-lg text-stone-500">{getSubtitle()}</p>
       </div>
       <div className="flex gap-3">
         <button

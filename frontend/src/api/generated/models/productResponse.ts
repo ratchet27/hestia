@@ -8,7 +8,6 @@
 import type { CategoryResponse } from './categoryResponse';
 import type { LocationResponse } from './locationResponse';
 import type { ProductResponseBarcodes } from './productResponseBarcodes';
-import type { StockSummaryResponse } from './stockSummaryResponse';
 
 export interface ProductResponse {
   id: string;
@@ -24,5 +23,4 @@ export interface ProductResponse {
   /** @nullable */
   updated_at?: string | null;
   barcodes?: ProductResponseBarcodes;
-  stock_summary?: StockSummaryResponse;
 }

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import type {
@@ -31,6 +32,8 @@ export function AddStockModal({
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<AddStockFormData>({
     defaultValues: {
@@ -38,6 +41,17 @@ export function AddStockModal({
       bestBefore: "",
     },
   });
+
+  const selectedProductId = watch("productId");
+
+  useEffect(() => {
+    if (selectedProductId) {
+      const product = products.find((p) => p.id === selectedProductId);
+      if (product?.default_location?.id) {
+        setValue("locationId", product.default_location.id);
+      }
+    }
+  }, [selectedProductId, products, setValue]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

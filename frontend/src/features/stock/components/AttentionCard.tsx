@@ -28,7 +28,7 @@ export function AttentionCard({ entry, onDone, onThrow }: AttentionCardProps) {
         <span className="font-medium text-sm flex-1 text-stone-800">
           {entry.product.name}
         </span>
-        <span className="text-[11px] text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded">
+        <span className="text-xs text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded">
           {entry.location.name}
         </span>
       </div>
@@ -51,14 +51,14 @@ export function AttentionCard({ entry, onDone, onThrow }: AttentionCardProps) {
         <button
           type="button"
           onClick={() => onDone(entry)}
-          className="flex-1 px-2.5 py-1 rounded text-xs bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors"
+          className="flex-1 px-2.5 py-1 rounded text-xs bg-green-300 text-green-800 border border-green-500 hover:bg-green-400 transition-colors"
         >
           {t("common.done")}
         </button>
         <button
           type="button"
           onClick={() => onThrow(entry)}
-          className="flex-1 px-2.5 py-1 rounded text-xs bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors"
+          className="flex-1 px-2.5 py-1 rounded text-xs bg-red-300 text-red-800 border border-red-500 hover:bg-red-400 transition-colors"
         >
           {t("stock.throw")}
         </button>

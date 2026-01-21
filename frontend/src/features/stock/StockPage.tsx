@@ -125,7 +125,7 @@ export function StockPage(): React.ReactElement {
   };
 
   return (
-    <div className="p-8 max-w-screen-2xl">
+    <div className="p-8">
       <StockPageHeader
         expiredCount={expiredCount}
         soonCount={soonCount}
@@ -150,7 +150,7 @@ export function StockPage(): React.ReactElement {
               placeholder={t("stock.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-60 px-3.5 py-2 border border-stone-200 rounded-md text-sm focus:outline-none focus:border-amber-500"
+              className="w-60 px-3.5 py-2 border border-stone-300 rounded-md text-sm bg-stone-50 shadow-sm focus:outline-none focus:border-amber-500 focus:bg-white"
             />
           </div>
         </div>
