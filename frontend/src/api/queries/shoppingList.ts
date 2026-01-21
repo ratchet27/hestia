@@ -17,7 +17,7 @@ export function useShoppingList() {
     queryKey: queryKeys.shoppingList.list(),
     queryFn: async () => {
       const response = await getApiInternalV1ShoppingListIndex();
-      return (response.data.data ?? []) as ShoppingItemResponse[];
+      return (response.data ?? []) as ShoppingItemResponse[];
     },
   });
 }
