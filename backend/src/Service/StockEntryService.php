@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Entity\StockEntry;
 use App\Exception\Product\LocationNotFoundException;
+use App\Exception\Product\ProductNotActiveException;
 use App\Exception\Product\ProductNotFoundException;
 use App\Exception\Stock\InsufficientStockException;
 use App\Exception\Stock\StockEntryNotFoundException;
@@ -52,6 +53,10 @@ class StockEntryService
         $product = $this->productRepository->find($productId);
         if ($product === null) {
             throw new ProductNotFoundException($productId);
+        }
+
+        if (!$product->isActive()) {
+            throw new ProductNotActiveException($productId);
         }
 
         $location = $this->locationRepository->find($locationId);

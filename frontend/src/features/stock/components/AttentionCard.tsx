@@ -22,9 +22,9 @@ export function AttentionCard({ entry, onDone, onThrow }: AttentionCardProps) {
 
   return (
     <div
-      className={`bg-white rounded-lg p-3 border-l-[3px] shadow-sm ${statusBorderColors[status]}`}
+      className={`bg-white rounded-lg p-3 border-l-[3px] shadow-sm flex flex-col h-36 ${statusBorderColors[status]}`}
     >
-      <div className="flex items-center gap-1.5 mb-2">
+      <div className="flex items-center gap-1.5">
         <span className="font-medium text-sm flex-1 text-stone-800">
           {entry.product.name}
         </span>
@@ -33,7 +33,7 @@ export function AttentionCard({ entry, onDone, onThrow }: AttentionCardProps) {
         </span>
       </div>
 
-      <div className="flex justify-between items-start mb-3 text-[13px]">
+      <div className="flex justify-between items-start mt-2 text-[13px]">
         <span className="text-stone-500">1 {entry.product.unit}</span>
         <div className="flex flex-col items-end">
           <span className={`font-medium ${statusColors[status]}`}>
@@ -47,7 +47,7 @@ export function AttentionCard({ entry, onDone, onThrow }: AttentionCardProps) {
         </div>
       </div>
 
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 mt-auto">
         <button
           type="button"
           onClick={() => onDone(entry)}

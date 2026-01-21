@@ -2,6 +2,7 @@ export interface ProductFilters {
   name?: string;
   categoryId?: string;
   active?: boolean;
+  includeArchived?: boolean;
 }
 
 export interface StockFilters {
