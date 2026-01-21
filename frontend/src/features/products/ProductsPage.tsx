@@ -156,58 +156,42 @@ export function ProductsPage(): React.ReactElement {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        {products.map((product: ProductResponse) => {
-          const totalStock = product.stock_summary?.total_quantity ?? 0;
-          const isLow = product.min_stock > 0 && totalStock < product.min_stock;
-
-          return (
-            <button
-              type="button"
-              key={product.id}
-              className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 hover:border-amber-400 transition-colors cursor-pointer text-left"
-              onClick={() => handleEditProduct(product)}
-            >
-              <div className="flex justify-between items-start mb-3">
-                <span className="px-2 py-1 bg-stone-100 rounded text-xs text-stone-600">
-                  {product.category.name}
-                </span>
-                {isLow && (
-                  <span className="px-2 py-1 bg-amber-100 rounded text-xs text-amber-700">
-                    Мало!
-                  </span>
+        {products.map((product: ProductResponse) => (
+          <button
+            type="button"
+            key={product.id}
+            className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 hover:border-amber-400 transition-colors cursor-pointer text-left"
+            onClick={() => handleEditProduct(product)}
+          >
+            <div className="flex justify-between items-start mb-3">
+              <span className="px-2 py-1 bg-stone-100 rounded text-xs text-stone-600">
+                {product.category.name}
+              </span>
+              <span
+                className={`text-sm ${product.active ? "text-green-600" : "text-stone-400"}`}
+              >
+                {product.active ? "Активен" : "Архив"}
+              </span>
+            </div>
+            <h3 className="font-semibold text-stone-800 mb-2">
+              {product.name}
+            </h3>
+            <div className="space-y-1 text-sm text-stone-500">
+              {product.barcodes &&
+                Array.isArray(product.barcodes) &&
+                product.barcodes.length > 0 &&
+                product.barcodes[0] && (
+                  <p>Штрихкод: {product.barcodes[0].barcode}</p>
                 )}
-              </div>
-              <h3 className="font-semibold text-stone-800 mb-2">
-                {product.name}
-              </h3>
-              <div className="space-y-1 text-sm text-stone-500">
-                {product.barcodes &&
-                  Array.isArray(product.barcodes) &&
-                  product.barcodes.length > 0 &&
-                  product.barcodes[0] && (
-                    <p>Штрихкод: {product.barcodes[0].barcode}</p>
-                  )}
-                {product.default_expiry_days && (
-                  <p>Срок годности: {product.default_expiry_days} дн.</p>
-                )}
-                <p>Место: {product.default_location.name}</p>
-                {product.min_stock > 0 && (
-                  <p>Мин. запас: {product.min_stock}</p>
-                )}
-              </div>
-              <div className="mt-3 pt-3 border-t border-stone-100 flex justify-between items-center">
-                <span className="text-lg font-bold text-stone-800">
-                  {totalStock} {product.unit}
-                </span>
-                <span
-                  className={`text-sm ${product.active ? "text-green-600" : "text-stone-400"}`}
-                >
-                  {product.active ? "Активен" : "Архив"}
-                </span>
-              </div>
-            </button>
-          );
-        })}
+              <p>Ед. изм.: {product.unit}</p>
+              {product.default_expiry_days && (
+                <p>Срок годности: {product.default_expiry_days} дн.</p>
+              )}
+              <p>Место: {product.default_location.name}</p>
+              {product.min_stock > 0 && <p>Мин. запас: {product.min_stock}</p>}
+            </div>
+          </button>
+        ))}
       </div>
 
       {products.length === 0 && (

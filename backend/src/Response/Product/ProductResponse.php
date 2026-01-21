@@ -8,7 +8,6 @@ use App\Entity\Product;
 use App\Response\Barcode\BarcodeResponse;
 use App\Response\Category\CategoryResponse;
 use App\Response\Location\LocationResponse;
-use App\Response\Stock\StockSummaryResponse;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\ObjectMapper\Transform\MapCollection;
 use Symfony\Component\Uid\Uuid;
@@ -32,9 +31,7 @@ final readonly class ProductResponse
         public \DateTimeImmutable $createdAt,
         public ?\DateTimeImmutable $updatedAt,
         #[Map(transform: MapCollection::class)]
-        public array $barcodes = [],
-        #[Map(if: false)]
-        public ?StockSummaryResponse $stock_summary = null
+        public array $barcodes = []
     ) {
     }
 }

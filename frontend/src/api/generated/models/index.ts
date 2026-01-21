@@ -38,7 +38,5 @@ export * from './productResponseBarcodes';
 export * from './productSummaryResponse';
 export * from './productSummaryResponseLocations';
 export * from './stockEntryResponse';
-export * from './stockSummaryResponse';
-export * from './stockSummaryResponseLocations';
 export * from './updateProductRequest';
 export * from './updateStockEntryRequest';
