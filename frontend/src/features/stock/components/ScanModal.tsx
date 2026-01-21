@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import { ApiError } from "../../../api/client";
 import { getApiBarcodesLookup } from "../../../api/generated/barcodes/barcodes";
 import type { ProductResponse } from "../../../api/generated/models";
 
@@ -30,14 +31,17 @@ export function ScanModal({
 
     setIsLoading(true);
     try {
-      const response = await getApiBarcodesLookup(trimmed);
-      if (response.status === 200) {
-        onProductFound(response.data);
-      } else if (response.status === 404) {
+      // apiFetch returns the JSON body directly - backend wraps product in { data: ... }
+      const response = (await getApiBarcodesLookup(trimmed)) as unknown as {
+        data: ProductResponse;
+      };
+      onProductFound(response.data);
+    } catch (error) {
+      if (error instanceof ApiError && error.isNotFound) {
         onBarcodeNotFound(trimmed);
+      } else {
+        toast.error(t("common.error"));
       }
-    } catch {
-      toast.error(t("common.error"));
     } finally {
       setIsLoading(false);
     }

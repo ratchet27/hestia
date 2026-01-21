@@ -48,6 +48,17 @@ export function AddStockModal({
 
   const selectedProductId = watch("productId");
 
+  // Set form values when preselectedProduct is provided
+  useEffect(() => {
+    if (preselectedProduct) {
+      setValue("productId", preselectedProduct.id);
+      if (preselectedProduct.default_location?.id) {
+        setValue("locationId", preselectedProduct.default_location.id);
+      }
+    }
+  }, [preselectedProduct, setValue]);
+
+  // Update location when product selection changes
   useEffect(() => {
     if (selectedProductId) {
       const product = products.find((p) => p.id === selectedProductId);
