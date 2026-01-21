@@ -13,25 +13,9 @@ interface StockRowProps {
   onConsume: (entry: StockEntryResponse) => void;
 }
 
-function getDaysUntil(dateStr: string | null | undefined): number {
-  if (!dateStr) return Infinity;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  // Parse as local date (not UTC) to match today's timezone
-  const [year, month, day] = dateStr.split("-").map(Number) as [
-    number,
-    number,
-    number,
-  ];
-  const target = new Date(year, month - 1, day);
-  return Math.ceil(
-    (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-  );
-}
-
 export function StockRow({ entry, onConsume }: StockRowProps) {
   const { t } = useTranslation();
-  const days = getDaysUntil(entry.best_before);
+  const days = entry.days_until_expiry ?? Infinity;
   const status = entry.best_before ? getExpiryStatus(days) : "ok";
   const relativeText = entry.best_before
     ? getRelativeExpiryText(days, t)
