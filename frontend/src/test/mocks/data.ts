@@ -1,7 +1,9 @@
 import type {
+  CategoryResponse,
   ExpiringEntryResponse,
   LocationResponse,
   ProductBriefResponse,
+  ProductResponse,
   ShoppingItemResponse,
   ShoppingListSource,
   StockEntryResponse,
@@ -73,6 +75,36 @@ export function createShoppingItem(
     done: false,
     created_at: new Date().toISOString(),
     ...overrides,
+  };
+}
+
+export function createCategory(
+  overrides: Partial<CategoryResponse> = {},
+): CategoryResponse {
+  return {
+    id: crypto.randomUUID(),
+    name: "Молочные продукты",
+    ...overrides,
+  };
+}
+
+export function createProductResponse(
+  overrides: Omit<Partial<ProductResponse>, "category" | "default_location"> & {
+    category?: Partial<CategoryResponse>;
+    default_location?: Partial<LocationResponse>;
+  } = {},
+): ProductResponse {
+  const { category, default_location, ...rest } = overrides;
+  return {
+    id: crypto.randomUUID(),
+    name: "Молоко",
+    unit: "шт",
+    category: createCategory(category),
+    default_location: createLocation(default_location),
+    min_stock: 0,
+    active: true,
+    created_at: new Date().toISOString(),
+    ...rest,
   };
 }
 
