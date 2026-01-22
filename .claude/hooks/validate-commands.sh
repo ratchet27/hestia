@@ -43,7 +43,7 @@ fi
 # =============================================================================
 if [[ "$command" =~ ^bun[[:space:]] ]] && [[ "$cwd" != *"/frontend"* ]] && [[ ! "$command" =~ "cd ".*"frontend" ]]; then
 	echo "BLOCKED: bun commands must run from frontend directory." >&2
-	echo "Use: cd /home/pavel/projects/hestia/frontend && $command" >&2
+	echo "Use: cd /home/pavel/projects/personal/hestia/frontend && $command" >&2
 	exit 2
 fi
 

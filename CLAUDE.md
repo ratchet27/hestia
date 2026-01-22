@@ -37,11 +37,11 @@ Always run from the correct directory. Use full paths to avoid mistakes.
 
 | Task | Command |
 |------|---------|
-| Frontend check | `cd /home/pavel/projects/hestia/frontend && bun run check` |
-| Frontend test | `cd /home/pavel/projects/hestia/frontend && bun run test:run` |
-| Backend check | `cd /home/pavel/projects/hestia/backend && make lint` |
-| Backend test | `cd /home/pavel/projects/hestia/backend && make test` |
-| Regenerate API | `cd /home/pavel/projects/hestia/frontend && NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api` |
+| Frontend check | `cd /home/pavel/projects/personal/hestia/frontend && bun run check` |
+| Frontend test | `cd /home/pavel/projects/personal/hestia/frontend && bun run test:run` |
+| Backend check | `cd /home/pavel/projects/personal/hestia/backend && make lint` |
+| Backend test | `cd /home/pavel/projects/personal/hestia/backend && make test` |
+| Regenerate API | `cd /home/pavel/projects/personal/hestia/frontend && NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api` |
 
 ### Common Mistakes to Avoid
 
