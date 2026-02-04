@@ -98,7 +98,7 @@ export function AddStockModal({
               ))}
             </select>
             {errors.productId && (
-              <p className="text-red-500 text-sm mt-1">
+              <p role="alert" className="text-red-500 text-sm mt-1">
                 {errors.productId.message}
               </p>
             )}
