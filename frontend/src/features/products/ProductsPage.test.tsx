@@ -80,6 +80,7 @@ describe("ProductsPage", () => {
   });
 
   it("shows error state on API failure", async () => {
+    setupMocks();
     server.use(
       http.get("*/api/internal/v1/products", () =>
         HttpResponse.json({ error: "Server error" }, { status: 500 }),
