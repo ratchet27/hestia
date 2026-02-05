@@ -1,0 +1,9 @@
+[codespell]
+# Skip lock files which contain package metadata and hashes
+skip = *.lock,composer.lock,bun.lock,package-lock.json,yarn.lock,pnpm-lock.yaml
+# Ignore words that are valid in this context
+# - Maks, maks, mabe: author names in package metadata
+# - invokable: PHP/Symfony term for callable factories
+# - connexion: Doctrine DBAL connection alias
+# - afterAll: Vitest/Jest test lifecycle function
+ignore-words-list = maks,mabe,invokable,connexion,afterall,coo
