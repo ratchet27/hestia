@@ -116,5 +116,89 @@
     "yesterday": "yesterday",
     "daysAgo": "{{count}} days ago",
     "inDays": "in {{count}} days"
+  },
+  "tasks": {
+    "title": "Tasks & Chores",
+    "subtitle": "Household duties and one-time tasks",
+    "chores": {
+      "title": "Recurring Chores",
+      "add": "Add",
+      "done": "Done",
+      "overdue": "Overdue by {{count}} days",
+      "today": "Today!",
+      "daysLeft": "In {{count}} days",
+      "schedule": {
+        "interval": "Every {{count}} days",
+        "fixedWeekly": "Every {{day}}",
+        "fixedMonthly": "Every {{day}}th of the month"
+      },
+      "form": {
+        "createTitle": "New Chore",
+        "editTitle": "Edit Chore",
+        "name": "Name",
+        "namePlaceholder": "e.g., Vacuum the house",
+        "nameRequired": "Name is required",
+        "scheduleType": "Schedule type",
+        "scheduleTypeRequired": "Select a schedule type",
+        "interval": "Every N days",
+        "fixedWeekly": "Day of week",
+        "fixedMonthly": "Day of month",
+        "scheduleValue": "Value",
+        "scheduleValueRequired": "Enter a value",
+        "days": "days",
+        "dayOfMonth": "Day of month (1–31)",
+        "assignee": "Assignee",
+        "assigneePlaceholder": "Optional",
+        "created": "Chore created",
+        "updated": "Chore updated",
+        "deleted": "Chore deleted",
+        "markedDone": "Chore marked done"
+      }
+    },
+    "items": {
+      "title": "One-time Tasks",
+      "add": "Add",
+      "completed": "Completed",
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "form": {
+        "createTitle": "New Task",
+        "editTitle": "Edit Task",
+        "name": "Name",
+        "namePlaceholder": "e.g., Book a doctor appointment",
+        "nameRequired": "Name is required",
+        "dueDate": "Due date",
+        "priority": "Priority",
+        "created": "Task created",
+        "updated": "Task updated",
+        "deleted": "Task deleted",
+        "toggled": "Task status updated"
+      }
+    },
+    "form": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "create": "Create",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete?",
+      "saving": "Saving...",
+      "creating": "Creating...",
+      "deleting": "Deleting..."
+    },
+    "weekdays": {
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday",
+      "7": "Sunday"
+    },
+    "errors": {
+      "loadFailed": "Failed to load data. Check server connection."
+    }
   }
 }
