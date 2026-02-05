@@ -125,18 +125,21 @@ class ChoreControllerTest extends WebTestCase
 
     public function testMarkChoreDone(): void
     {
+        // Set a specific next_due that won't collide with today + 7 days
+        $specificNextDue = new \DateTimeImmutable('+30 days');
         $chore = ChoreFactory::createOne([
             'scheduleType' => ScheduleType::INTERVAL,
-            'scheduleValue' => 7
+            'scheduleValue' => 7,
+            'nextDueAt' => $specificNextDue
         ]);
-        $originalNextDue = $chore->getNextDueAt();
 
         $response = $this->apiPost('/chores/' . $chore->getId() . '/done', []);
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertNotNull($data['data']['last_done_at']);
+        // After marking done, next_due should be ~7 days from now, not +30 days
         static::assertNotEquals(
-            $originalNextDue->format('Y-m-d'),
+            $specificNextDue->format('Y-m-d'),
             substr((string) $data['data']['next_due_at'], 0, 10)
         );
     }
