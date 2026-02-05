@@ -41,4 +41,18 @@ export const queryKeys = {
     all: ["shopping-list"] as const,
     list: () => ["shopping-list", "list"] as const,
   },
+
+  // Tasks
+  tasks: {
+    all: ["tasks"] as const,
+    list: (status: string) => ["tasks", status] as const,
+    detail: (id: string) => ["tasks", id] as const,
+  },
+
+  // Chores
+  chores: {
+    all: ["chores"] as const,
+    list: () => ["chores", "list"] as const,
+    detail: (id: string) => ["chores", id] as const,
+  },
 } as const;
