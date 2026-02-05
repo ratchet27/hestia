@@ -15,22 +15,6 @@ export interface StockEntry {
   note: string;
 }
 
-export interface Chore {
-  id: number;
-  name: string;
-  frequency: "daily" | "weekly" | "monthly";
-  lastDone: string;
-  nextDue: string;
-  assignee: string | null;
-}
-
-export interface Task {
-  id: number;
-  name: string;
-  dueDate: string | null;
-  done: boolean;
-}
-
 export interface Recipe {
   id: number;
   name: string;
