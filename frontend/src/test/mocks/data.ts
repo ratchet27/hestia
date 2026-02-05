@@ -1,5 +1,6 @@
 import type {
   CategoryResponse,
+  ChoreResponse,
   ExpiringEntryResponse,
   LocationResponse,
   ProductBriefResponse,
@@ -7,6 +8,7 @@ import type {
   ShoppingItemResponse,
   ShoppingListSource,
   StockEntryResponse,
+  TaskResponse,
 } from "@/api/generated/models";
 
 export function createProduct(
@@ -105,6 +107,38 @@ export function createProductResponse(
     active: true,
     created_at: new Date().toISOString(),
     ...rest,
+  };
+}
+
+export function createTaskResponse(
+  overrides: Partial<TaskResponse> = {},
+): TaskResponse {
+  return {
+    id: crypto.randomUUID(),
+    name: "Записаться к врачу",
+    due_date: "2026-02-15T00:00:00+00:00",
+    priority: "medium",
+    done: false,
+    done_at: null,
+    created_at: new Date().toISOString(),
+    ...overrides,
+  };
+}
+
+export function createChoreResponse(
+  overrides: Partial<ChoreResponse> = {},
+): ChoreResponse {
+  return {
+    id: crypto.randomUUID(),
+    name: "Пропылесосить квартиру",
+    schedule_type: "interval",
+    schedule_value: 7,
+    assignee: null,
+    last_done_at: null,
+    next_due_at: new Date(Date.now() + 86400000 * 3).toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: null,
+    ...overrides,
   };
 }
 
