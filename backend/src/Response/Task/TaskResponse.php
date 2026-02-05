@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace App\Response\Task;
 
 use App\Entity\Task;
+use App\Enum\TaskPriority;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Uid\Uuid;
 
@@ -16,9 +17,7 @@ final readonly class TaskResponse
         public Uuid $id,
         public string $name,
         public ?\DateTimeImmutable $dueDate,
-        #[Map(source: 'priority.value')]
-        public string $priority,
-        #[Map(source: 'done')]
+        public TaskPriority $priority,
         public bool $done,
         public ?\DateTimeImmutable $doneAt,
         public \DateTimeImmutable $createdAt

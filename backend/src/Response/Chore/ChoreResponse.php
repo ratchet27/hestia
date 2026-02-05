@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace App\Response\Chore;
 
 use App\Entity\Chore;
+use App\Enum\ScheduleType;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Uid\Uuid;
 
@@ -15,8 +16,7 @@ final readonly class ChoreResponse
     public function __construct(
         public Uuid $id,
         public string $name,
-        #[Map(source: 'scheduleType.value')]
-        public string $scheduleType,
+        public ScheduleType $scheduleType,
         public int $scheduleValue,
         public ?string $assignee,
         public ?\DateTimeImmutable $lastDoneAt,
