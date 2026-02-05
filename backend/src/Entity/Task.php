@@ -98,6 +98,7 @@ class Task
         } elseif (!$done) {
             $this->doneAt = null;
         }
+
         return $this;
     }
 

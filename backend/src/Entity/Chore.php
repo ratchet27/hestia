@@ -153,7 +153,7 @@ class Chore
     private function calculateNextDueAt(\DateTimeImmutable $from): \DateTimeImmutable
     {
         return match ($this->scheduleType) {
-            ScheduleType::INTERVAL => $from->modify("+{$this->scheduleValue} days"),
+            ScheduleType::INTERVAL => $from->modify(sprintf('+%d days', $this->scheduleValue)),
             ScheduleType::FIXED_WEEKLY => $this->nextWeekday($from, $this->scheduleValue),
             ScheduleType::FIXED_MONTHLY => $this->nextMonthDay($from, $this->scheduleValue)
         };
@@ -166,7 +166,8 @@ class Chore
         if ($daysUntil <= 0) {
             $daysUntil += 7;
         }
-        return $from->modify("+{$daysUntil} days");
+
+        return $from->modify(sprintf('+%d days', $daysUntil));
     }
 
     private function nextMonthDay(\DateTimeImmutable $from, int $targetDay): \DateTimeImmutable
@@ -175,6 +176,7 @@ class Chore
         if ($currentDay < $targetDay) {
             return $from->setDate((int) $from->format('Y'), (int) $from->format('m'), $targetDay);
         }
+
         $nextMonth = $from->modify('first day of next month');
         return $nextMonth->setDate((int) $nextMonth->format('Y'), (int) $nextMonth->format('m'), $targetDay);
     }

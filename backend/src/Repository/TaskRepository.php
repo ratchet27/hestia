@@ -37,7 +37,7 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function findCompletedRecently(int $days = 3): array
     {
-        $since = new \DateTimeImmutable("-{$days} days");
+        $since = new \DateTimeImmutable(sprintf('-%d days', $days));
         // @mago-ignore analysis:mixed-return-statement
         return $this
             ->createQueryBuilder('t')
