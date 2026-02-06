@@ -146,6 +146,12 @@ class Chore
         $this->updatedAt = new \DateTimeImmutable();
     }
 
+    public function initializeNextDueAt(): static
+    {
+        $this->nextDueAt = $this->calculateNextDueAt(new \DateTimeImmutable('today'));
+        return $this;
+    }
+
     public function markDone(\DateTimeImmutable $now): static
     {
         $this->lastDoneAt = $now;
