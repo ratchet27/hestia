@@ -161,11 +161,15 @@ class Chore
 
     private function calculateNextDueAt(\DateTimeImmutable $from): \DateTimeImmutable
     {
-        return match ($this->scheduleType) {
-            ScheduleType::INTERVAL => $from->modify(sprintf('+%d days', $this->scheduleValue)),
-            ScheduleType::FIXED_WEEKLY => $this->nextWeekday($from, $this->scheduleValue),
-            ScheduleType::FIXED_MONTHLY => $this->nextMonthDay($from, $this->scheduleValue)
+        $date = $from->setTime(0, 0);
+
+        $result = match ($this->scheduleType) {
+            ScheduleType::INTERVAL => $date->modify(sprintf('+%d days', $this->scheduleValue)),
+            ScheduleType::FIXED_WEEKLY => $this->nextWeekday($date, $this->scheduleValue),
+            ScheduleType::FIXED_MONTHLY => $this->nextMonthDay($date, $this->scheduleValue)
         };
+
+        return $result->setTime(0, 0);
     }
 
     private function nextWeekday(\DateTimeImmutable $from, int $targetWeekday): \DateTimeImmutable
