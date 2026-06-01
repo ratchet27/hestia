@@ -26,10 +26,10 @@ class ChoreServiceTest extends TestCase
             ->setScheduleType(ScheduleType::INTERVAL)
             ->setScheduleValue(7);
 
-        $repository = $this->createMock(ChoreRepository::class);
+        $repository = $this->createStub(ChoreRepository::class);
         $repository->method('find')->willReturn($chore);
 
-        $em = $this->createMock(EntityManagerInterface::class);
+        $em = $this->createStub(EntityManagerInterface::class);
 
         $service = new ChoreService($em, $repository, $clock, new AppTimezone('+05:00', 'Asia/Almaty'));
 
@@ -37,5 +37,6 @@ class ChoreServiceTest extends TestCase
 
         // Almaty "today" is Jun 2, so +7 days = Jun 9 (NOT Jun 8 from UTC).
         static::assertSame('2026-06-09', $result->getNextDueAt()->format('Y-m-d'));
+        static::assertSame('Asia/Almaty', $result->getNextDueAt()->getTimezone()->getName());
     }
 }
