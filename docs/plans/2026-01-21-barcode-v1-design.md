@@ -16,7 +16,7 @@
 ```
 [Scan Button] → ScanModal
                     │
-                    ├─ Barcode found → AddStockModal (product pre-selected)
+                    ├─ Barcode found → AddStockModal (product preselected)
                     │                        │
                     │                        └─ Submit → Close
                     │
