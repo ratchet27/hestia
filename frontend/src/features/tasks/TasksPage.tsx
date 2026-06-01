@@ -206,24 +206,27 @@ export function TasksPage(): React.ReactElement {
                 ))}
               </div>
             )}
-            <div className="space-y-3">
-              {choreGroups.overdue.length > 0 && (
-                <h4 className="text-sm font-medium text-stone-500">
-                  {t("tasks.chores.sections.upcoming")}
-                </h4>
-              )}
-              {choreGroups.upcoming.map((chore) => (
-                <ChoreCard
-                  key={chore.id}
-                  chore={chore}
-                  onMarkDone={handleMarkChoreDone}
-                  onClick={setEditingChore}
-                />
-              ))}
-            </div>
-            {chores.length === 0 && (
-              <p className="text-stone-500 text-sm">{t("common.noItems")}</p>
+            {choreGroups.upcoming.length > 0 && (
+              <div className="space-y-3">
+                {choreGroups.overdue.length > 0 && (
+                  <h4 className="text-sm font-medium text-stone-500">
+                    {t("tasks.chores.sections.upcoming")}
+                  </h4>
+                )}
+                {choreGroups.upcoming.map((chore) => (
+                  <ChoreCard
+                    key={chore.id}
+                    chore={chore}
+                    onMarkDone={handleMarkChoreDone}
+                    onClick={setEditingChore}
+                  />
+                ))}
+              </div>
             )}
+            {choreGroups.overdue.length === 0 &&
+              choreGroups.upcoming.length === 0 && (
+                <p className="text-stone-500 text-sm">{t("common.noItems")}</p>
+              )}
           </div>
         </div>
 
@@ -257,24 +260,27 @@ export function TasksPage(): React.ReactElement {
                 ))}
               </div>
             )}
-            <div className="space-y-3">
-              {taskGroups.overdue.length > 0 && (
-                <h4 className="text-sm font-medium text-stone-500">
-                  {t("tasks.items.sections.active")}
-                </h4>
-              )}
-              {taskGroups.active.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onToggleDone={handleToggleTaskDone}
-                  onClick={setEditingTask}
-                />
-              ))}
-            </div>
-            {activeTasks.length === 0 && (
-              <p className="text-stone-500 text-sm">{t("common.noItems")}</p>
+            {taskGroups.active.length > 0 && (
+              <div className="space-y-3">
+                {taskGroups.overdue.length > 0 && (
+                  <h4 className="text-sm font-medium text-stone-500">
+                    {t("tasks.items.sections.active")}
+                  </h4>
+                )}
+                {taskGroups.active.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onToggleDone={handleToggleTaskDone}
+                    onClick={setEditingTask}
+                  />
+                ))}
+              </div>
             )}
+            {taskGroups.overdue.length === 0 &&
+              taskGroups.active.length === 0 && (
+                <p className="text-stone-500 text-sm">{t("common.noItems")}</p>
+              )}
           </div>
 
           {completedTasks.length > 0 && (

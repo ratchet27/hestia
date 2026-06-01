@@ -1,3 +1,4 @@
+import { within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 import {
@@ -141,10 +142,12 @@ describe("TasksPage", () => {
     );
 
     render(<TasksPage />);
-    await waitFor(() => {
-      expect(screen.getByText("Просрочено")).toBeInTheDocument();
-    });
-    expect(screen.getByText("Просроченное дело")).toBeInTheDocument();
+    const heading = await screen.findByRole("heading", { name: "Просрочено" });
+    const section = heading.closest("div");
+    expect(section).not.toBeNull();
+    expect(
+      within(section as HTMLElement).getByText("Просроченное дело"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Предстоящее дело")).toBeInTheDocument();
   });
 });
