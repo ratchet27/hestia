@@ -29,10 +29,10 @@ readonly class ShoppingListService
      * Handle stock change event - auto-add or auto-remove shopping list items.
      *
      * @param Uuid $productId      The product that changed
-     * @param int  $previousQty    Previous total stock quantity
+     * @param int  $_previousQty   Previous total stock quantity (unused; kept for the event contract)
      * @param int  $newQty         New total stock quantity
      */
-    public function handleStockChange(Uuid $productId, int $previousQty, int $newQty): void
+    public function handleStockChange(Uuid $productId, int $_previousQty, int $newQty): void
     {
         $product = $this->productRepository->find($productId);
         if ($product === null || !$product->isActive()) {
