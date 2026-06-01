@@ -84,11 +84,11 @@ class ChoreTest extends TestCase
         yield 'target same day' => ['2026-02-15', 15, '2026-03-15'];
         yield 'cross year boundary' => ['2026-12-20', 10, '2027-01-10'];
 
-        // Edge case: PHP wraps invalid dates (day 31 in short months overflows)
-        // Note: This behavior may need review - users might expect "last day of month"
-        yield 'day 31 in February wraps to March' => ['2026-02-05', 31, '2026-03-03'];
-        yield 'day 31 in April wraps to May' => ['2026-04-05', 31, '2026-05-01'];
-        yield 'day 30 in February wraps to March' => ['2026-02-05', 30, '2026-03-02'];
+        // Days beyond a month's length clamp to the last valid day (no overflow/skip).
+        yield 'day 31 clamps to end of February' => ['2026-02-05', 31, '2026-02-28'];
+        yield 'day 31 clamps to end of April' => ['2026-04-05', 31, '2026-04-30'];
+        yield 'day 30 clamps to end of February' => ['2026-02-05', 30, '2026-02-28'];
+        yield 'done on the 31st does not skip February' => ['2026-01-31', 31, '2026-02-28'];
     }
 
     public function testMarkDoneUpdatesLastDoneAt(): void
@@ -115,6 +115,15 @@ class ChoreTest extends TestCase
         $chore->markDone(new \DateTimeImmutable('2026-02-05'));
         static::assertSame('2026-02-12', $chore->getNextDueAt()->format('Y-m-d'));
         static::assertSame('2026-02-05', $chore->getLastDoneAt()->format('Y-m-d'));
+    }
+
+    public function testInitializeNextDueAtUsesGivenInstant(): void
+    {
+        $chore = $this->createChore(ScheduleType::INTERVAL, 7);
+
+        $chore->initializeNextDueAt(new \DateTimeImmutable('2026-06-02 00:00:00'));
+
+        static::assertSame('2026-06-09', $chore->getNextDueAt()->format('Y-m-d'));
     }
 
     private function createChore(ScheduleType $type, int $value): Chore

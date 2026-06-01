@@ -146,9 +146,9 @@ class Chore
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function initializeNextDueAt(): static
+    public function initializeNextDueAt(\DateTimeImmutable $now): static
     {
-        $this->nextDueAt = $this->calculateNextDueAt(new \DateTimeImmutable('today'));
+        $this->nextDueAt = $this->calculateNextDueAt($now);
         return $this;
     }
 
@@ -186,11 +186,11 @@ class Chore
     private function nextMonthDay(\DateTimeImmutable $from, int $targetDay): \DateTimeImmutable
     {
         $currentDay = (int) $from->format('j');
-        if ($currentDay < $targetDay) {
-            return $from->setDate((int) $from->format('Y'), (int) $from->format('m'), $targetDay);
-        }
+        $month = $currentDay < $targetDay ? $from : $from->modify('first day of next month');
 
-        $nextMonth = $from->modify('first day of next month');
-        return $nextMonth->setDate((int) $nextMonth->format('Y'), (int) $nextMonth->format('m'), $targetDay);
+        $lastDay = (int) $month->format('t');
+        $day = min($targetDay, $lastDay);
+
+        return $month->setDate((int) $month->format('Y'), (int) $month->format('m'), $day);
     }
 }

@@ -47,7 +47,7 @@ class ChoreService
         $chore->setScheduleType(ScheduleType::from($request->schedule_type));
         $chore->setScheduleValue($request->schedule_value);
         $chore->setAssignee($request->assignee);
-        $chore->initializeNextDueAt();
+        $chore->initializeNextDueAt(new \DateTimeImmutable('today'));
 
         $this->em->persist($chore);
         $this->em->flush();
