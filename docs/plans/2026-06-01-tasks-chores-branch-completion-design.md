@@ -19,7 +19,9 @@ Six work items. Each is independently testable. All implemented test-first (TDD)
 **Problem:** `Chore::initializeNextDueAt()` (`backend/src/Entity/Chore.php:151`) uses `new \DateTimeImmutable('today')` and `ChoreService::markChoreDone` passes `new \DateTimeImmutable()` — both server UTC. A chore completed between 00:00–05:00 Almaty time resolves to the previous UTC calendar day, anchoring `next_due_at` one day early. The same applies to a chore created in those hours.
 
 **Fix (Option A):**
-- Add an application timezone: parameter `app.timezone` bound from env `APP_TIMEZONE`, default `Asia/Almaty`.
+- Add an application timezone: parameter `app.timezone` bound from env `APP_TIMEZONE`, **default `+05:00`** (fixed offset).
+  - **Why a fixed offset, not `Asia/Almaty`:** Kazakhstan moved permanently to UTC+5 on 2024-03-01 and observes **no DST**, so a fixed `+05:00` is semantically exact. The named zone `Asia/Almaty` resolves to +05 *only* with tzdata ≥ 2024a; if the FrankenPHP container ships **stale tzdata it silently resolves to +06** and schedules every chore a day off. The fixed offset is immune to tzdata version. A named zone may still be supplied via `APP_TIMEZONE` if DST-aware behaviour is ever wanted.
+  - **Guard:** a test asserts the configured timezone currently resolves to a `+05:00` offset (for a date after 2024-03-01), so a misconfigured/stale-tzdata environment **fails loudly** instead of scheduling wrong.
 - Use Symfony `Symfony\Component\Clock\ClockInterface` for "now" so it is freezable in tests.
 - Scheduling derives the **calendar date in the app timezone**, then anchors `next_due_at` at **midnight UTC of that date** — preserving the existing wire contract (`...T00:00:00+00:00`) that the frontend already reads correctly.
 - `Chore::calculateNextDueAt` continues to receive a `\DateTimeImmutable`; the caller (`ChoreService`) is responsible for converting "now" to the app-timezone calendar date before passing it. Entity stays persistence-focused; timezone policy lives in the service.
