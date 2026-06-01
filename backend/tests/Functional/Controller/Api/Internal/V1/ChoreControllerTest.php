@@ -92,6 +92,26 @@ class ChoreControllerTest extends WebTestCase
         static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
+    public function testCreateChoreRejectsWeekdayOutOfRange(): void
+    {
+        $response = $this->apiPost('/chores', [
+            'name' => 'Bad weekly',
+            'schedule_type' => 'fixed_weekly',
+            'schedule_value' => 8,
+        ]);
+        static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function testCreateChoreRejectsMonthDayOutOfRange(): void
+    {
+        $response = $this->apiPost('/chores', [
+            'name' => 'Bad monthly',
+            'schedule_type' => 'fixed_monthly',
+            'schedule_value' => 31,
+        ]);
+        static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
     public function testUpdateChore(): void
     {
         $chore = ChoreFactory::createOne([
