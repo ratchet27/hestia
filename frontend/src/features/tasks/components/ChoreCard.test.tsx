@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createChoreResponse } from "@/test/mocks/data";
-import { render, screen } from "@/test/utils";
+import { render, screen, userEvent } from "@/test/utils";
 import { ChoreCard } from "./ChoreCard";
 
 describe("ChoreCard", () => {
@@ -109,5 +109,15 @@ describe("ChoreCard", () => {
     );
     await user.click(screen.getByText("Выполнено"));
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("opens the card on Space key", async () => {
+    const onClick = vi.fn();
+    const chore = createChoreResponse({ id: "c1", name: "Пылесосить полы" });
+    render(<ChoreCard chore={chore} onMarkDone={vi.fn()} onClick={onClick} />);
+    const card = screen.getByRole("button", { name: /Пылесосить полы/i });
+    card.focus();
+    await userEvent.keyboard("[Space]");
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });

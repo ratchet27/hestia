@@ -60,8 +60,9 @@ export function ChoreCard({
   );
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className={`bg-white rounded-xl p-4 shadow-sm border cursor-pointer hover:border-amber-400 transition-colors w-full text-left ${
         isOverdue
           ? "border-red-300 bg-red-50"
@@ -70,7 +71,12 @@ export function ChoreCard({
             : "border-stone-200"
       }`}
       onClick={() => onClick(chore)}
-      onKeyDown={(e) => e.key === "Enter" && onClick(chore)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick(chore);
+        }
+      }}
     >
       <div className="flex items-center justify-between">
         <div className="min-w-0 flex-1">
@@ -93,6 +99,6 @@ export function ChoreCard({
           {t("tasks.chores.done")}
         </button>
       </div>
-    </button>
+    </div>
   );
 }

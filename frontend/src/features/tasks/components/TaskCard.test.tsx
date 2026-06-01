@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createTaskResponse } from "@/test/mocks/data";
-import { render, screen } from "@/test/utils";
+import { render, screen, userEvent } from "@/test/utils";
 import { TaskCard } from "./TaskCard";
 
 describe("TaskCard", () => {
@@ -96,5 +96,20 @@ describe("TaskCard", () => {
     const buttons = screen.getAllByRole("button");
     await user.click(buttons[1]!);
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("opens the card on Space key", async () => {
+    const onClick = vi.fn();
+    render(
+      <TaskCard
+        task={createTaskResponse({ id: "t1", name: "Купить хлеб" })}
+        onToggleDone={vi.fn()}
+        onClick={onClick}
+      />,
+    );
+    const card = screen.getByRole("button", { name: /Купить хлеб/i });
+    card.focus();
+    await userEvent.keyboard("[Space]");
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });

@@ -29,11 +29,17 @@ export function TaskCard({
     : null;
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 hover:border-amber-400 transition-colors cursor-pointer w-full text-left"
       onClick={() => onClick(task)}
-      onKeyDown={(e) => e.key === "Enter" && onClick(task)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick(task);
+        }
+      }}
     >
       <div className="flex items-center gap-3">
         <button
@@ -68,6 +74,6 @@ export function TaskCard({
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
