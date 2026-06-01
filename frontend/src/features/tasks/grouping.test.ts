@@ -52,4 +52,17 @@ describe("groupTasks", () => {
     expect(result.active.map((t) => t.id)).toEqual(["t2", "t3"]);
     expect(result.completed.map((t) => t.id)).toEqual(["t4"]);
   });
+
+  it("treats a task due today as active, not overdue", () => {
+    const dueToday = createTaskResponse({
+      id: "t1",
+      due_date: isoDaysFromToday(0),
+      done: false,
+    });
+
+    const result = groupTasks([dueToday], []);
+
+    expect(result.overdue).toEqual([]);
+    expect(result.active.map((t) => t.id)).toEqual(["t1"]);
+  });
 });
