@@ -10,14 +10,18 @@ use App\Exception\Chore\ChoreNotFoundException;
 use App\Repository\ChoreRepository;
 use App\Request\CreateChoreRequest;
 use App\Request\UpdateChoreRequest;
+use App\Service\Time\AppTimezone;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Uid\Uuid;
 
 class ChoreService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly ChoreRepository $choreRepository
+        private readonly ChoreRepository $choreRepository,
+        private readonly ClockInterface $clock,
+        private readonly AppTimezone $appTimezone
     ) {
     }
 
@@ -47,7 +51,7 @@ class ChoreService
         $chore->setScheduleType(ScheduleType::from($request->schedule_type));
         $chore->setScheduleValue($request->schedule_value);
         $chore->setAssignee($request->assignee);
-        $chore->initializeNextDueAt(new \DateTimeImmutable('today'));
+        $chore->initializeNextDueAt($this->now());
 
         $this->em->persist($chore);
         $this->em->flush();
@@ -78,10 +82,15 @@ class ChoreService
     public function markChoreDone(Uuid $id): Chore
     {
         $chore = $this->getChore($id);
-        $chore->markDone(new \DateTimeImmutable());
+        $chore->markDone($this->now());
 
         $this->em->flush();
 
         return $chore;
+    }
+
+    private function now(): \DateTimeImmutable
+    {
+        return $this->clock->now()->setTimezone($this->appTimezone->get());
     }
 }
