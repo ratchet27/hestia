@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useProducts, useShoppingList } from "../../api/queries";
-import { useChores } from "../../api/queries/chores";
+import { useChores, useMarkChoreDone } from "../../api/queries/chores";
 import { useExpiringStock, useStockEntries } from "../../api/queries/stocks";
 import { useTasks } from "../../api/queries/tasks";
 import { Icons } from "../../components/Icons";
@@ -20,6 +20,7 @@ export function DashboardPage(): React.ReactElement {
   const { data: shoppingList = [] } = useShoppingList();
   const { data: chores = [] } = useChores();
   const { data: tasks = [] } = useTasks("active");
+  const markChoreDone = useMarkChoreDone();
 
   // Low stock calculation
   const lowStockItems = products
@@ -211,7 +212,9 @@ export function DashboardPage(): React.ReactElement {
                     <p className="font-medium text-stone-800">{chore.name}</p>
                     <button
                       type="button"
-                      className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
+                      onClick={() => markChoreDone.mutate(chore.id)}
+                      disabled={markChoreDone.isPending}
+                      className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors disabled:opacity-50"
                     >
                       {t("dashboard.completed")}
                     </button>
