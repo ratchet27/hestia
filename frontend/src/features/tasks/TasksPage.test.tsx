@@ -115,4 +115,36 @@ describe("TasksPage", () => {
 
     expect(screen.getByText("Новое дело")).toBeInTheDocument();
   });
+
+  it("renders overdue chores under 'Просрочено' section heading", async () => {
+    const yesterday = new Date();
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    yesterday.setUTCHours(0, 0, 0, 0);
+
+    const tomorrow = new Date();
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 3);
+    tomorrow.setUTCHours(0, 0, 0, 0);
+
+    const overdueChore = createChoreResponse({
+      name: "Просроченное дело",
+      next_due_at: yesterday.toISOString(),
+    });
+    const upcomingChore = createChoreResponse({
+      name: "Предстоящее дело",
+      next_due_at: tomorrow.toISOString(),
+    });
+
+    server.use(
+      http.get("*/api/internal/v1/chores", () =>
+        HttpResponse.json(wrapResponse([overdueChore, upcomingChore])),
+      ),
+    );
+
+    render(<TasksPage />);
+    await waitFor(() => {
+      expect(screen.getByText("Просрочено")).toBeInTheDocument();
+    });
+    expect(screen.getByText("Просроченное дело")).toBeInTheDocument();
+    expect(screen.getByText("Предстоящее дело")).toBeInTheDocument();
+  });
 });

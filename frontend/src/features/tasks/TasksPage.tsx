@@ -20,6 +20,7 @@ import { ChoreCard } from "./components/ChoreCard";
 import { ChoreForm, type ChoreFormValues } from "./components/ChoreForm";
 import { TaskCard } from "./components/TaskCard";
 import { TaskForm, type TaskFormValues } from "./components/TaskForm";
+import { groupChores, groupTasks } from "./grouping";
 
 export function TasksPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -163,6 +164,9 @@ export function TasksPage(): React.ReactElement {
     );
   }
 
+  const choreGroups = groupChores(chores);
+  const taskGroups = groupTasks(activeTasks, completedTasks);
+
   return (
     <div className="p-8">
       <div className="mb-6">
@@ -186,15 +190,37 @@ export function TasksPage(): React.ReactElement {
               + {t("tasks.chores.add")}
             </button>
           </div>
-          <div className="space-y-3">
-            {chores.map((chore) => (
-              <ChoreCard
-                key={chore.id}
-                chore={chore}
-                onMarkDone={handleMarkChoreDone}
-                onClick={setEditingChore}
-              />
-            ))}
+          <div className="space-y-4">
+            {choreGroups.overdue.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-red-600">
+                  {t("tasks.chores.sections.overdue")}
+                </h4>
+                {choreGroups.overdue.map((chore) => (
+                  <ChoreCard
+                    key={chore.id}
+                    chore={chore}
+                    onMarkDone={handleMarkChoreDone}
+                    onClick={setEditingChore}
+                  />
+                ))}
+              </div>
+            )}
+            <div className="space-y-3">
+              {choreGroups.overdue.length > 0 && (
+                <h4 className="text-sm font-medium text-stone-500">
+                  {t("tasks.chores.sections.upcoming")}
+                </h4>
+              )}
+              {choreGroups.upcoming.map((chore) => (
+                <ChoreCard
+                  key={chore.id}
+                  chore={chore}
+                  onMarkDone={handleMarkChoreDone}
+                  onClick={setEditingChore}
+                />
+              ))}
+            </div>
             {chores.length === 0 && (
               <p className="text-stone-500 text-sm">{t("common.noItems")}</p>
             )}
@@ -215,15 +241,37 @@ export function TasksPage(): React.ReactElement {
             </button>
           </div>
 
-          <div className="space-y-3">
-            {activeTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onToggleDone={handleToggleTaskDone}
-                onClick={setEditingTask}
-              />
-            ))}
+          <div className="space-y-4">
+            {taskGroups.overdue.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-red-600">
+                  {t("tasks.items.sections.overdue")}
+                </h4>
+                {taskGroups.overdue.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onToggleDone={handleToggleTaskDone}
+                    onClick={setEditingTask}
+                  />
+                ))}
+              </div>
+            )}
+            <div className="space-y-3">
+              {taskGroups.overdue.length > 0 && (
+                <h4 className="text-sm font-medium text-stone-500">
+                  {t("tasks.items.sections.active")}
+                </h4>
+              )}
+              {taskGroups.active.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onToggleDone={handleToggleTaskDone}
+                  onClick={setEditingTask}
+                />
+              ))}
+            </div>
             {activeTasks.length === 0 && (
               <p className="text-stone-500 text-sm">{t("common.noItems")}</p>
             )}

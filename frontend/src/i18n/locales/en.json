@@ -124,6 +124,10 @@
       "title": "Recurring Chores",
       "add": "Add",
       "done": "Done",
+      "sections": {
+        "overdue": "Overdue",
+        "upcoming": "Upcoming"
+      },
       "overdue": "Overdue by {{count}} days",
       "today": "Today!",
       "daysLeft": "In {{count}} days",
@@ -159,6 +163,10 @@
       "title": "One-time Tasks",
       "add": "Add",
       "completed": "Completed",
+      "sections": {
+        "overdue": "Overdue",
+        "active": "Active"
+      },
       "priority": {
         "low": "Low",
         "medium": "Medium",
