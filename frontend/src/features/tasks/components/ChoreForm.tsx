@@ -123,7 +123,7 @@ export function ChoreForm({
             id="chore-schedule-value"
             type="number"
             min={1}
-            max={scheduleType === "fixed_monthly" ? 31 : 365}
+            max={scheduleType === "fixed_monthly" ? 28 : 365}
             placeholder={
               scheduleType === "fixed_monthly"
                 ? t("tasks.chores.form.dayOfMonth")
