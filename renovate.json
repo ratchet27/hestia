@@ -36,6 +36,17 @@
       "description": "Major updates require explicit approval via the dependency dashboard",
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Hold Symfony at 8.0 until the object-mapper 8.1 migration is done (patches still flow)",
+      "matchPackageNames": ["symfony/**"],
+      "matchUpdateTypes": ["minor", "major"],
+      "enabled": false
+    },
+    {
+      "description": "Do not propose raising the PHP platform requirement",
+      "matchDepNames": ["php"],
+      "enabled": false
     }
   ]
 }
