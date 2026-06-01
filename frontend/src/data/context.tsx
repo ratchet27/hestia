@@ -1,16 +1,6 @@
 import { createContext, type ReactNode, useState } from "react";
-import { mockChores, mockRecipes, mockTasks, mockUser } from "./mocks";
-import type { Chore, Recipe, Task, User } from "./types";
-
-export interface ChoresContextValue {
-  chores: Chore[];
-  setChores: React.Dispatch<React.SetStateAction<Chore[]>>;
-}
-
-export interface TasksContextValue {
-  tasks: Task[];
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-}
+import { mockRecipes, mockUser } from "./mocks";
+import type { Recipe, User } from "./types";
 
 export interface RecipesContextValue {
   recipes: Recipe[];
@@ -23,8 +13,6 @@ export interface AuthContextValue {
   logout: () => void;
 }
 
-export const ChoresContext = createContext<ChoresContextValue | null>(null);
-export const TasksContext = createContext<TasksContextValue | null>(null);
 export const RecipesContext = createContext<RecipesContextValue | null>(null);
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -35,18 +23,12 @@ interface DataProviderProps {
 export function DataProvider({
   children,
 }: DataProviderProps): React.ReactElement {
-  const [chores, setChores] = useState<Chore[]>(mockChores);
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [recipes, setRecipes] = useState<Recipe[]>(mockRecipes);
 
   return (
-    <ChoresContext.Provider value={{ chores, setChores }}>
-      <TasksContext.Provider value={{ tasks, setTasks }}>
-        <RecipesContext.Provider value={{ recipes, setRecipes }}>
-          {children}
-        </RecipesContext.Provider>
-      </TasksContext.Provider>
-    </ChoresContext.Provider>
+    <RecipesContext.Provider value={{ recipes, setRecipes }}>
+      {children}
+    </RecipesContext.Provider>
   );
 }
 

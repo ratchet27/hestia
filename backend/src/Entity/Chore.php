@@ -146,6 +146,12 @@ class Chore
         $this->updatedAt = new \DateTimeImmutable();
     }
 
+    public function initializeNextDueAt(\DateTimeImmutable $now): static
+    {
+        $this->nextDueAt = $this->calculateNextDueAt($now);
+        return $this;
+    }
+
     public function markDone(\DateTimeImmutable $now): static
     {
         $this->lastDoneAt = $now;
@@ -155,11 +161,15 @@ class Chore
 
     private function calculateNextDueAt(\DateTimeImmutable $from): \DateTimeImmutable
     {
-        return match ($this->scheduleType) {
-            ScheduleType::INTERVAL => $from->modify(sprintf('+%d days', $this->scheduleValue)),
-            ScheduleType::FIXED_WEEKLY => $this->nextWeekday($from, $this->scheduleValue),
-            ScheduleType::FIXED_MONTHLY => $this->nextMonthDay($from, $this->scheduleValue)
+        $date = $from->setTime(0, 0);
+
+        $result = match ($this->scheduleType) {
+            ScheduleType::INTERVAL => $date->modify(sprintf('+%d days', $this->scheduleValue)),
+            ScheduleType::FIXED_WEEKLY => $this->nextWeekday($date, $this->scheduleValue),
+            ScheduleType::FIXED_MONTHLY => $this->nextMonthDay($date, $this->scheduleValue)
         };
+
+        return $result->setTime(0, 0);
     }
 
     private function nextWeekday(\DateTimeImmutable $from, int $targetWeekday): \DateTimeImmutable
@@ -176,11 +186,19 @@ class Chore
     private function nextMonthDay(\DateTimeImmutable $from, int $targetDay): \DateTimeImmutable
     {
         $currentDay = (int) $from->format('j');
-        if ($currentDay < $targetDay) {
-            return $from->setDate((int) $from->format('Y'), (int) $from->format('m'), $targetDay);
+        $anchor = $currentDay < $targetDay ? $from : $from->modify('first day of next month');
+
+        $lastDay = (int) $anchor->format('t');
+        $day = min($targetDay, $lastDay);
+
+        // If clamping reproduced $from (month too short to reach the target day),
+        // advance one more month and clamp again so the chore never stays on today.
+        if ($anchor === $from && $day === $currentDay) {
+            $anchor = $from->modify('first day of next month');
+            $lastDay = (int) $anchor->format('t');
+            $day = min($targetDay, $lastDay);
         }
 
-        $nextMonth = $from->modify('first day of next month');
-        return $nextMonth->setDate((int) $nextMonth->format('Y'), (int) $nextMonth->format('m'), $targetDay);
+        return $anchor->setDate((int) $anchor->format('Y'), (int) $anchor->format('m'), $day);
     }
 }

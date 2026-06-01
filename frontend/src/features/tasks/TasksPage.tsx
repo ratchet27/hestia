@@ -1,242 +1,373 @@
 import { useState } from "react";
-import { Icons } from "../../components/Icons";
-import { useChores, useTasks } from "../../data/hooks";
-import type { Chore } from "../../data/types";
-import { formatDate, getDaysUntil } from "../../data/types";
-
-const frequencyLabels: Record<Chore["frequency"], string> = {
-  daily: "Ежедневно",
-  weekly: "Еженедельно",
-  monthly: "Ежемесячно",
-};
+import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import type { ChoreResponse, TaskResponse } from "../../api/generated/models";
+import {
+  useChores,
+  useCreateChore,
+  useDeleteChore,
+  useMarkChoreDone,
+  useUpdateChore,
+} from "../../api/queries/chores";
+import {
+  useCreateTask,
+  useDeleteTask,
+  useTasks,
+  useToggleTaskDone,
+  useUpdateTask,
+} from "../../api/queries/tasks";
+import { ChoreCard } from "./components/ChoreCard";
+import { ChoreForm, type ChoreFormValues } from "./components/ChoreForm";
+import { TaskCard } from "./components/TaskCard";
+import { TaskForm, type TaskFormValues } from "./components/TaskForm";
+import { groupChores, groupTasks } from "./grouping";
 
 export function TasksPage(): React.ReactElement {
-  const { chores, setChores } = useChores();
-  const { tasks, setTasks } = useTasks();
-  const [showAddTask, setShowAddTask] = useState(false);
-  const [newTaskName, setNewTaskName] = useState("");
+  const { t } = useTranslation();
 
-  const calculateNextDue = (frequency: Chore["frequency"]): string => {
-    const today = new Date();
-    switch (frequency) {
-      case "daily":
-        today.setDate(today.getDate() + 1);
-        break;
-      case "weekly":
-        today.setDate(today.getDate() + 7);
-        break;
-      case "monthly":
-        today.setMonth(today.getMonth() + 1);
-        break;
-    }
-    return today.toISOString().split("T")[0]!;
+  const {
+    data: activeTasks = [],
+    isLoading: tasksLoading,
+    isError: tasksError,
+  } = useTasks("active");
+  const { data: completedTasks = [] } = useTasks("completed");
+  const {
+    data: chores = [],
+    isLoading: choresLoading,
+    isError: choresError,
+  } = useChores();
+
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+  const toggleTaskDone = useToggleTaskDone();
+  const createChore = useCreateChore();
+  const updateChore = useUpdateChore();
+  const deleteChore = useDeleteChore();
+  const markChoreDone = useMarkChoreDone();
+
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskResponse | null>(null);
+  const [showChoreForm, setShowChoreForm] = useState(false);
+  const [editingChore, setEditingChore] = useState<ChoreResponse | null>(null);
+
+  const handleCreateTask = async (data: TaskFormValues): Promise<void> => {
+    await createTask.mutateAsync({
+      name: data.name,
+      due_date: data.due_date || undefined,
+      priority: data.priority as "low" | "medium" | "high",
+    });
+    toast.success(t("tasks.items.form.created"));
+    setShowTaskForm(false);
   };
 
-  const markChoreDone = (id: number): void => {
-    setChores(
-      chores.map((c) => {
-        if (c.id === id) {
-          return {
-            ...c,
-            lastDone: new Date().toISOString().split("T")[0]!,
-            nextDue: calculateNextDue(c.frequency),
-          };
-        }
-        return c;
-      }),
-    );
-  };
-
-  const toggleTask = (id: number): void => {
-    setTasks(tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
-  };
-
-  const addTask = (): void => {
-    if (!newTaskName.trim()) return;
-    setTasks([
-      ...tasks,
-      {
-        id: Date.now(),
-        name: newTaskName,
-        dueDate: null,
-        done: false,
+  const handleUpdateTask = async (data: TaskFormValues): Promise<void> => {
+    if (!editingTask) return;
+    await updateTask.mutateAsync({
+      id: editingTask.id,
+      data: {
+        name: data.name,
+        due_date: data.due_date || undefined,
+        priority: data.priority as "low" | "medium" | "high",
       },
-    ]);
-    setNewTaskName("");
-    setShowAddTask(false);
+    });
+    toast.success(t("tasks.items.form.updated"));
+    setEditingTask(null);
   };
+
+  const handleDeleteTask = async (): Promise<void> => {
+    if (!editingTask) return;
+    await deleteTask.mutateAsync(editingTask.id);
+    toast.success(t("tasks.items.form.deleted"));
+    setEditingTask(null);
+  };
+
+  const handleToggleTaskDone = async (id: string): Promise<void> => {
+    await toggleTaskDone.mutateAsync(id);
+    toast.success(t("tasks.items.form.toggled"));
+  };
+
+  const handleCreateChore = async (data: ChoreFormValues): Promise<void> => {
+    await createChore.mutateAsync({
+      name: data.name,
+      schedule_type: data.schedule_type as
+        | "interval"
+        | "fixed_weekly"
+        | "fixed_monthly",
+      schedule_value: Number.parseInt(data.schedule_value, 10),
+      assignee: data.assignee || undefined,
+    });
+    toast.success(t("tasks.chores.form.created"));
+    setShowChoreForm(false);
+  };
+
+  const handleUpdateChore = async (data: ChoreFormValues): Promise<void> => {
+    if (!editingChore) return;
+    await updateChore.mutateAsync({
+      id: editingChore.id,
+      data: {
+        name: data.name,
+        schedule_type: data.schedule_type as
+          | "interval"
+          | "fixed_weekly"
+          | "fixed_monthly",
+        schedule_value: Number.parseInt(data.schedule_value, 10),
+        assignee: data.assignee || undefined,
+      },
+    });
+    toast.success(t("tasks.chores.form.updated"));
+    setEditingChore(null);
+  };
+
+  const handleDeleteChore = async (): Promise<void> => {
+    if (!editingChore) return;
+    await deleteChore.mutateAsync(editingChore.id);
+    toast.success(t("tasks.chores.form.deleted"));
+    setEditingChore(null);
+  };
+
+  const handleMarkChoreDone = async (id: string): Promise<void> => {
+    await markChoreDone.mutateAsync(id);
+    toast.success(t("tasks.chores.form.markedDone"));
+  };
+
+  const isLoading = tasksLoading || choresLoading;
+  const isError = tasksError || choresError;
+
+  if (isLoading) {
+    return (
+      <div className="p-8">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-stone-800">
+            {t("tasks.title")}
+          </h2>
+          <p className="text-stone-500 mt-1">{t("tasks.subtitle")}</p>
+        </div>
+        <div className="text-stone-500">{t("common.loading")}</div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-stone-800">
+            {t("tasks.title")}
+          </h2>
+          <p className="text-stone-500 mt-1">{t("tasks.subtitle")}</p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          {t("tasks.errors.loadFailed")}
+        </div>
+      </div>
+    );
+  }
+
+  const choreGroups = groupChores(chores);
+  const taskGroups = groupTasks(activeTasks, completedTasks);
 
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h2 className="text-3xl font-bold text-stone-800">Задачи и дела</h2>
-        <p className="text-stone-500 mt-1">
-          Домашние обязанности и разовые задачи
-        </p>
+        <h2 className="text-3xl font-bold text-stone-800">
+          {t("tasks.title")}
+        </h2>
+        <p className="text-stone-500 mt-1">{t("tasks.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
         <div>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-stone-800">
-              Регулярные дела
+              {t("tasks.chores.title")}
             </h3>
             <button
               type="button"
+              onClick={() => setShowChoreForm(true)}
               className="text-sm text-amber-600 hover:underline"
             >
-              + Добавить
+              + {t("tasks.chores.add")}
             </button>
           </div>
-          <div className="space-y-3">
-            {[...chores]
-              .sort((a, b) => getDaysUntil(a.nextDue) - getDaysUntil(b.nextDue))
-              .map((chore) => {
-                const days = getDaysUntil(chore.nextDue);
-                const isOverdue = days < 0;
-                const isDueToday = days === 0;
-
-                return (
-                  <div
+          <div className="space-y-4">
+            {choreGroups.overdue.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-red-600">
+                  {t("tasks.chores.sections.overdue")}
+                </h4>
+                {choreGroups.overdue.map((chore) => (
+                  <ChoreCard
                     key={chore.id}
-                    className={`bg-white rounded-xl p-4 shadow-sm border ${
-                      isOverdue
-                        ? "border-red-300 bg-red-50"
-                        : isDueToday
-                          ? "border-amber-300 bg-amber-50"
-                          : "border-stone-200"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-stone-800">
-                          {chore.name}
-                        </p>
-                        <p className="text-sm text-stone-500">
-                          {frequencyLabels[chore.frequency]} ·
-                          {isOverdue
-                            ? ` Просрочено на ${Math.abs(days)} дн.`
-                            : isDueToday
-                              ? " Сегодня!"
-                              : ` Через ${days} дн.`}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => markChoreDone(chore.id)}
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
-                      >
-                        Выполнено
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                    chore={chore}
+                    onMarkDone={handleMarkChoreDone}
+                    onClick={setEditingChore}
+                  />
+                ))}
+              </div>
+            )}
+            {choreGroups.upcoming.length > 0 && (
+              <div className="space-y-3">
+                {choreGroups.overdue.length > 0 && (
+                  <h4 className="text-sm font-medium text-stone-500">
+                    {t("tasks.chores.sections.upcoming")}
+                  </h4>
+                )}
+                {choreGroups.upcoming.map((chore) => (
+                  <ChoreCard
+                    key={chore.id}
+                    chore={chore}
+                    onMarkDone={handleMarkChoreDone}
+                    onClick={setEditingChore}
+                  />
+                ))}
+              </div>
+            )}
+            {choreGroups.overdue.length === 0 &&
+              choreGroups.upcoming.length === 0 && (
+                <p className="text-stone-500 text-sm">{t("common.noItems")}</p>
+              )}
           </div>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-stone-800">
-              Разовые задачи
+              {t("tasks.items.title")}
             </h3>
             <button
               type="button"
-              onClick={() => setShowAddTask(true)}
+              onClick={() => setShowTaskForm(true)}
               className="text-sm text-amber-600 hover:underline"
             >
-              + Добавить
+              + {t("tasks.items.add")}
             </button>
           </div>
 
-          {showAddTask && (
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-amber-300 mb-3">
-              <input
-                type="text"
-                placeholder="Название задачи..."
-                value={newTaskName}
-                onChange={(e) => setNewTaskName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addTask()}
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddTask(false)}
-                  className="flex-1 px-3 py-1 border border-stone-300 rounded-lg text-sm"
-                >
-                  Отмена
-                </button>
-                <button
-                  type="button"
-                  onClick={addTask}
-                  className="flex-1 px-3 py-1 bg-amber-500 text-white rounded-lg text-sm"
-                >
-                  Добавить
-                </button>
+          <div className="space-y-4">
+            {taskGroups.overdue.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-red-600">
+                  {t("tasks.items.sections.overdue")}
+                </h4>
+                {taskGroups.overdue.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onToggleDone={handleToggleTaskDone}
+                    onClick={setEditingTask}
+                  />
+                ))}
               </div>
-            </div>
-          )}
-
-          <div className="space-y-3">
-            {tasks
-              .filter((t) => !t.done)
-              .map((task) => (
-                <div
-                  key={task.id}
-                  className="bg-white rounded-xl p-4 shadow-sm border border-stone-200"
-                >
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => toggleTask(task.id)}
-                      className="w-6 h-6 rounded-full border-2 border-stone-300 hover:border-green-500 transition-colors"
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium text-stone-800">{task.name}</p>
-                      {task.dueDate && (
-                        <p className="text-sm text-stone-500">
-                          До {formatDate(task.dueDate)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            )}
+            {taskGroups.active.length > 0 && (
+              <div className="space-y-3">
+                {taskGroups.overdue.length > 0 && (
+                  <h4 className="text-sm font-medium text-stone-500">
+                    {t("tasks.items.sections.active")}
+                  </h4>
+                )}
+                {taskGroups.active.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onToggleDone={handleToggleTaskDone}
+                    onClick={setEditingTask}
+                  />
+                ))}
+              </div>
+            )}
+            {taskGroups.overdue.length === 0 &&
+              taskGroups.active.length === 0 && (
+                <p className="text-stone-500 text-sm">{t("common.noItems")}</p>
+              )}
           </div>
 
-          {tasks.filter((t) => t.done).length > 0 && (
+          {completedTasks.length > 0 && (
             <div className="mt-6">
               <h4 className="text-sm font-medium text-stone-500 mb-3">
-                Выполнено
+                {t("tasks.items.completed")}
               </h4>
               <div className="space-y-2 opacity-60">
-                {tasks
-                  .filter((t) => t.done)
-                  .map((task) => (
-                    <div
-                      key={task.id}
-                      className="bg-white rounded-xl p-4 shadow-sm border border-stone-200"
-                    >
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => toggleTask(task.id)}
-                          className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center"
-                        >
-                          <Icons.Check />
-                        </button>
-                        <p className="line-through text-stone-400">
-                          {task.name}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                {completedTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onToggleDone={handleToggleTaskDone}
+                    onClick={setEditingTask}
+                  />
+                ))}
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {showTaskForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-stone-800 mb-4">
+              {t("tasks.items.form.createTitle")}
+            </h3>
+            <TaskForm
+              onSubmit={handleCreateTask}
+              onCancel={() => setShowTaskForm(false)}
+              isSubmitting={createTask.isPending}
+            />
+          </div>
+        </div>
+      )}
+
+      {editingTask && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-stone-800 mb-4">
+              {t("tasks.items.form.editTitle")}
+            </h3>
+            <TaskForm
+              task={editingTask}
+              onSubmit={handleUpdateTask}
+              onCancel={() => setEditingTask(null)}
+              onDelete={handleDeleteTask}
+              isSubmitting={updateTask.isPending}
+              isDeleting={deleteTask.isPending}
+            />
+          </div>
+        </div>
+      )}
+
+      {showChoreForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-stone-800 mb-4">
+              {t("tasks.chores.form.createTitle")}
+            </h3>
+            <ChoreForm
+              onSubmit={handleCreateChore}
+              onCancel={() => setShowChoreForm(false)}
+              isSubmitting={createChore.isPending}
+            />
+          </div>
+        </div>
+      )}
+
+      {editingChore && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-stone-800 mb-4">
+              {t("tasks.chores.form.editTitle")}
+            </h3>
+            <ChoreForm
+              chore={editingChore}
+              onSubmit={handleUpdateChore}
+              onCancel={() => setEditingChore(null)}
+              onDelete={handleDeleteChore}
+              isSubmitting={updateChore.isPending}
+              isDeleting={deleteChore.isPending}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -15,22 +15,6 @@ export interface StockEntry {
   note: string;
 }
 
-export interface Chore {
-  id: number;
-  name: string;
-  frequency: "daily" | "weekly" | "monthly";
-  lastDone: string;
-  nextDue: string;
-  assignee: string | null;
-}
-
-export interface Task {
-  id: number;
-  name: string;
-  dueDate: string | null;
-  done: boolean;
-}
-
 export interface Recipe {
   id: number;
   name: string;
@@ -56,10 +40,10 @@ export function getDaysUntil(dateStr: string | null): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const target = new Date(dateStr);
-  const diff = Math.ceil(
+  target.setHours(0, 0, 0, 0);
+  return Math.round(
     (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
   );
-  return diff;
 }
 
 export function getExpiryStatus(

@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useProducts, useShoppingList } from "../../api/queries";
+import { useChores, useMarkChoreDone } from "../../api/queries/chores";
 import { useExpiringStock, useStockEntries } from "../../api/queries/stocks";
+import { useTasks } from "../../api/queries/tasks";
 import { Icons } from "../../components/Icons";
-import { useChores, useTasks } from "../../data/hooks";
 import { formatDate, getDaysUntil } from "../../data/types";
 import {
   getExpiryStatus,
@@ -17,8 +18,9 @@ export function DashboardPage(): React.ReactElement {
   const { data: stockEntries = [] } = useStockEntries();
   const { data: expiringItems = [] } = useExpiringStock(7);
   const { data: shoppingList = [] } = useShoppingList();
-  const { chores } = useChores();
-  const { tasks } = useTasks();
+  const { data: chores = [] } = useChores();
+  const { data: tasks = [] } = useTasks("active");
+  const markChoreDone = useMarkChoreDone();
 
   // Low stock calculation
   const lowStockItems = products
@@ -31,7 +33,7 @@ export function DashboardPage(): React.ReactElement {
     })
     .filter((p) => p.isLow);
 
-  const todayChores = chores.filter((c) => getDaysUntil(c.nextDue) <= 0);
+  const todayChores = chores.filter((c) => getDaysUntil(c.next_due_at) <= 0);
   const upcomingTasks = tasks.filter((t) => !t.done).slice(0, 3);
   const shoppingCount = shoppingList.filter((i) => !i.done).length;
 
@@ -210,7 +212,9 @@ export function DashboardPage(): React.ReactElement {
                     <p className="font-medium text-stone-800">{chore.name}</p>
                     <button
                       type="button"
-                      className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors"
+                      onClick={() => markChoreDone.mutate(chore.id)}
+                      disabled={markChoreDone.isPending}
+                      className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition-colors disabled:opacity-50"
                     >
                       {t("dashboard.completed")}
                     </button>
@@ -248,7 +252,7 @@ export function DashboardPage(): React.ReactElement {
                   >
                     <p className="font-medium text-stone-800">{task.name}</p>
                     <span className="text-sm text-stone-500">
-                      {formatDate(task.dueDate)}
+                      {formatDate(task.due_date ?? null)}
                     </span>
                   </div>
                 ))}

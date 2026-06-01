@@ -21,6 +21,7 @@ integrations = ["symfony", "phpunit"]
 ambiguous-function-call = { enabled = false }
 literal-named-argument = { enabled = false }
 halstead = { effort-threshold = 7000 }
+too-many-methods = { threshold = 20 }
 
 [analyzer]
 find-unused-definitions = true

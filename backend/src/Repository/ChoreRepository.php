@@ -24,10 +24,6 @@ class ChoreRepository extends ServiceEntityRepository
     public function findAllOrderedByNextDue(): array
     {
         // @mago-ignore analysis:mixed-return-statement
-        return $this
-            ->createQueryBuilder('c')
-            ->orderBy('c.nextDueAt', 'ASC')
-            ->getQuery()
-            ->getResult();
+        return $this->createQueryBuilder('c')->orderBy('c.nextDueAt', 'ASC')->getQuery()->getResult();
     }
 }

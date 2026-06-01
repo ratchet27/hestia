@@ -1,4 +1,4 @@
-import type { Chore, Recipe, StockEntry, Task, User } from "./types";
+import type { Recipe, StockEntry, User } from "./types";
 
 export const mockUser: User = {
   id: 1,
@@ -98,64 +98,6 @@ export const mockStockEntries: StockEntry[] = [
     location: "fridge",
     note: "Скоро истекает!",
   },
-];
-
-export const mockChores: Chore[] = [
-  {
-    id: 1,
-    name: "Пропылесосить квартиру",
-    frequency: "weekly",
-    lastDone: "2026-01-10",
-    nextDue: "2026-01-17",
-    assignee: null,
-  },
-  {
-    id: 2,
-    name: "Помыть полы",
-    frequency: "weekly",
-    lastDone: "2026-01-12",
-    nextDue: "2026-01-19",
-    assignee: null,
-  },
-  {
-    id: 3,
-    name: "Вынести мусор",
-    frequency: "daily",
-    lastDone: "2026-01-16",
-    nextDue: "2026-01-17",
-    assignee: null,
-  },
-  {
-    id: 4,
-    name: "Полить цветы",
-    frequency: "weekly",
-    lastDone: "2026-01-14",
-    nextDue: "2026-01-21",
-    assignee: null,
-  },
-  {
-    id: 5,
-    name: "Протереть пыль",
-    frequency: "weekly",
-    lastDone: "2026-01-11",
-    nextDue: "2026-01-18",
-    assignee: null,
-  },
-  {
-    id: 6,
-    name: "Постирать бельё",
-    frequency: "weekly",
-    lastDone: "2026-01-13",
-    nextDue: "2026-01-20",
-    assignee: null,
-  },
-];
-
-export const mockTasks: Task[] = [
-  { id: 1, name: "Записаться к врачу", dueDate: "2026-01-20", done: false },
-  { id: 2, name: "Оплатить коммуналку", dueDate: "2026-01-25", done: false },
-  { id: 3, name: "Купить подарок маме", dueDate: "2026-01-28", done: false },
-  { id: 4, name: "Вызвать сантехника", dueDate: "2026-01-15", done: true },
 ];
 
 export const mockRecipes: Recipe[] = [

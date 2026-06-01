@@ -1,6 +1,7 @@
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 import {
+  createChoreResponse,
   createExpiringEntry,
   createProductResponse,
   createShoppingItem,
@@ -124,5 +125,41 @@ describe("DashboardPage", () => {
     // Router should navigate (we can't fully test this without router mock,
     // but at least verify the button exists and is clickable)
     expect(viewAllLink).toBeInTheDocument();
+  });
+
+  it("clicking Выполнено button fires POST to mark chore done", async () => {
+    const chore = createChoreResponse({
+      id: "chore-test-1",
+      name: "Помыть полы",
+      // past date so getDaysUntil <= 0, making it a today-chore
+      next_due_at: "2026-05-31T00:00:00+00:00",
+    });
+
+    let markDoneHit = false;
+
+    server.use(
+      http.get("*/api/internal/v1/chores", () =>
+        HttpResponse.json(wrapResponse([chore])),
+      ),
+      http.get("*/api/internal/v1/shopping-list", () =>
+        HttpResponse.json(wrapResponse([])),
+      ),
+      http.post(`*/api/internal/v1/chores/${chore.id}/done`, () => {
+        markDoneHit = true;
+        return HttpResponse.json(wrapResponse(chore));
+      }),
+    );
+
+    const { user } = render(<DashboardPage />);
+
+    // Wait for the chore to appear in the today section
+    await screen.findByText("Помыть полы");
+
+    // Click the Выполнено button
+    const doneButton = screen.getByRole("button", { name: /Выполнено/i });
+    await user.click(doneButton);
+
+    // Verify the POST was hit
+    await expect.poll(() => markDoneHit).toBe(true);
   });
 });
