@@ -469,9 +469,9 @@ class ProductControllerTest extends WebTestCase
         $newCategory = $this->createCategory(['name' => 'New Category']);
         $product = $this->createProduct(['category' => $oldCategory]);
 
-        $response = $this->apiPut('/products/'
-            . $product->getId(), $this->buildUpdatePayload($product, ['category_id' =>
-            (string) $newCategory->getId()]));
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'category_id' => (string) $newCategory->getId()
+        ]));
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertSame('New Category', $data['data']['category']['name']);
@@ -483,9 +483,9 @@ class ProductControllerTest extends WebTestCase
         $newLocation = $this->createLocation(['name' => 'New Location']);
         $product = $this->createProduct(['defaultLocation' => $oldLocation]);
 
-        $response = $this->apiPut('/products/'
-            . $product->getId(), $this->buildUpdatePayload($product, ['default_location_id' =>
-            (string) $newLocation->getId()]));
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'default_location_id' => (string) $newLocation->getId()
+        ]));
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
         static::assertSame('New Location', $data['data']['default_location']['name']);

@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 class AppTimezoneTest extends TestCase
 {
-    private const POST_CHANGE_DATE = '2026-06-01T12:00:00+00:00';
+    private const string POST_CHANGE_DATE = '2026-06-01T12:00:00+00:00';
 
     public function testEffectiveOffsetIsAlwaysPlusFive(): void
     {

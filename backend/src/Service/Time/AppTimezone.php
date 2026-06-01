@@ -12,24 +12,22 @@ namespace App\Service\Time;
  * offset as the fixed fallback — so a container with stale tzdata that maps the
  * named zone to the wrong offset transparently falls back to the safe fixed value.
  */
-final class AppTimezone
+final readonly class AppTimezone
 {
     /** A date after Kazakhstan's 2024-03-01 move to permanent UTC+5. */
-    private const REFERENCE = '2024-06-01T12:00:00+00:00';
+    private const string REFERENCE = '2024-06-01T12:00:00+00:00';
 
-    private readonly \DateTimeZone $timezone;
+    private \DateTimeZone $timezone;
 
     public function __construct(
         string $fixedOffset = '+05:00',
-        string $preferredZone = 'Asia/Almaty',
+        string $preferredZone = 'Asia/Almaty'
     ) {
         $reference = new \DateTimeImmutable(self::REFERENCE);
         $named = new \DateTimeZone($preferredZone);
         $fixed = new \DateTimeZone($fixedOffset);
 
-        $this->timezone = $named->getOffset($reference) === $fixed->getOffset($reference)
-            ? $named
-            : $fixed;
+        $this->timezone = $named->getOffset($reference) === $fixed->getOffset($reference) ? $named : $fixed;
     }
 
     public function get(): \DateTimeZone

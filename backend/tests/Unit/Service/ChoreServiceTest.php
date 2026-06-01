@@ -21,7 +21,7 @@ class ChoreServiceTest extends TestCase
         // 21:00 UTC on Jun 1 == 02:00 Almaty (+05) on Jun 2.
         $clock = new MockClock(new \DateTimeImmutable('2026-06-01 21:00:00', new \DateTimeZone('UTC')));
 
-        $chore = (new Chore())
+        $chore = new Chore()
             ->setName('Test')
             ->setScheduleType(ScheduleType::INTERVAL)
             ->setScheduleValue(7);
