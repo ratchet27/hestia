@@ -89,6 +89,11 @@ class ChoreTest extends TestCase
         yield 'day 31 clamps to end of April' => ['2026-04-05', 31, '2026-04-30'];
         yield 'day 30 clamps to end of February' => ['2026-02-05', 30, '2026-02-28'];
         yield 'done on the 31st does not skip February' => ['2026-01-31', 31, '2026-02-28'];
+
+        // Regression: when $from is already the last day of a short month and $targetDay
+        // exceeds that last day, nextMonthDay must advance to the NEXT month, not stay on $from.
+        yield 'from end of non-leap Feb, target 31 advances to March' => ['2026-02-28', 31, '2026-03-31'];
+        yield 'from end of April, target 31 advances to May' => ['2026-04-30', 31, '2026-05-31'];
     }
 
     public function testMarkDoneUpdatesLastDoneAt(): void

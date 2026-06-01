@@ -186,11 +186,19 @@ class Chore
     private function nextMonthDay(\DateTimeImmutable $from, int $targetDay): \DateTimeImmutable
     {
         $currentDay = (int) $from->format('j');
-        $month = $currentDay < $targetDay ? $from : $from->modify('first day of next month');
+        $anchor = $currentDay < $targetDay ? $from : $from->modify('first day of next month');
 
-        $lastDay = (int) $month->format('t');
+        $lastDay = (int) $anchor->format('t');
         $day = min($targetDay, $lastDay);
 
-        return $month->setDate((int) $month->format('Y'), (int) $month->format('m'), $day);
+        // If clamping reproduced $from (month too short to reach the target day),
+        // advance one more month and clamp again so the chore never stays on today.
+        if ($anchor === $from && $day === $currentDay) {
+            $anchor = $from->modify('first day of next month');
+            $lastDay = (int) $anchor->format('t');
+            $day = min($targetDay, $lastDay);
+        }
+
+        return $anchor->setDate((int) $anchor->format('Y'), (int) $anchor->format('m'), $day);
     }
 }
