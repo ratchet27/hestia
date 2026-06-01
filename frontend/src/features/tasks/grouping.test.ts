@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import { createChoreResponse, createTaskResponse } from "@/test/mocks/data";
 import { groupChores, groupTasks } from "./grouping";
 
+// Uses LOCAL-midnight arithmetic to match getDaysUntil (which compares local
+// midnights). UTC-based arithmetic would disagree by a day near the date
+// boundary in a non-UTC timezone, making the days=0 cases flaky.
 function isoDaysFromToday(days: number): string {
   const d = new Date();
-  d.setUTCHours(0, 0, 0, 0);
-  d.setUTCDate(d.getUTCDate() + days);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + days);
   return d.toISOString();
 }
 

@@ -118,13 +118,14 @@ describe("TasksPage", () => {
   });
 
   it("renders overdue chores under 'Просрочено' section heading", async () => {
+    // Local-midnight arithmetic to match getDaysUntil (avoids timezone-boundary flakiness).
     const yesterday = new Date();
-    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-    yesterday.setUTCHours(0, 0, 0, 0);
+    yesterday.setHours(0, 0, 0, 0);
+    yesterday.setDate(yesterday.getDate() - 1);
 
     const tomorrow = new Date();
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 3);
-    tomorrow.setUTCHours(0, 0, 0, 0);
+    tomorrow.setHours(0, 0, 0, 0);
+    tomorrow.setDate(tomorrow.getDate() + 3);
 
     const overdueChore = createChoreResponse({
       name: "Просроченное дело",
