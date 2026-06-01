@@ -60,6 +60,7 @@ export function ChoreCard({
   );
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: card wraps an action button; a real <button> would nest interactive elements
     <div
       role="button"
       tabIndex={0}

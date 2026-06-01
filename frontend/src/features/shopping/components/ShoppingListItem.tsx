@@ -32,6 +32,7 @@ export function ShoppingListItem({
   };
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: Contains nested button, can't use button element
     <div
       role="button"
       tabIndex={0}
