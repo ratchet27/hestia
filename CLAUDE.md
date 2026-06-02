@@ -49,3 +49,5 @@ Always run from the correct directory. Use full paths to avoid mistakes.
 - **NEVER** run `mago` inside Docker → it runs locally on host
 - **NEVER** run `bun run check` without `cd frontend` first
 - **NEVER** run `php` or `composer` on host → use `docker compose exec php`
+- **NEVER** use a subset (e.g. bare `mago format && mago lint`) as the backend gate → run **`make lint`**. It runs `rector → mago format → mago lint → mago analyze → phpstan`, a superset of CI's Code Quality job. Bare `mago lint` skips `mago analyze`, so analyzer errors (`invalid-return-statement`, `mixed-argument`, …) pass locally but fail CI.
+- **`config/reference.php` is generated** (Symfony IDE-autocomplete dump, non-deterministic union ordering) and **gitignored** — never commit it or treat its churn as a real change.
