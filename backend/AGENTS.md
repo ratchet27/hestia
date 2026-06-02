@@ -141,7 +141,10 @@ docker compose exec database psql -U app -d app
 
 ## Testing
 
-PHPUnit 12 via Symfony test-pack.
+PHPUnit 13 via Symfony test-pack. Functional tests use Zenstruck Foundry factories +
+`ResetDatabase`; the API sits behind an authenticated firewall, so functional tests that hit
+`/api/internal/v1/...` must authenticate in `setUp` (`$this->client->loginUser(UserFactory::createOne())`)
+and attach a CSRF token on writes (see `ApiTestTrait`).
 
 ```bash
 # Run tests
@@ -163,6 +166,15 @@ Reports saved to `var/infection.log` and `var/infection.html`.
 
 ## Code Quality
 
+**You MUST run `make lint` before claiming any backend work is complete.** It runs the full
+gate in order — `rector → mago format → mago lint → mago analyze → phpstan` — which is a
+**superset of CI's Code Quality job** (`mago format --check`, `mago lint`, `mago analyze`).
+
+**Do NOT substitute a subset** (e.g. bare `mago format && mago lint`). That skips
+`mago analyze`, so analyzer-only errors (`invalid-return-statement`, `mixed-argument`, …)
+pass locally and then fail CI. `make lint` needs Docker up (rector + phpstan run in the
+container; mago runs on the host, never in Docker).
+
 Tools configured: Rector, Mago, PHPStan. Run in this order (file-modifying first, then analysis).
 
 ### Rector (refactoring)
@@ -182,6 +194,12 @@ mago lint             # Check for issues
 mago analyze          # Static analysis
 ```
 
+mago scans `src` and `tests` only (see `mago.toml` `[source] paths`) — it does NOT touch
+`config/`. For genuine vendor/framework type mismatches the analyzer can't reconcile,
+suppress with an inline `// @mago-ignore analysis:<rule>` on the line above (the codebase
+already does this, e.g. `analysis:mixed-return-statement` for Doctrine `getResult()`).
+Prefer a real fix (e.g. an explicit `(string)` cast) when one is clean.
+
 ### PHPStan (static analysis)
 
 ```bash
@@ -190,11 +208,15 @@ docker compose exec php vendor/bin/phpstan analyse
 
 ### Quick Check (all tools)
 
+Just use `make lint` — it runs all of the above in the correct order:
+
 ```bash
-docker compose exec php vendor/bin/rector && \
-mago format && mago lint && mago analyze && \
-docker compose exec php vendor/bin/phpstan analyse
+make lint
 ```
+
+Note: `config/reference.php` is a Symfony-generated IDE-autocomplete dump (non-deterministic
+union ordering, regenerated on every kernel boot). It is **gitignored** — never commit it or
+treat its churn as a real change.
 
 ## Claude Code Notes
 
