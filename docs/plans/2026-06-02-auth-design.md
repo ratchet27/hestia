@@ -58,14 +58,15 @@ authenticating via **`json_login`** (JSON POST, not an HTML form — SPA-friendl
 
 ## Backend components
 
-- **`User` entity** — UUIDv7 PK; `username` (unique), `email` (unique), `name` (display),
-  `password` (hashed), `roles` (default `["ROLE_USER"]`). Implements `UserInterface` +
+- **`User` entity** — UUIDv7 PK; `username` (unique), `email` (unique, **optional/nullable** —
+  Telegram has no email later), `name` (display), `password` (hashed), `roles` (default
+  `["ROLE_USER"]`). Implements `UserInterface` +
   `PasswordAuthenticatedUserInterface`. One Doctrine migration.
 - **`security.yaml`** — auto password hasher (argon/bcrypt), entity user provider keyed on
   `username`, firewall (`json_login` + `logout` + `remember_me` + `login_throttling`),
   `access_control` protecting the API.
 - **Auth controller** — thin: `me` endpoint and login/logout response shaping; Symfony does the auth.
-- **CLI commands** — `app:user:create` (prompt username/email/name/password, hash it) and
+- **CLI commands** — `app:user:create` (prompt username/name/password, email optional, hash it) and
   `app:user:set-password`. No registration endpoint.
 
 ## Frontend wiring
