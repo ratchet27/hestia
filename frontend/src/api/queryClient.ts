@@ -14,6 +14,12 @@ function handleGlobalError(error: unknown): void {
       return;
     }
 
+    // 401 means the session expired; apiFetch already redirects to /login,
+    // so a toast would only flash before navigation.
+    if (error.isUnauthorized) {
+      return;
+    }
+
     // Server errors and other failures get toasts
     toast.error(error.message);
   } else if (error instanceof Error) {
