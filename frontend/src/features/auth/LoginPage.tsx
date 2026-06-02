@@ -9,7 +9,6 @@ export function LoginPage(): React.ReactElement {
   const { user, login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -105,20 +104,6 @@ export function LoginPage(): React.ReactElement {
               className="w-full px-3 py-2 bg-stone-700 border border-stone-600 rounded text-stone-200 placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               placeholder={t("auth.passwordPlaceholder")}
             />
-          </div>
-
-          <div className="mb-6">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded bg-stone-700 border-stone-600 text-amber-500 focus:ring-amber-500 focus:ring-offset-stone-800"
-              />
-              <span className="text-sm text-stone-400">
-                {t("auth.rememberMe")}
-              </span>
-            </label>
           </div>
 
           <button

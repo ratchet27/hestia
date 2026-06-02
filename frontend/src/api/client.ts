@@ -17,6 +17,10 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 
+  get isUnauthorized(): boolean {
+    return this.status === 401;
+  }
+
   get isConflict(): boolean {
     return this.status === 409;
   }
