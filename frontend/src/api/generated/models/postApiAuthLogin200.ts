@@ -5,8 +5,8 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
-import type { TaskResponse } from './taskResponse.ts';
+import type { UserResponse } from './userResponse.ts';
 
-export type GetApiTasksShow200 = {
-  data?: TaskResponse;
+export type PostApiAuthLogin200 = {
+  data?: UserResponse;
 };
