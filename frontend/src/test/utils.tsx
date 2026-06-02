@@ -4,7 +4,7 @@ import { userEvent } from "@testing-library/user-event";
 import type { ReactElement, ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { BrowserRouter } from "react-router-dom";
-import { DataProvider } from "@/data/context";
+import { AuthProvider, DataProvider } from "@/data/context";
 import i18n from "@/i18n";
 
 // Create a fresh QueryClient for each test
@@ -33,9 +33,11 @@ function AllProviders({ children }: WrapperProps) {
   return (
     <I18nextProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
-        <DataProvider>
-          <BrowserRouter>{children}</BrowserRouter>
-        </DataProvider>
+        <AuthProvider>
+          <DataProvider>
+            <BrowserRouter>{children}</BrowserRouter>
+          </DataProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </I18nextProvider>
   );
