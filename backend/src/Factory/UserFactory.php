@@ -37,6 +37,7 @@ final class UserFactory extends PersistentObjectFactory
         ];
     }
 
+    #[\Override]
     protected function initialize(): static
     {
         return $this->instantiateWith(Instantiator::withConstructor()->allowExtra(

@@ -20,9 +20,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $id;
 
-    #[ORM\Column(length: 180, unique: true)]
-    private string $username;
-
     #[ORM\Column(length: 180, unique: true, nullable: true)]
     private ?string $email = null;
 
@@ -39,10 +36,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct(string $username)
-    {
+    public function __construct(
+        #[ORM\Column(length: 180, unique: true)]
+        private string $username
+    ) {
         $this->id = Uuid::v7();
-        $this->username = $username;
         $this->createdAt = new \DateTimeImmutable();
     }
 
