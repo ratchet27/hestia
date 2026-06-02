@@ -1,11 +1,4 @@
-import type { Recipe, StockEntry, User } from "./types";
-
-export const mockUser: User = {
-  id: 1,
-  name: "Pavel",
-  username: "pavel",
-  email: "ratchet270@gmail.com",
-};
+import type { Recipe, StockEntry } from "./types";
 
 export const mockStockEntries: StockEntry[] = [
   {
