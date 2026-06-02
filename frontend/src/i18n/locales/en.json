@@ -117,6 +117,22 @@
     "daysAgo": "{{count}} days ago",
     "inDays": "in {{count}} days"
   },
+  "auth": {
+    "appTagline": "Household tracker",
+    "title": "Sign in",
+    "username": "Username",
+    "usernamePlaceholder": "Enter username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "rememberMe": "Remember me",
+    "submit": "Sign in",
+    "submitting": "Signing in...",
+    "usernameRequired": "Enter your username",
+    "passwordRequired": "Enter your password",
+    "invalidCredentials": "Invalid username or password",
+    "tooManyAttempts": "Too many attempts. Try again later.",
+    "genericError": "Could not sign in. Please try again."
+  },
   "tasks": {
     "title": "Tasks & Chores",
     "subtitle": "Household duties and one-time tasks",

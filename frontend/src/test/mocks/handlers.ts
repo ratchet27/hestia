@@ -3,6 +3,9 @@ import { createStockEntry, wrapResponse } from "./data";
 
 // Default success handlers - provide sensible defaults for all API endpoints
 export const handlers = [
+  http.get("*/api/internal/v1/auth/me", () =>
+    HttpResponse.json({ message: "Authentication required." }, { status: 401 }),
+  ),
   http.get("*/api/internal/v1/stocks/entries", () =>
     HttpResponse.json(wrapResponse([createStockEntry()])),
   ),

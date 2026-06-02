@@ -13,6 +13,7 @@ use App\Factory\CategoryFactory;
 use App\Factory\LocationFactory;
 use App\Factory\ProductFactory;
 use App\Factory\ShoppingListItemFactory;
+use App\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,6 +30,7 @@ class ShoppingListControllerTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->loginAs(UserFactory::createOne());
     }
 
     /** @param array<string, mixed> $attributes */

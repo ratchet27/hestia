@@ -34,11 +34,10 @@ export class ApiError extends Error {
   }
 }
 
-// CSRF token placeholder - will be implemented with session auth
+// Reads the double-submit CSRF token set by the backend (XSRF-TOKEN cookie).
 function getCsrfToken(): string | null {
-  // TODO: Implement when session auth is added
-  // Options: read from cookie, meta tag, or dedicated endpoint
-  return null;
+  const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+  return match ? decodeURIComponent(match[1]!) : null;
 }
 
 export async function apiFetch<T>(
@@ -90,6 +89,16 @@ export async function apiFetch<T>(
 
   // Handle errors - throw so they don't reach calling code
   if (!response.ok) {
+    if (
+      response.status === 401 &&
+      !url.includes("/auth/me") &&
+      !url.includes("/auth/login") &&
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/login"
+    ) {
+      window.location.assign("/login");
+    }
+
     const errorData = data as {
       detail?: string;
       message?: string;

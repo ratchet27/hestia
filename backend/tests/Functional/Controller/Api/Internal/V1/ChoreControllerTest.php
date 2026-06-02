@@ -7,6 +7,7 @@ namespace App\Tests\Functional\Controller\Api\Internal\V1;
 use App\Entity\Chore;
 use App\Enum\ScheduleType;
 use App\Factory\ChoreFactory;
+use App\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,7 @@ class ChoreControllerTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->loginAs(UserFactory::createOne());
     }
 
     public function testListReturnsEmptyWhenNoData(): void

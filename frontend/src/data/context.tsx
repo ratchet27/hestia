@@ -1,5 +1,6 @@
-import { createContext, type ReactNode, useState } from "react";
-import { mockRecipes, mockUser } from "./mocks";
+import { createContext, type ReactNode, useEffect, useState } from "react";
+import { apiFetch } from "../api/client";
+import { mockRecipes } from "./mocks";
 import type { Recipe, User } from "./types";
 
 export interface RecipesContextValue {
@@ -9,8 +10,9 @@ export interface RecipesContextValue {
 
 export interface AuthContextValue {
   user: User | null;
-  login: (username: string, password: string, rememberMe?: boolean) => boolean;
-  logout: () => void;
+  isLoading: boolean;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const RecipesContext = createContext<RecipesContextValue | null>(null);
@@ -36,39 +38,70 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const AUTH_STORAGE_KEY = "hestia_auth";
-
 export function AuthProvider({
   children,
 }: AuthProviderProps): React.ReactElement {
-  // Initialize user synchronously from localStorage to prevent redirect flash
-  const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-    return stored === "remembered" ? mockUser : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = (
-    username: string,
-    password: string,
-    rememberMe?: boolean,
-  ): boolean => {
-    if (username === "pavel" && password === "password") {
-      setUser(mockUser);
-      if (rememberMe) {
-        localStorage.setItem(AUTH_STORAGE_KEY, "remembered");
-      }
-      return true;
+  useEffect(() => {
+    let cancelled = false;
+
+    apiFetch<{ data: { data?: User }; status: number; headers: Headers }>(
+      "/api/internal/v1/auth/me",
+    )
+      .then((result) => {
+        if (!cancelled) {
+          setUser(result.data.data ?? null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const login = async (username: string, password: string): Promise<void> => {
+    // Attempt CSRF token fetch; ignore failures
+    try {
+      await apiFetch("/api/internal/v1/auth/csrf");
+    } catch {
+      // ignore
     }
-    return false;
+
+    const result = await apiFetch<{
+      data: { data?: User };
+      status: number;
+      headers: Headers;
+    }>("/api/internal/v1/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password }),
+    });
+
+    setUser(result.data.data ?? null);
   };
 
-  const logout = (): void => {
+  const logout = async (): Promise<void> => {
+    try {
+      await apiFetch("/api/internal/v1/auth/logout", { method: "POST" });
+    } catch {
+      // ignore failures
+    }
     setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

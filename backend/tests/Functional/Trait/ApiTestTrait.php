@@ -19,6 +19,11 @@ trait ApiTestTrait
         'CONTENT_TYPE' => 'application/json'
     ];
 
+    protected function loginAs(\App\Entity\User $user): void
+    {
+        $this->client->loginUser($user);
+    }
+
     /** @param array<string, mixed> $parameters */
     protected function apiGet(string $uri, array $parameters = []): Response
     {
@@ -35,7 +40,7 @@ trait ApiTestTrait
             self::API_PREFIX . $uri,
             [],
             [],
-            self::JSON_HEADERS,
+            $this->csrfHeaders(),
             json_encode($data, JSON_THROW_ON_ERROR)
         );
 
@@ -50,7 +55,7 @@ trait ApiTestTrait
             self::API_PREFIX . $uri,
             [],
             [],
-            self::JSON_HEADERS,
+            $this->csrfHeaders(),
             json_encode($data, JSON_THROW_ON_ERROR)
         );
 
@@ -65,7 +70,7 @@ trait ApiTestTrait
             self::API_PREFIX . $uri,
             [],
             [],
-            self::JSON_HEADERS,
+            $this->csrfHeaders(),
             json_encode($data, JSON_THROW_ON_ERROR)
         );
 
@@ -76,9 +81,18 @@ trait ApiTestTrait
     protected function apiDelete(string $uri, array $parameters = []): Response
     {
         $queryString = $parameters ? '?' . http_build_query($parameters) : '';
-        $this->client->request('DELETE', self::API_PREFIX . $uri . $queryString, [], [], self::JSON_HEADERS);
+        $this->client->request('DELETE', self::API_PREFIX . $uri . $queryString, [], [], $this->csrfHeaders());
 
         return $this->client->getResponse();
+    }
+
+    /** @return array<string, string> */
+    private function csrfHeaders(): array
+    {
+        $this->client->request('GET', self::API_PREFIX . '/auth/csrf');
+        $token = $this->client->getCookieJar()->get('XSRF-TOKEN')?->getValue() ?? '';
+
+        return self::JSON_HEADERS + ['HTTP_X_CSRF_TOKEN' => $token];
     }
 
     /** @return array<string, mixed> */

@@ -4,17 +4,24 @@ declare(strict_types = 1);
 
 namespace App\Tests\Functional\EventListener;
 
+use App\Factory\UserFactory;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Zenstruck\Foundry\Test\Factories;
+use Zenstruck\Foundry\Test\ResetDatabase;
 
 class ApiContentNegotiationListenerTest extends WebTestCase
 {
+    use Factories;
+    use ResetDatabase;
+
     private KernelBrowser $client;
 
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->client->loginUser(UserFactory::createOne());
     }
 
     public function testRejectsTextHtmlAcceptHeader(): void

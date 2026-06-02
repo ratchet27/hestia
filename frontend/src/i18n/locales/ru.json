@@ -119,6 +119,22 @@
     "daysAgo": "{{count}} дн. назад",
     "inDays": "через {{count}} дн."
   },
+  "auth": {
+    "appTagline": "Домашний учёт",
+    "title": "Вход",
+    "username": "Имя пользователя",
+    "usernamePlaceholder": "Введите имя пользователя",
+    "password": "Пароль",
+    "passwordPlaceholder": "Введите пароль",
+    "rememberMe": "Запомнить меня",
+    "submit": "Войти",
+    "submitting": "Вход...",
+    "usernameRequired": "Введите имя пользователя",
+    "passwordRequired": "Введите пароль",
+    "invalidCredentials": "Неверное имя пользователя или пароль",
+    "tooManyAttempts": "Слишком много попыток. Попробуйте позже.",
+    "genericError": "Не удалось войти. Попробуйте ещё раз."
+  },
   "tasks": {
     "title": "Задачи и дела",
     "subtitle": "Домашние обязанности и разовые задачи",

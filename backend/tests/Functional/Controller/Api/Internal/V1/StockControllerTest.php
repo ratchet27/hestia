@@ -12,6 +12,7 @@ use App\Factory\CategoryFactory;
 use App\Factory\LocationFactory;
 use App\Factory\ProductFactory;
 use App\Factory\StockEntryFactory;
+use App\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Clock\Test\ClockSensitiveTrait;
@@ -30,6 +31,7 @@ class StockControllerTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->loginAs(UserFactory::createOne());
     }
 
     /** @param array<string, mixed> $attributes */

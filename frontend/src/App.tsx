@@ -15,7 +15,14 @@ function ProtectedRoute({
 }: {
   children: React.ReactElement;
 }): React.ReactElement {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-stone-900 flex items-center justify-center text-stone-400">
+        Загрузка...
+      </div>
+    );
+  }
   if (!user) {
     return <Navigate to="/login" replace />;
   }
