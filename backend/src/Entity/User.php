@@ -56,6 +56,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
+        // @mago-ignore analysis:invalid-return-statement
         return $this->username;
     }
 

@@ -43,7 +43,8 @@ final class UserFactory extends PersistentObjectFactory
         return $this->instantiateWith(Instantiator::withConstructor()->allowExtra(
             'plainPassword'
         ))->afterInstantiate(function (User $user, array $attributes): void {
-            $user->setPassword($this->hasher->hashPassword($user, $attributes['plainPassword'] ?? 'password'));
+            $plainPassword = (string) ( $attributes['plainPassword'] ?? 'password' );
+            $user->setPassword($this->hasher->hashPassword($user, $plainPassword));
         });
     }
 }
