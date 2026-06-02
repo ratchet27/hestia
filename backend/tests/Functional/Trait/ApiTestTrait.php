@@ -19,6 +19,11 @@ trait ApiTestTrait
         'CONTENT_TYPE' => 'application/json'
     ];
 
+    protected function loginAs(\App\Entity\User $user): void
+    {
+        $this->client->loginUser($user);
+    }
+
     /** @param array<string, mixed> $parameters */
     protected function apiGet(string $uri, array $parameters = []): Response
     {

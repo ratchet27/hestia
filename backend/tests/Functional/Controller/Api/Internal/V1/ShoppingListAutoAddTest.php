@@ -14,6 +14,7 @@ use App\Factory\LocationFactory;
 use App\Factory\ProductFactory;
 use App\Factory\ShoppingListItemFactory;
 use App\Factory\StockEntryFactory;
+use App\Factory\UserFactory;
 use App\Message\StockChangedMessage;
 use App\Service\ShoppingListService;
 use App\Tests\Functional\Trait\ApiTestTrait;
@@ -40,6 +41,7 @@ class ShoppingListAutoAddTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->loginAs(UserFactory::createOne());
         $this->shoppingListService = static::getContainer()->get(ShoppingListService::class);
     }
 
