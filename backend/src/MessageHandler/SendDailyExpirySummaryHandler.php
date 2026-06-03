@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types = 1);
+
+namespace App\MessageHandler;
+
+use App\Message\SendDailyExpirySummary;
+use App\Repository\StockEntryRepository;
+use App\Service\Telegram\ExpirySummaryBuilder;
+use App\Service\Telegram\TelegramSender;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+final readonly class SendDailyExpirySummaryHandler
+{
+    private const int WINDOW_DAYS = 3;
+
+    public function __construct(
+        private StockEntryRepository $stockEntryRepository,
+        private ExpirySummaryBuilder $builder,
+        private TelegramSender $sender
+    ) {
+    }
+
+    public function __invoke(SendDailyExpirySummary $message): void
+    {
+        $entries = $this->stockEntryRepository->findExpiring(self::WINDOW_DAYS);
+        $summary = $this->builder->build($entries);
+
+        if ($summary === null) {
+            return;
+        }
+
+        $this->sender->send($summary);
+    }
+}
