@@ -39,7 +39,7 @@ Not yet installed: `symfony/notifier`, `symfony/telegram-notifier`, `symfony/sch
 | Recipients | **One shared household chat** (single chat ID) | 2-person household; expiry is household-wide. No per-user storage. |
 | Send mechanism | **`symfony/notifier` + telegram bridge** (`ChatterInterface`) | Idiomatic, handles API + formatting, mockable in tests. |
 | Scheduling | **`symfony/scheduler`** (rides the messenger worker) | Schedule-as-code, timezone-aware, no new process. |
-| Send time | **08:30 Asia/Almaty**, daily | Morning, act during the day. |
+| Send time | **Configurable via env** (`TELEGRAM_DAILY_SUMMARY_TIME`, default `08:30`), Asia/Almaty, daily | Morning by default; tweakable without a code change. |
 | "Expiring soon" window | **3 days** | Actionable "use/buy within a few days" horizon. |
 | Empty state | **Send nothing** | A ping then always means action; avoids notification fatigue. |
 
@@ -63,7 +63,10 @@ If the builder returns `null`, the handler returns early and nothing is sent.
 - `src/MessageHandler/SendDailyExpirySummaryHandler.php` — orchestrates builder → sender; no-op on `null`.
 - `src/Service/Telegram/ExpirySummaryBuilder.php` — pure logic: entries → `?string` (RU HTML or `null`). The testable heart; injects `ClockInterface` + `AppTimezone` for "days until".
 - `src/Service/Telegram/TelegramSender.php` — thin wrapper over `ChatterInterface` (handlers never touch the notifier directly; trivially mockable).
-- `src/Schedule/MainSchedule.php` — `#[AsSchedule]` provider with the daily recurring trigger (08:30, Asia/Almaty), dispatching `SendDailyExpirySummary`.
+- `src/Schedule/MainSchedule.php` — `#[AsSchedule]` provider with the daily recurring trigger,
+  dispatching `SendDailyExpirySummary`. Reads the send time from `TELEGRAM_DAILY_SUMMARY_TIME`
+  (injected `%env(...)%`, `HH:MM`, default `08:30`) and builds a daily trigger at that time in
+  Asia/Almaty (`AppTimezone`).
 - `config/packages/notifier.yaml` — chatter transport bound to `TELEGRAM_DSN`.
 
 **Modify:**
@@ -99,7 +102,10 @@ RU, HTML-formatted, expired section first (most urgent), then expiring-soon. Exa
 - **`TELEGRAM_DSN`** = `telegram://<BOT_TOKEN>@default?channel=<CHAT_ID>` — chat ID baked into the
   DSN, so `TelegramSender` just sends.
 - Placeholder committed in `.env`; **real token + chat ID in `.env.local`** (gitignored).
-- Threshold (3 days) and send time (08:30) live in code/schedule (version-controlled, one place).
+- **`TELEGRAM_DAILY_SUMMARY_TIME`** = daily send time as `HH:MM` (default `08:30`, Asia/Almaty);
+  committed in `.env`, overridable in `.env.local`. The schedule reads it; changing it needs no
+  code change (just a worker restart).
+- Threshold (3 days) lives in code (version-controlled, one place).
 - **One-time manual setup** (documented, not code): create the bot via @BotFather → token; create
   the household group, add the bot → chat ID.
 
@@ -119,7 +125,8 @@ RU, HTML-formatted, expired section first (most urgent), then expiring-soon. Exa
 - **`SendDailyExpirySummaryHandler`:** mock builder + mock `TelegramSender` — asserts sender called
   with the built text; asserts sender **not** called when builder returns `null`.
 - **`TelegramSender`:** mock `ChatterInterface` — asserts a `ChatMessage` is dispatched (no network).
-- **Schedule:** assert the schedule contains the recurring `SendDailyExpirySummary` (no time-travel).
+- **Schedule:** assert the schedule contains the recurring `SendDailyExpirySummary`, built from the
+  configured `TELEGRAM_DAILY_SUMMARY_TIME` (no time-travel).
 
 ## Out of scope (v1 of this feature)
 
