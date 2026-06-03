@@ -13,6 +13,7 @@ framework:
 
         routing:
             'App\Message\StockChangedMessage': async
+            'App\Message\SendDailyExpirySummary': async
 
 when@test:
     framework:
