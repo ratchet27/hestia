@@ -35,6 +35,7 @@ class SetUserPasswordCommandTest extends KernelTestCase
         $hasher = self::getContainer()->get(UserPasswordHasherInterface::class);
         $em = self::getContainer()->get('doctrine')->getManager();
         $em->clear();
+
         $freshUser = $em->getRepository(User::class)->findOneBy(['username' => 'testuser']);
         static::assertNotNull($freshUser);
         static::assertTrue($hasher->isPasswordValid($freshUser, 'newpassword456'));
