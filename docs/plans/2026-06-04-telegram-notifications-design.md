@@ -128,6 +128,34 @@ RU, HTML-formatted, expired section first (most urgent), then expiring-soon. Exa
 - **Schedule:** assert the schedule contains the recurring `SendDailyExpirySummary`, built from the
   configured `TELEGRAM_DAILY_SUMMARY_TIME` (no time-travel).
 
+## One-time setup
+
+The bot token and chat ID are **not** in the repo — they live in `backend/.env.local` (gitignored).
+Do this once:
+
+1. **Create the bot.** In Telegram, message **@BotFather** → `/newbot` → follow the prompts → copy the
+   **bot token** it gives you (looks like `123456789:AA...`).
+2. **Create the household chat and get its ID.**
+   - Create a Telegram group, add the bot to it, and post any message in the group.
+   - Fetch updates: open `https://api.telegram.org/bot<TOKEN>/getUpdates` in a browser (replace
+     `<TOKEN>`). Find `"chat":{"id":<CHAT_ID>,...}` — for a group the ID is negative
+     (e.g. `-1001234567890`). That's the **chat ID**.
+   - (If `getUpdates` is empty, post another message in the group and refresh.)
+3. **Put both into `backend/.env.local`** (create the file if absent):
+   ```bash
+   TELEGRAM_DSN=telegram://<BOT_TOKEN>@default?channel=<CHAT_ID>
+   # Optional — override the default 08:30 Asia/Almaty send time:
+   # TELEGRAM_DAILY_SUMMARY_TIME=09:00
+   ```
+4. **Restart the worker** so it picks up the env and consumes the schedule:
+   ```bash
+   cd backend && docker compose up -d messenger
+   ```
+   Verify the schedule is live: `docker compose exec -T php bin/console debug:scheduler` should list
+   the `main` schedule with `SendDailyExpirySummary` and the next run at your configured time.
+
+The summary fires daily at the configured time and stays silent when nothing is expired/expiring.
+
 ## Out of scope (v1 of this feature)
 
 Weekly chores summary · shopping-list summary (both small follow-ons on these rails) · inbound
