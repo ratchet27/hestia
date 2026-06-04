@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { locations } from "../../data/types";
 
 export function SettingsPage(): React.ReactElement {
@@ -41,6 +42,11 @@ export function SettingsPage(): React.ReactElement {
               />
             </div>
           </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-200">
+          <h3 className="font-semibold text-stone-800 mb-4">Язык / Language</h3>
+          <LanguageSwitcher />
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-200">
