@@ -38,3 +38,16 @@ services:
     App\Service\Time\AppTimezone:
         arguments:
             $fixedOffset: '%app.timezone%'
+
+    # Logging: enrich records' extra (uid/call-site/request metadata).
+    # Correlation id per request. UidProcessor implements ResettableInterface,
+    # which MonologBundle autoconfigures with kernel.reset so the id regenerates
+    # between requests (FrankenPHP workers are long-lived).
+    Monolog\Processor\UidProcessor: ~
+
+    Monolog\Processor\WebProcessor: ~
+
+    Monolog\Processor\IntrospectionProcessor:
+        arguments:
+            $level: !php/const Monolog\Level::Debug
+            $skipClassesPartials: ['Symfony\\']
