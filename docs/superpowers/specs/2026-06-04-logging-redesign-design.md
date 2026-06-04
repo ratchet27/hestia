@@ -37,7 +37,7 @@ Registered in `config/services.yaml` with the `monolog.processor` tag so they ap
 
 - `Monolog\Processor\UidProcessor` → `extra.uid`. Correlates every line within one request. Symfony's service resetter regenerates it per request (incl. FrankenPHP worker mode).
 - `Monolog\Processor\IntrospectionProcessor` (skip partials `Symfony\`, `Monolog\`) → `extra.file`, `line`, `class`, `function`. Points at the application call site, not framework internals.
-- `Monolog\Processor\WebProcessor` → `extra.url`, `ip`, `http_method`, `referrer`. No-ops cleanly in worker/CLI contexts (guards on `$_SERVER['REQUEST_URI']`).
+- `App\Logger\RequestContextProcessor` (custom, `RequestStack`-backed) → `extra.url`, `http_method`, `ip`. No-ops cleanly outside an HTTP request (CLI / messenger worker). **Not** Monolog's `WebProcessor`: that binds the `$_SERVER` superglobal once and goes stale under FrankenPHP's long-lived workers (every request logs the first request's URL/method). `RequestStack` is request-scoped, so it stays accurate per request. (This was caught during live verification; see the implementation history.) Uses `getMainRequest()` so all logs in one transaction share a correlating URL; consequently the `terminate`-time access line itself carries no `extra.url` — the request has already been popped — but its `context` already holds method/path.
 
 Git enrichment is intentionally **out of scope** (GitProcessor shells out to `git` at runtime, unreliable in the container image).
 
