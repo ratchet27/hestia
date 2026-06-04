@@ -15,6 +15,7 @@ use App\Service\Telegram\TelegramSender;
 use App\Service\Time\AppTimezone;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Clock\MockClock;
+use Psr\Log\NullLogger;
 use Symfony\Component\Notifier\ChatterInterface;
 use Symfony\Component\Notifier\Message\ChatMessage;
 
@@ -62,6 +63,6 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
             new AppTimezone()
         );
 
-        return new SendDailyExpirySummaryHandler($repo, $builder, new TelegramSender($chatter));
+        return new SendDailyExpirySummaryHandler($repo, $builder, new TelegramSender($chatter, new NullLogger()));
     }
 }
