@@ -223,5 +223,19 @@
     "errors": {
       "loadFailed": "Failed to load data. Check server connection."
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "System configuration",
+    "language": "Language",
+    "locations": "Storage locations",
+    "categories": "Categories",
+    "telegram": "Telegram",
+    "telegramConfigured": "Configured",
+    "telegramNotConfigured": "Not configured",
+    "telegramDailyTime": "Daily summary",
+    "telegramSendTest": "Send test",
+    "telegramTestOk": "Test message sent",
+    "telegramTestFailed": "Failed to send test message"
   }
 }

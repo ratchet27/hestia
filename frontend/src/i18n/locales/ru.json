@@ -225,5 +225,19 @@
     "errors": {
       "loadFailed": "Не удалось загрузить данные. Проверьте подключение к серверу."
     }
+  },
+  "settings": {
+    "title": "Настройки",
+    "subtitle": "Конфигурация системы",
+    "language": "Язык / Language",
+    "locations": "Места хранения",
+    "categories": "Категории",
+    "telegram": "Telegram",
+    "telegramConfigured": "Настроено",
+    "telegramNotConfigured": "Не настроено",
+    "telegramDailyTime": "Ежедневный отчёт",
+    "telegramSendTest": "Отправить тест",
+    "telegramTestOk": "Тестовое сообщение отправлено",
+    "telegramTestFailed": "Не удалось отправить тестовое сообщение"
   }
 }
