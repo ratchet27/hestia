@@ -74,7 +74,7 @@ class CategoryControllerTest extends WebTestCase
         $response = $this->apiGet('/categories');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $snacks = array_values(array_filter($data['data'], fn($c) => $c['name'] === 'Снеки'))[0];
+        $snacks = array_values(array_filter($data['data'], static fn($c) => $c['name'] === 'Снеки'))[0];
         static::assertSame(1, $snacks['usage_count']);
     }
 

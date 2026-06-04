@@ -75,7 +75,7 @@ class LocationControllerTest extends WebTestCase
         $response = $this->apiGet('/locations');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $garage = array_values(array_filter($data['data'], fn($l) => $l['name'] === 'Гараж'))[0];
+        $garage = array_values(array_filter($data['data'], static fn($l) => $l['name'] === 'Гараж'))[0];
         static::assertSame(1, $garage['usage_count']);
     }
 
@@ -153,7 +153,7 @@ class LocationControllerTest extends WebTestCase
         $response = $this->apiGet('/locations');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
 
-        $cellar = array_values(array_filter($data['data'], fn($l) => $l['name'] === 'Подвал'))[0];
+        $cellar = array_values(array_filter($data['data'], static fn($l) => $l['name'] === 'Подвал'))[0];
         static::assertSame(1, $cellar['usage_count']);
     }
 

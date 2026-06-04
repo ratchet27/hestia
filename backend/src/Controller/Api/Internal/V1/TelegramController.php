@@ -30,7 +30,10 @@ final class TelegramController extends AbstractController
     }
 
     #[Route('/telegram/status', name: 'api_telegram_status', methods: ['GET'])]
-    #[OA\Get(summary: 'Telegram status', description: 'Whether the bot is configured and the daily summary time. No secrets returned.')]
+    #[OA\Get(
+        summary: 'Telegram status',
+        description: 'Whether the bot is configured and the daily summary time. No secrets returned.'
+    )]
     #[OA\Response(response: 200, description: 'Status')]
     public function status(): JsonResponse
     {
@@ -40,7 +43,10 @@ final class TelegramController extends AbstractController
     }
 
     #[Route('/telegram/test', name: 'api_telegram_test', methods: ['POST'])]
-    #[OA\Post(summary: 'Send Telegram test', description: 'Sends a real test message synchronously to the configured chat.')]
+    #[OA\Post(
+        summary: 'Send Telegram test',
+        description: 'Sends a real test message synchronously to the configured chat.'
+    )]
     #[OA\Response(response: 200, description: 'Delivery result')]
     public function test(): JsonResponse
     {

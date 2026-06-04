@@ -51,7 +51,7 @@ final class LocationController extends AbstractController
     public function list(): JsonResponse
     {
         $locations = $this->locationRepository->findAllOrderedByName();
-        $data = array_map(fn(Location $l) => $this->toResponse($l), $locations);
+        $data = array_map($this->toResponse(...), $locations);
 
         return $this->json([
             'data' => $data,
@@ -73,13 +73,19 @@ final class LocationController extends AbstractController
 
         $location = new Location();
         $location->setName($request->name);
+
         $this->em->persist($location);
         $this->em->flush();
 
         return $this->json(['data' => $this->toResponse($location)], Response::HTTP_CREATED);
     }
 
-    #[Route('/locations/{uuid}', name: 'api_locations_update', requirements: ['uuid' => Requirement::UUID_V7], methods: ['PATCH'])]
+    #[Route(
+        '/locations/{uuid}',
+        name: 'api_locations_update',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['PATCH']
+    )]
     #[OA\Patch(summary: 'Rename location', description: 'Renames a storage location.')]
     #[OA\RequestBody(required: true, content: new Model(type: UpdateLocationRequest::class))]
     #[OA\Response(response: 200, description: 'Location updated', content: new OA\JsonContent(properties: [
@@ -100,7 +106,12 @@ final class LocationController extends AbstractController
         return $this->json(['data' => $this->toResponse($location)]);
     }
 
-    #[Route('/locations/{uuid}', name: 'api_locations_delete', requirements: ['uuid' => Requirement::UUID_V7], methods: ['DELETE'])]
+    #[Route(
+        '/locations/{uuid}',
+        name: 'api_locations_delete',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['DELETE']
+    )]
     #[OA\Delete(summary: 'Delete location', description: 'Deletes a location only when nothing references it.')]
     #[OA\Response(response: 204, description: 'Location deleted')]
     #[OA\Response(response: 404, description: 'Location not found')]
@@ -127,8 +138,10 @@ final class LocationController extends AbstractController
 
     private function usageCount(Location $location): int
     {
-        return $this->em->getRepository(Product::class)->count(['defaultLocation' => $location])
-            + $this->em->getRepository(StockEntry::class)->count(['location' => $location]);
+        return (
+            $this->em->getRepository(Product::class)->count(['defaultLocation' => $location])
+            + $this->em->getRepository(StockEntry::class)->count(['location' => $location])
+        );
     }
 
     private function assertNameAvailable(string $name): void

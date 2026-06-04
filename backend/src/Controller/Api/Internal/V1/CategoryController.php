@@ -50,7 +50,7 @@ final class CategoryController extends AbstractController
     public function list(): JsonResponse
     {
         $categories = $this->categoryRepository->findAllOrderedByName();
-        $data = array_map(fn(Category $c) => $this->toResponse($c), $categories);
+        $data = array_map($this->toResponse(...), $categories);
 
         return $this->json([
             'data' => $data,
@@ -72,13 +72,19 @@ final class CategoryController extends AbstractController
 
         $category = new Category();
         $category->setName($request->name);
+
         $this->em->persist($category);
         $this->em->flush();
 
         return $this->json(['data' => $this->toResponse($category)], Response::HTTP_CREATED);
     }
 
-    #[Route('/categories/{uuid}', name: 'api_categories_update', requirements: ['uuid' => Requirement::UUID_V7], methods: ['PATCH'])]
+    #[Route(
+        '/categories/{uuid}',
+        name: 'api_categories_update',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['PATCH']
+    )]
     #[OA\Patch(summary: 'Rename category', description: 'Renames a product category.')]
     #[OA\RequestBody(required: true, content: new Model(type: UpdateCategoryRequest::class))]
     #[OA\Response(response: 200, description: 'Category updated', content: new OA\JsonContent(properties: [
@@ -99,7 +105,12 @@ final class CategoryController extends AbstractController
         return $this->json(['data' => $this->toResponse($category)]);
     }
 
-    #[Route('/categories/{uuid}', name: 'api_categories_delete', requirements: ['uuid' => Requirement::UUID_V7], methods: ['DELETE'])]
+    #[Route(
+        '/categories/{uuid}',
+        name: 'api_categories_delete',
+        requirements: ['uuid' => Requirement::UUID_V7],
+        methods: ['DELETE']
+    )]
     #[OA\Delete(summary: 'Delete category', description: 'Deletes a category only when no products reference it.')]
     #[OA\Response(response: 204, description: 'Category deleted')]
     #[OA\Response(response: 404, description: 'Category not found')]
