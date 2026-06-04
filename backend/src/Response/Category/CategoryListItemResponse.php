@@ -4,16 +4,14 @@ declare(strict_types = 1);
 
 namespace App\Response\Category;
 
-use App\Entity\Category;
-use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Uid\Uuid;
 
-#[Map(source: Category::class)]
-final readonly class CategoryResponse
+final readonly class CategoryListItemResponse
 {
     public function __construct(
         public Uuid $id,
-        public string $name
+        public string $name,
+        public int $usageCount
     ) {
     }
 }
