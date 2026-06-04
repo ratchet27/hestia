@@ -54,9 +54,9 @@ export function SettingsPage(): React.ReactElement {
         <p className="text-stone-500 mt-1">{t("settings.subtitle")}</p>
       </div>
 
-      <div className="grid max-w-5xl grid-cols-1 items-start gap-6 lg:grid-cols-2">
-        {/* Left column: language + storage locations */}
-        <div className="space-y-6">
+      <div className="max-w-5xl space-y-6">
+        {/* Top row: the two compact cards, equal height (grid stretch) */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-200">
             <h3 className="font-semibold text-stone-800 mb-4">
               {t("settings.language")}
@@ -64,17 +64,6 @@ export function SettingsPage(): React.ReactElement {
             <LanguageSwitcher />
           </div>
 
-          <ManagedList
-            title={t("settings.locations")}
-            items={locations.data ?? []}
-            onAdd={(name) => createLocation.mutateAsync(name)}
-            onRename={(id, name) => renameLocation.mutateAsync({ id, name })}
-            onDelete={(id) => deleteLocation.mutateAsync(id)}
-          />
-        </div>
-
-        {/* Right column: telegram + categories */}
-        <div className="space-y-6">
           <div className="bg-white rounded-xl p-6 shadow-sm border border-stone-200">
             <h3 className="font-semibold text-stone-800 mb-4">
               {t("settings.telegram")}
@@ -103,6 +92,17 @@ export function SettingsPage(): React.ReactElement {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Bottom row: the two lists, top-aligned (uneven bottoms are fine) */}
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+          <ManagedList
+            title={t("settings.locations")}
+            items={locations.data ?? []}
+            onAdd={(name) => createLocation.mutateAsync(name)}
+            onRename={(id, name) => renameLocation.mutateAsync({ id, name })}
+            onDelete={(id) => deleteLocation.mutateAsync(id)}
+          />
 
           <ManagedList
             title={t("settings.categories")}
