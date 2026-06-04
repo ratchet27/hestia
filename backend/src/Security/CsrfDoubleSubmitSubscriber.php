@@ -16,7 +16,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
 final class CsrfDoubleSubmitSubscriber implements EventSubscriberInterface
 {
     private const string COOKIE_NAME = 'XSRF-TOKEN';
+
     private const string HEADER_NAME = 'X-CSRF-Token';
+
     private const array SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
     /** @return array<string, array{0: string, 1: int}> */
