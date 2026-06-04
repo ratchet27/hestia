@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 import { Icons } from "./Icons";
-import { LanguageSwitcher } from "./LanguageSwitcher";
 import { UserProfile } from "./UserProfile";
 
 // TODO: Move date/time display (and possibly weather) to top-right corner of main content area
@@ -47,9 +46,6 @@ export function Navigation(): React.ReactElement {
             </NavLink>
           );
         })}
-      </div>
-      <div className="px-5 py-3 border-t border-stone-700">
-        <LanguageSwitcher />
       </div>
       <UserProfile />
     </nav>
