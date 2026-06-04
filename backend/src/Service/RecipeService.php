@@ -24,6 +24,8 @@ use Symfony\Component\Uid\Uuid;
 // @mago-ignore lint:kan-defect
 readonly class RecipeService
 {
+    // Reads stock counts via StockEntryRepository (fulfillment) and consumes via StockEntryService (cook);
+    // both are genuinely needed.
     // @mago-ignore lint:excessive-parameter-list
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -59,11 +61,13 @@ readonly class RecipeService
     public function update(Uuid $id, SaveRecipeRequest $request): RecipeResponse
     {
         $recipe = $this->getRecipe($id);
-        $recipe->clearIngredients();
 
-        $this->entityManager->flush();
-        $this->applyRequest($recipe, $request);
-        $this->entityManager->flush();
+        $this->entityManager->wrapInTransaction(function () use ($recipe, $request): void {
+            $recipe->clearIngredients();
+            $this->entityManager->flush(); // process orphan removals before re-inserting
+            $this->applyRequest($recipe, $request);
+            $this->entityManager->flush();
+        });
 
         return $this->toResponse($recipe);
     }
@@ -174,6 +178,7 @@ readonly class RecipeService
 
         foreach ($recipe->getIngredients() as $ingredient) {
             $product = $ingredient->getProduct();
+            // TODO: if recipe lists grow, replace per-ingredient COUNT with a single bulk stock-count query.
             $inStock = $this->stockEntryRepository->countByProduct($product->getId());
             $hasEnough = $inStock >= $ingredient->getRequiredCount();
             if (!$hasEnough) {

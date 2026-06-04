@@ -146,6 +146,64 @@ class RecipeControllerTest extends WebTestCase
         static::assertSame(ShoppingListSource::MANUAL, $item->getSource());
     }
 
+    public function testShowRecipe(): void
+    {
+        $recipe = RecipeFactory::createOne(['name' => 'My Soup']);
+
+        $body = static::assertJsonResponse($this->apiGet('/recipes/' . $recipe->getId()), Response::HTTP_OK);
+
+        static::assertSame((string) $recipe->getId(), $body['data']['id']);
+        static::assertSame('My Soup', $body['data']['name']);
+    }
+
+    public function testUpdateReplacesIngredients(): void
+    {
+        $productA = ProductFactory::createOne(['name' => 'Keep']);
+        $productB = ProductFactory::createOne(['name' => 'Remove']);
+        $productC = ProductFactory::createOne(['name' => 'New']);
+
+        $recipe = RecipeFactory::createOne(['name' => 'Original Name']);
+        RecipeIngredientFactory::createOne([
+            'recipe' => $recipe,
+            'product' => $productA,
+            'requiredCount' => 1,
+            'consumeOnCook' => false
+        ]);
+        RecipeIngredientFactory::createOne([
+            'recipe' => $recipe,
+            'product' => $productB,
+            'requiredCount' => 1,
+            'consumeOnCook' => false
+        ]);
+
+        $body = static::assertJsonResponse(
+            $this->apiPut('/recipes/' . $recipe->getId(), [
+                'name' => 'Updated Name',
+                'instructions' => null,
+                'source_url' => null,
+                'ingredients' => [
+                    ['product_id' => (string) $productA->getId(), 'required_count' => 2, 'consume_on_cook' => true],
+                    ['product_id' => (string) $productC->getId(), 'required_count' => 1, 'consume_on_cook' => false]
+                ]
+            ]),
+            Response::HTTP_OK
+        );
+
+        static::assertSame('Updated Name', $body['data']['name']);
+        static::assertCount(2, $body['data']['ingredients']);
+
+        $names = array_column($body['data']['ingredients'], 'product_name');
+        static::assertContains('Keep', $names);
+        static::assertContains('New', $names);
+        static::assertNotContains('Remove', $names);
+
+        $keepIngredient = array_values(array_filter(
+            $body['data']['ingredients'],
+            static fn(array $i): bool => $i['product_name'] === 'Keep'
+        ))[0];
+        static::assertSame(2, $keepIngredient['required_count']);
+    }
+
     public function testDeleteRecipe(): void
     {
         $recipe = RecipeFactory::createOne();
