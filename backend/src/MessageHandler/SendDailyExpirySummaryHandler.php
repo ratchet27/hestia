@@ -8,6 +8,7 @@ use App\Message\SendDailyExpirySummary;
 use App\Repository\StockEntryRepository;
 use App\Service\Telegram\ExpirySummaryBuilder;
 use App\Service\Telegram\TelegramSender;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -18,7 +19,8 @@ final readonly class SendDailyExpirySummaryHandler
     public function __construct(
         private StockEntryRepository $stockEntryRepository,
         private ExpirySummaryBuilder $builder,
-        private TelegramSender $sender
+        private TelegramSender $sender,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -28,9 +30,12 @@ final readonly class SendDailyExpirySummaryHandler
         $summary = $this->builder->build($entries);
 
         if ($summary === null) {
+            $this->logger->info('Daily expiry summary skipped', ['expiring' => count($entries)]);
+
             return;
         }
 
         $this->sender->send($summary);
+        $this->logger->info('Daily expiry summary sent', ['expiring' => count($entries)]);
     }
 }

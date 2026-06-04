@@ -1,21 +1,24 @@
 monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - http        # Per-request access line emitted by RequestLogListener
 
 when@dev:
     monolog:
         handlers:
-            main:
-                type: stream
-                path: "%kernel.logs_dir%/%kernel.environment%.log"
-                level: debug
-                channels: ["!event"]
+            # Single stdout sink. No file handler: in a container stdout is the
+            # canonical sink, and the Symfony profiler still captures full
+            # DEBUG/SQL detail in dev independently.
             console:
                 type: stream
                 path: php://stdout
                 level: debug
                 formatter: monolog.formatter.json
-                channels: ["!event", "!doctrine", "!console", "!request", "!messenger"]
+                # Silenced: framework event/doctrine/console internals, the
+                # pre-handler "Matched route" (request), security auth chatter,
+                # and http_client request/response (failures are logged in code).
+                # messenger is intentionally NOT excluded so the worker shows its lifecycle.
+                channels: ["!event", "!doctrine", "!console", "!request", "!security", "!http_client"]
 
 when@test:
     monolog:
