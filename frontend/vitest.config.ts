@@ -13,6 +13,10 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Cap workers: on high-core machines 16+ parallel jsdom forks make async
+    // provider/i18n updates land late, tripping the strict act-warning check in
+    // setup.ts (intermittent failures). min(cores, 8) — a no-op on small CI runners.
+    maxWorkers: 8,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
