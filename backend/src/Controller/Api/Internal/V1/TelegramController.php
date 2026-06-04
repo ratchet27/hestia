@@ -20,6 +20,11 @@ final class TelegramController extends AbstractController
         private readonly string $telegramDsn,
         #[Autowire('%env(TELEGRAM_DAILY_SUMMARY_TIME)%')]
         private readonly string $dailySummaryTime,
+        // Lazy: the Telegram chatter transport is built from TELEGRAM_DSN only when a
+        // message is actually sent. Without this, merely constructing the controller
+        // (e.g. for GET /telegram/status) instantiates the transport and 500s when the
+        // DSN is the unconfigured placeholder — exactly the case status() must report.
+        #[Autowire(lazy: true)]
         private readonly TelegramSender $telegramSender
     ) {
     }
