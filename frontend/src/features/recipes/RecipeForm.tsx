@@ -1,10 +1,219 @@
+import { useFieldArray, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import type { SaveRecipeRequest } from "../../api/generated/models";
+import { useProducts } from "../../api/queries/products";
+import {
+  useCreateRecipe,
+  useRecipes,
+  useUpdateRecipe,
+} from "../../api/queries/recipes";
+
+interface IngredientRow {
+  product_id: string;
+  required_count: number;
+  consume_on_cook: boolean;
+}
+
+interface RecipeFormValues {
+  name: string;
+  instructions: string;
+  source_url: string;
+  ingredients: IngredientRow[];
+}
+
 export function RecipeForm({
-  recipeId: _recipeId,
-  onClose: _onClose,
+  recipeId,
+  onClose,
 }: {
   recipeId: string | null;
   onClose: () => void;
 }): React.ReactElement {
-  // Stub — full implementation in Task 9.
-  return <div data-testid="recipe-form-stub" hidden />;
+  const { t } = useTranslation();
+  const { data: products = [] } = useProducts();
+  const { data: recipes = [] } = useRecipes();
+  const create = useCreateRecipe();
+  const update = useUpdateRecipe();
+
+  const existing = recipeId
+    ? recipes.find((r) => r.id === recipeId)
+    : undefined;
+  const existingIngredients = existing
+    ? Array.isArray(existing.ingredients)
+      ? existing.ingredients
+      : Object.values(existing.ingredients ?? {})
+    : [];
+
+  const { register, control, handleSubmit, formState } =
+    useForm<RecipeFormValues>({
+      defaultValues: {
+        name: existing?.name ?? "",
+        instructions: existing?.instructions ?? "",
+        source_url: existing?.source_url ?? "",
+        ingredients: existingIngredients.map((i) => ({
+          product_id: i.product_id,
+          required_count: i.required_count ?? 1,
+          consume_on_cook: i.consume_on_cook ?? true,
+        })),
+      },
+    });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "ingredients",
+  });
+
+  const onSubmit = handleSubmit(async (values) => {
+    const payload: SaveRecipeRequest = {
+      name: values.name,
+      instructions: values.instructions || null,
+      source_url: values.source_url || null,
+      ingredients: values.ingredients.map((i) => ({
+        product_id: i.product_id,
+        required_count: Number(i.required_count),
+        consume_on_cook: i.consume_on_cook,
+      })),
+    };
+    if (recipeId) {
+      await update.mutateAsync({ id: recipeId, data: payload });
+    } else {
+      await create.mutateAsync(payload);
+    }
+    onClose();
+  });
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-lg max-h-[90vh] overflow-auto p-6">
+        <h3 className="text-xl font-bold mb-4">
+          {recipeId ? t("recipes.editRecipe") : t("recipes.newRecipe")}
+        </h3>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <label
+              htmlFor="recipe-name"
+              className="block text-sm font-medium text-stone-600 mb-1"
+            >
+              {t("recipes.name")}
+            </label>
+            <input
+              id="recipe-name"
+              {...register("name", { required: true })}
+              className="w-full border border-stone-300 rounded-lg px-3 py-2"
+            />
+            {formState.errors.name && (
+              <p className="text-red-600 text-sm mt-1">
+                {t("recipes.nameRequired")}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <span className="block text-sm font-medium text-stone-600 mb-1">
+              {t("recipes.ingredients")}
+            </span>
+            <div className="space-y-2">
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2">
+                  <select
+                    {...register(`ingredients.${index}.product_id`, {
+                      required: true,
+                    })}
+                    className="flex-1 border border-stone-300 rounded-lg px-2 py-1"
+                  >
+                    <option value="">—</option>
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min={1}
+                    {...register(`ingredients.${index}.required_count`, {
+                      valueAsNumber: true,
+                      min: 1,
+                    })}
+                    className="w-16 border border-stone-300 rounded-lg px-2 py-1"
+                  />
+                  <label className="flex items-center gap-1 text-sm text-stone-600">
+                    <input
+                      type="checkbox"
+                      {...register(`ingredients.${index}.consume_on_cook`)}
+                    />
+                    {t("recipes.consumeOnCook")}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => remove(index)}
+                    className="text-red-600 px-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                append({
+                  product_id: "",
+                  required_count: 1,
+                  consume_on_cook: true,
+                })
+              }
+              className="mt-2 text-sm text-stone-700 underline"
+            >
+              {t("recipes.addIngredient")}
+            </button>
+          </div>
+
+          <div>
+            <label
+              htmlFor="recipe-instructions"
+              className="block text-sm font-medium text-stone-600 mb-1"
+            >
+              {t("recipes.instructions")}
+            </label>
+            <textarea
+              id="recipe-instructions"
+              {...register("instructions")}
+              rows={3}
+              className="w-full border border-stone-300 rounded-lg px-3 py-2"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="recipe-source"
+              className="block text-sm font-medium text-stone-600 mb-1"
+            >
+              {t("recipes.sourceUrl")}
+            </label>
+            <input
+              id="recipe-source"
+              {...register("source_url")}
+              className="w-full border border-stone-300 rounded-lg px-3 py-2"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-stone-300 rounded-lg"
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              type="submit"
+              disabled={create.isPending || update.isPending}
+              className="px-4 py-2 bg-stone-800 text-white rounded-lg disabled:opacity-50"
+            >
+              {t("common.save")}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
