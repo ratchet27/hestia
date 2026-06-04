@@ -45,8 +45,6 @@ services:
     # between requests (FrankenPHP workers are long-lived).
     Monolog\Processor\UidProcessor: ~
 
-    Monolog\Processor\WebProcessor: ~
-
     Monolog\Processor\IntrospectionProcessor:
         arguments:
             $level: !php/const Monolog\Level::Debug
