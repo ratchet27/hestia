@@ -11,7 +11,7 @@ final readonly class LocationListItemResponse
     public function __construct(
         public Uuid $id,
         public string $name,
-        public int $usage_count
+        public int $usageCount
     ) {
     }
 }
