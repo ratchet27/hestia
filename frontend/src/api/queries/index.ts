@@ -3,6 +3,7 @@ export * from "./chores";
 export * from "./keys";
 export * from "./locations";
 export * from "./products";
+export * from "./recipes";
 export * from "./shoppingList";
 export * from "./stocks";
 export * from "./tasks";
