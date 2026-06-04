@@ -236,6 +236,13 @@
     "telegramDailyTime": "Daily summary",
     "telegramSendTest": "Send test",
     "telegramTestOk": "Test message sent",
-    "telegramTestFailed": "Failed to send test message"
+    "telegramTestFailed": "Failed to send test message",
+    "usageCount": "in use: {{n}}",
+    "delete": "Delete",
+    "deleteAria": "Delete \"{{name}}\"",
+    "deleteConfirm": "Delete \"{{name}}\"?",
+    "deleteDisabledReason": "Used by {{n}} — can't delete",
+    "add": "Add",
+    "addPlaceholder": "Add…"
   }
 }

@@ -45,11 +45,22 @@ describe("ManagedList", () => {
   });
 
   it("calls onDelete for an empty item", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
     const props = setup();
     const user = userEvent.setup();
     await user.click(
       screen.getByRole("button", { name: /удалить «Холодильник»/i }),
     );
     expect(props.onDelete).toHaveBeenCalledWith("a");
+  });
+
+  it("does not call onDelete when confirm is cancelled", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    const props = setup();
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("button", { name: /удалить «Холодильник»/i }),
+    );
+    expect(props.onDelete).not.toHaveBeenCalled();
   });
 });

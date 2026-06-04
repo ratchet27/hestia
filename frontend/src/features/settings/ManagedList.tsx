@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export interface ManagedItem {
   id: string;
@@ -21,6 +22,7 @@ export function ManagedList({
   onRename,
   onDelete,
 }: ManagedListProps): React.ReactElement {
+  const { t } = useTranslation();
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -72,17 +74,31 @@ export function ManagedList({
             <div className="flex items-center gap-3">
               {item.usage_count > 0 && (
                 <span className="text-xs text-stone-400">
-                  используется: {item.usage_count}
+                  {t("settings.usageCount", { n: item.usage_count })}
                 </span>
               )}
               <button
                 type="button"
-                aria-label={`Удалить «${item.name}»`}
+                aria-label={t("settings.deleteAria", { name: item.name })}
+                title={
+                  item.usage_count > 0
+                    ? t("settings.deleteDisabledReason", {
+                        n: item.usage_count,
+                      })
+                    : undefined
+                }
                 disabled={item.usage_count > 0}
-                onClick={() => onDelete(item.id)}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      t("settings.deleteConfirm", { name: item.name }),
+                    )
+                  )
+                    onDelete(item.id);
+                }}
                 className="text-sm text-stone-500 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-stone-500"
               >
-                Удалить
+                {t("settings.delete")}
               </button>
             </div>
           </div>
@@ -93,7 +109,7 @@ export function ManagedList({
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submitAdd()}
-          placeholder="Добавить…"
+          placeholder={t("settings.addPlaceholder")}
           className="flex-1 px-3 py-2 border border-stone-300 rounded-lg text-sm"
         />
         <button
@@ -101,7 +117,7 @@ export function ManagedList({
           onClick={submitAdd}
           className="px-4 py-2 text-sm text-amber-600 hover:underline"
         >
-          Добавить
+          {t("settings.add")}
         </button>
       </div>
     </div>
