@@ -6,7 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 import type {
-  GetApiLocationsList200
+  CreateLocationRequest,
+  GetApiLocationsList200,
+  PatchApiLocationsUpdate200,
+  PostApiLocationsCreate201,
+  UpdateLocationRequest
 } from '../models';
 
 import { apiFetch } from '../../client';
@@ -32,7 +36,7 @@ export const getGetApiLocationsListUrl = () => {
 }
 
 /**
- * Returns all storage locations.
+ * Returns all storage locations with usage counts.
  * @summary List locations
  */
 export const getApiLocationsList = async ( options?: RequestInit): Promise<getApiLocationsListResponse> => {
@@ -43,6 +47,151 @@ export const getApiLocationsList = async ( options?: RequestInit): Promise<getAp
     method: 'GET'
 
 
+  }
+);}
+
+
+export type postApiLocationsCreateResponse201 = {
+  data: PostApiLocationsCreate201
+  status: 201
+}
+
+export type postApiLocationsCreateResponse409 = {
+  data: void
+  status: 409
+}
+
+export type postApiLocationsCreateResponse422 = {
+  data: void
+  status: 422
+}
+
+export type postApiLocationsCreateResponseSuccess = (postApiLocationsCreateResponse201) & {
+  headers: Headers;
+};
+export type postApiLocationsCreateResponseError = (postApiLocationsCreateResponse409 | postApiLocationsCreateResponse422) & {
+  headers: Headers;
+};
+
+export type postApiLocationsCreateResponse = (postApiLocationsCreateResponseSuccess | postApiLocationsCreateResponseError)
+
+export const getPostApiLocationsCreateUrl = () => {
+
+
+
+
+  return `/api/internal/v1/locations`
+}
+
+/**
+ * Creates a storage location.
+ * @summary Create location
+ */
+export const postApiLocationsCreate = async (createLocationRequest: CreateLocationRequest, options?: RequestInit): Promise<postApiLocationsCreateResponse> => {
+
+  return apiFetch<postApiLocationsCreateResponse>(getPostApiLocationsCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createLocationRequest)
+  }
+);}
+
+
+export type deleteApiLocationsDeleteResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteApiLocationsDeleteResponse404 = {
+  data: void
+  status: 404
+}
+
+export type deleteApiLocationsDeleteResponse409 = {
+  data: void
+  status: 409
+}
+
+export type deleteApiLocationsDeleteResponseSuccess = (deleteApiLocationsDeleteResponse204) & {
+  headers: Headers;
+};
+export type deleteApiLocationsDeleteResponseError = (deleteApiLocationsDeleteResponse404 | deleteApiLocationsDeleteResponse409) & {
+  headers: Headers;
+};
+
+export type deleteApiLocationsDeleteResponse = (deleteApiLocationsDeleteResponseSuccess | deleteApiLocationsDeleteResponseError)
+
+export const getDeleteApiLocationsDeleteUrl = (uuid: string,) => {
+
+
+
+
+  return `/api/internal/v1/locations/${uuid}`
+}
+
+/**
+ * Deletes a location only when nothing references it.
+ * @summary Delete location
+ */
+export const deleteApiLocationsDelete = async (uuid: string, options?: RequestInit): Promise<deleteApiLocationsDeleteResponse> => {
+
+  return apiFetch<deleteApiLocationsDeleteResponse>(getDeleteApiLocationsDeleteUrl(uuid),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+export type patchApiLocationsUpdateResponse200 = {
+  data: PatchApiLocationsUpdate200
+  status: 200
+}
+
+export type patchApiLocationsUpdateResponse404 = {
+  data: void
+  status: 404
+}
+
+export type patchApiLocationsUpdateResponse409 = {
+  data: void
+  status: 409
+}
+
+export type patchApiLocationsUpdateResponseSuccess = (patchApiLocationsUpdateResponse200) & {
+  headers: Headers;
+};
+export type patchApiLocationsUpdateResponseError = (patchApiLocationsUpdateResponse404 | patchApiLocationsUpdateResponse409) & {
+  headers: Headers;
+};
+
+export type patchApiLocationsUpdateResponse = (patchApiLocationsUpdateResponseSuccess | patchApiLocationsUpdateResponseError)
+
+export const getPatchApiLocationsUpdateUrl = (uuid: string,) => {
+
+
+
+
+  return `/api/internal/v1/locations/${uuid}`
+}
+
+/**
+ * Renames a storage location.
+ * @summary Rename location
+ */
+export const patchApiLocationsUpdate = async (uuid: string,
+    updateLocationRequest: UpdateLocationRequest, options?: RequestInit): Promise<patchApiLocationsUpdateResponse> => {
+
+  return apiFetch<patchApiLocationsUpdateResponse>(getPatchApiLocationsUpdateUrl(uuid),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateLocationRequest)
   }
 );}
 

@@ -5,10 +5,8 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
-import type { GetApiLocationsList200Meta } from './getApiLocationsList200Meta.ts';
 import type { LocationListItemResponse } from './locationListItemResponse.ts';
 
-export type GetApiLocationsList200 = {
-  data?: LocationListItemResponse[];
-  meta?: GetApiLocationsList200Meta;
+export type PostApiLocationsCreate201 = {
+  data?: LocationListItemResponse;
 };

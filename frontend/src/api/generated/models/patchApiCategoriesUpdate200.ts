@@ -6,9 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { CategoryListItemResponse } from './categoryListItemResponse.ts';
-import type { GetApiCategoriesList200Meta } from './getApiCategoriesList200Meta.ts';
 
-export type GetApiCategoriesList200 = {
-  data?: CategoryListItemResponse[];
-  meta?: GetApiCategoriesList200Meta;
+export type PatchApiCategoriesUpdate200 = {
+  data?: CategoryListItemResponse;
 };
