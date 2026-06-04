@@ -109,7 +109,8 @@
     "missingIngredients": "Не хватает {{count}} ингр.",
     "ingredients": "Ингредиенты:",
     "cook": "Приготовить",
-    "addToShoppingList": "В список покупок"
+    "addToShoppingList": "В список покупок",
+    "staple": "(запас)"
   },
   "expiry": {
     "expired": "просрочено",

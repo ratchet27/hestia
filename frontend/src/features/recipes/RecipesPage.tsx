@@ -94,7 +94,10 @@ export function RecipesPage(): React.ReactElement {
               <div className="p-4 bg-stone-50 border-t border-stone-100 flex gap-2">
                 <button
                   type="button"
-                  disabled={!recipe.cookable || cook.isPending}
+                  disabled={
+                    !recipe.cookable ||
+                    (cook.isPending && cook.variables === recipe.id)
+                  }
                   onClick={() => cook.mutate(recipe.id)}
                   className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -103,7 +106,9 @@ export function RecipesPage(): React.ReactElement {
                 {!recipe.cookable && (
                   <button
                     type="button"
-                    disabled={addMissing.isPending}
+                    disabled={
+                      addMissing.isPending && addMissing.variables === recipe.id
+                    }
                     onClick={() => addMissing.mutate(recipe.id)}
                     className="px-4 py-2 border border-stone-300 rounded-lg hover:bg-white transition-colors"
                   >

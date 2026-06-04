@@ -117,6 +117,70 @@ describe("RecipesPage", () => {
     });
   });
 
+  it("fires POST to cook endpoint when Cook button is clicked", async () => {
+    let cookCalled = false;
+
+    server.use(
+      http.get("*/api/internal/v1/recipes", () =>
+        HttpResponse.json({ data: [cookableRecipe], meta: {} }),
+      ),
+      http.post(`*/api/internal/v1/recipes/${cookableRecipe.id}/cook`, () => {
+        cookCalled = true;
+        return HttpResponse.json({ data: cookableRecipe });
+      }),
+    );
+
+    const { user } = render(<RecipesPage />);
+
+    expect(await screen.findByText("Омлет")).toBeInTheDocument();
+
+    const cookButton = screen.getByRole("button", { name: /Приготовить/i });
+    expect(cookButton).not.toBeDisabled();
+    await user.click(cookButton);
+
+    await waitFor(() => {
+      expect(cookCalled).toBe(true);
+    });
+  });
+
+  it("renders staple label for ingredient with consume_on_cook false", async () => {
+    const stapleIngredientRecipe = {
+      id: "01890000-0000-7000-8000-000000000003",
+      name: "Бутерброд",
+      instructions: null,
+      source_url: null,
+      cookable: true,
+      created_at: "2026-06-04T00:00:00+00:00",
+      ingredients: [
+        {
+          id: "01890000-0000-7000-8000-000000000012",
+          product_id: "01890000-0000-7000-8000-000000000022",
+          product_name: "Масло",
+          required_count: 1,
+          consume_on_cook: false,
+          in_stock: 2,
+          has_enough: true,
+          shortfall: 0,
+          product_inactive: false,
+        },
+      ],
+    };
+
+    server.use(
+      http.get("*/api/internal/v1/recipes", () =>
+        HttpResponse.json({ data: [stapleIngredientRecipe], meta: {} }),
+      ),
+    );
+
+    render(<RecipesPage />);
+
+    expect(await screen.findByText("Бутерброд")).toBeInTheDocument();
+
+    // The ingredient text should include the translated staple label, not the raw key
+    expect(screen.getByText(/Масло.*\(запас\)/)).toBeInTheDocument();
+    expect(screen.queryByText(/recipes\.staple/)).not.toBeInTheDocument();
+  });
+
   it("shows loading state while fetching recipes", () => {
     server.use(
       http.get("*/api/internal/v1/recipes", async () => {
