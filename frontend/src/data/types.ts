@@ -16,12 +16,6 @@ export interface StockEntry {
   note: string;
 }
 
-export interface Recipe {
-  id: number;
-  name: string;
-  ingredients: { productId: number; amount: number }[];
-}
-
 export const locations: Record<string, string> = {
   fridge: "Холодильник",
   pantry: "Кладовая",
