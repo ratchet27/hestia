@@ -42,6 +42,26 @@ class StockEntryRepository extends ServiceEntityRepository
     }
 
     /**
+     * Find entries for FIFO consumption across ALL locations (earliest best_before first, NULL last).
+     *
+     * @return StockEntry[]
+     */
+    public function findForFifoConsumptionAcrossLocations(Uuid $productId, int $limit): array
+    {
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
+            ->createQueryBuilder('e')
+            ->where('e.product = :productId')
+            ->setParameter('productId', $productId)
+            ->orderBy('CASE WHEN e.bestBefore IS NULL THEN 1 ELSE 0 END', 'ASC')
+            ->addOrderBy('e.bestBefore', 'ASC')
+            ->addOrderBy('e.createdAt', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Count entries for a product at a location.
      */
     public function countByProductAndLocation(Uuid $productId, Uuid $locationId): int

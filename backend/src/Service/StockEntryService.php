@@ -149,6 +149,31 @@ class StockEntryService
     }
 
     /**
+     * Consume N entries of a product across all locations (FIFO, earliest expiry first).
+     *
+     * @return int Number of entries consumed
+     */
+    public function consumeAcrossLocations(Uuid $productId, int $quantity): int
+    {
+        $previousQty = $this->stockEntryRepository->countByProduct($productId);
+        if ($previousQty < $quantity) {
+            throw new InsufficientStockException($quantity, $previousQty);
+        }
+
+        $entries = $this->stockEntryRepository->findForFifoConsumptionAcrossLocations($productId, $quantity);
+        foreach ($entries as $entry) {
+            $this->entityManager->remove($entry);
+        }
+
+        $this->entityManager->flush();
+
+        $newQty = $previousQty - $quantity;
+        $this->messageBus->dispatch(new StockChangedMessage($productId, $previousQty, $newQty));
+
+        return count($entries);
+    }
+
+    /**
      * Update a stock entry (location and/or best_before).
      */
     public function updateEntry(Uuid $entryId, UpdateStockEntryRequest $request): StockEntry
