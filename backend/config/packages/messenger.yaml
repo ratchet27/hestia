@@ -9,7 +9,7 @@ framework:
                     max_retries: 3
                     delay: 1000
                     multiplier: 2
-            failed: 'doctrine://default?queue_name=failed'
+            failed: 'doctrine://default?queue_name=failed&auto_setup=false'
 
         routing:
             'App\Message\StockChangedMessage': async
