@@ -54,7 +54,7 @@ Stop excluding the `messenger` channel from the output handler(s). The worker (a
 ### 5. Leave alone
 
 - Caddy/FrankenPHP runtime logs (out of scope).
-- `prod` `fingers_crossed` structure — already quiet (buffers, flushes only on error). It gains the global processors and the `http_client`/`security` channel silencing, nothing else structural.
+- `prod` `fingers_crossed` structure — already quiet (buffers, flushes only on error). It gains the global processors **only**. Channel silencing is **dev-only**: in prod the `main` handler buffers every channel and writes nothing on the happy path, so excluding `security`/`http_client` there would strip useful context from the error-flush buffer without reducing any volume. The noise being cut exists solely on the dev `console` handler (level `debug`, writes continuously). Prod `main` channels stay `["!deprecation"]`.
 - `test` env (null handler).
 
 ## Channel configuration summary
