@@ -95,16 +95,18 @@ readonly class RecipeService
             throw new RecipeNotCookableException($id, $missing);
         }
 
-        foreach ($recipe->getIngredients() as $ingredient) {
-            if (!$ingredient->isConsumeOnCook()) {
-                continue;
-            }
+        $this->entityManager->wrapInTransaction(function () use ($recipe): void {
+            foreach ($recipe->getIngredients() as $ingredient) {
+                if (!$ingredient->isConsumeOnCook()) {
+                    continue;
+                }
 
-            $this->stockEntryService->consumeAcrossLocations(
-                $ingredient->getProduct()->getId(),
-                $ingredient->getRequiredCount()
-            );
-        }
+                $this->stockEntryService->consumeAcrossLocations(
+                    $ingredient->getProduct()->getId(),
+                    $ingredient->getRequiredCount()
+                );
+            }
+        });
 
         return $this->toResponse($recipe);
     }
