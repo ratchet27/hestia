@@ -5,10 +5,15 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
+import type {
+  GetApiTelegramStatus200,
+  PostApiTelegramTest200
+} from '../models';
+
 import { apiFetch } from '../../client';
 
 export type getApiTelegramStatusResponse200 = {
-  data: void
+  data: GetApiTelegramStatus200
   status: 200
 }
 
@@ -44,7 +49,7 @@ export const getApiTelegramStatus = async ( options?: RequestInit): Promise<getA
 
 
 export type postApiTelegramTestResponse200 = {
-  data: void
+  data: PostApiTelegramTest200
   status: 200
 }
 
