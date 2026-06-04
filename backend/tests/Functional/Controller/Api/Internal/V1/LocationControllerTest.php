@@ -7,6 +7,7 @@ namespace App\Tests\Functional\Controller\Api\Internal\V1;
 use App\Entity\Location;
 use App\Factory\LocationFactory;
 use App\Factory\ProductFactory;
+use App\Factory\StockEntryFactory;
 use App\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -142,5 +143,36 @@ class LocationControllerTest extends WebTestCase
         static::assertSame('LOCATION_IN_USE', $data['type']);
         static::assertSame(1, $data['usageCount']);
         $this->assertDatabaseHas(Location::class, ['name' => 'Гараж']);
+    }
+
+    public function testListUsageCountIncludesStockEntries(): void
+    {
+        $location = LocationFactory::createOne(['name' => 'Подвал']);
+        StockEntryFactory::createOne(['location' => $location]);
+
+        $response = $this->apiGet('/locations');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        $cellar = array_values(array_filter($data['data'], fn($l) => $l['name'] === 'Подвал'))[0];
+        static::assertSame(1, $cellar['usage_count']);
+    }
+
+    public function testRenameToExistingNameConflicts(): void
+    {
+        LocationFactory::createOne(['name' => 'Балкон']);
+        $other = LocationFactory::createOne(['name' => 'Гараж']);
+
+        $response = $this->apiPatch('/locations/' . $other->getId(), ['name' => 'Балкон']);
+        $data = static::assertErrorResponse($response, Response::HTTP_CONFLICT);
+
+        static::assertSame('LOCATION_NAME_TAKEN', $data['type']);
+    }
+
+    public function testDeleteMissingLocationIsNotFound(): void
+    {
+        $response = $this->apiDelete('/locations/' . Uuid::v7());
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
+
+        static::assertSame('LOCATION_NOT_FOUND', $data['type']);
     }
 }
