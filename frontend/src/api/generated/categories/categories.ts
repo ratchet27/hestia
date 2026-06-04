@@ -6,7 +6,11 @@
  * OpenAPI spec version: 1.0.0
  */
 import type {
-  GetApiCategoriesList200
+  CreateCategoryRequest,
+  GetApiCategoriesList200,
+  PatchApiCategoriesUpdate200,
+  PostApiCategoriesCreate201,
+  UpdateCategoryRequest
 } from '../models';
 
 import { apiFetch } from '../../client';
@@ -32,7 +36,7 @@ export const getGetApiCategoriesListUrl = () => {
 }
 
 /**
- * Returns all product categories.
+ * Returns all product categories with usage counts.
  * @summary List categories
  */
 export const getApiCategoriesList = async ( options?: RequestInit): Promise<getApiCategoriesListResponse> => {
@@ -43,6 +47,151 @@ export const getApiCategoriesList = async ( options?: RequestInit): Promise<getA
     method: 'GET'
 
 
+  }
+);}
+
+
+export type postApiCategoriesCreateResponse201 = {
+  data: PostApiCategoriesCreate201
+  status: 201
+}
+
+export type postApiCategoriesCreateResponse409 = {
+  data: void
+  status: 409
+}
+
+export type postApiCategoriesCreateResponse422 = {
+  data: void
+  status: 422
+}
+
+export type postApiCategoriesCreateResponseSuccess = (postApiCategoriesCreateResponse201) & {
+  headers: Headers;
+};
+export type postApiCategoriesCreateResponseError = (postApiCategoriesCreateResponse409 | postApiCategoriesCreateResponse422) & {
+  headers: Headers;
+};
+
+export type postApiCategoriesCreateResponse = (postApiCategoriesCreateResponseSuccess | postApiCategoriesCreateResponseError)
+
+export const getPostApiCategoriesCreateUrl = () => {
+
+
+
+
+  return `/api/internal/v1/categories`
+}
+
+/**
+ * Creates a product category.
+ * @summary Create category
+ */
+export const postApiCategoriesCreate = async (createCategoryRequest: CreateCategoryRequest, options?: RequestInit): Promise<postApiCategoriesCreateResponse> => {
+
+  return apiFetch<postApiCategoriesCreateResponse>(getPostApiCategoriesCreateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createCategoryRequest)
+  }
+);}
+
+
+export type deleteApiCategoriesDeleteResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteApiCategoriesDeleteResponse404 = {
+  data: void
+  status: 404
+}
+
+export type deleteApiCategoriesDeleteResponse409 = {
+  data: void
+  status: 409
+}
+
+export type deleteApiCategoriesDeleteResponseSuccess = (deleteApiCategoriesDeleteResponse204) & {
+  headers: Headers;
+};
+export type deleteApiCategoriesDeleteResponseError = (deleteApiCategoriesDeleteResponse404 | deleteApiCategoriesDeleteResponse409) & {
+  headers: Headers;
+};
+
+export type deleteApiCategoriesDeleteResponse = (deleteApiCategoriesDeleteResponseSuccess | deleteApiCategoriesDeleteResponseError)
+
+export const getDeleteApiCategoriesDeleteUrl = (uuid: string,) => {
+
+
+
+
+  return `/api/internal/v1/categories/${uuid}`
+}
+
+/**
+ * Deletes a category only when no products reference it.
+ * @summary Delete category
+ */
+export const deleteApiCategoriesDelete = async (uuid: string, options?: RequestInit): Promise<deleteApiCategoriesDeleteResponse> => {
+
+  return apiFetch<deleteApiCategoriesDeleteResponse>(getDeleteApiCategoriesDeleteUrl(uuid),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+export type patchApiCategoriesUpdateResponse200 = {
+  data: PatchApiCategoriesUpdate200
+  status: 200
+}
+
+export type patchApiCategoriesUpdateResponse404 = {
+  data: void
+  status: 404
+}
+
+export type patchApiCategoriesUpdateResponse409 = {
+  data: void
+  status: 409
+}
+
+export type patchApiCategoriesUpdateResponseSuccess = (patchApiCategoriesUpdateResponse200) & {
+  headers: Headers;
+};
+export type patchApiCategoriesUpdateResponseError = (patchApiCategoriesUpdateResponse404 | patchApiCategoriesUpdateResponse409) & {
+  headers: Headers;
+};
+
+export type patchApiCategoriesUpdateResponse = (patchApiCategoriesUpdateResponseSuccess | patchApiCategoriesUpdateResponseError)
+
+export const getPatchApiCategoriesUpdateUrl = (uuid: string,) => {
+
+
+
+
+  return `/api/internal/v1/categories/${uuid}`
+}
+
+/**
+ * Renames a product category.
+ * @summary Rename category
+ */
+export const patchApiCategoriesUpdate = async (uuid: string,
+    updateCategoryRequest: UpdateCategoryRequest, options?: RequestInit): Promise<patchApiCategoriesUpdateResponse> => {
+
+  return apiFetch<patchApiCategoriesUpdateResponse>(getPatchApiCategoriesUpdateUrl(uuid),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateCategoryRequest)
   }
 );}
 

@@ -55,4 +55,9 @@ export const queryKeys = {
     list: () => ["chores", "list"] as const,
     detail: (id: string) => ["chores", id] as const,
   },
+
+  // Telegram
+  telegram: {
+    status: ["telegram", "status"] as const,
+  },
 } as const;
