@@ -13,7 +13,8 @@ final readonly class LocationResponse
 {
     public function __construct(
         public Uuid $id,
-        public string $name
+        public string $name,
+        public int $usageCount = 0
     ) {
     }
 }
