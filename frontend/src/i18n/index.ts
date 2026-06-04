@@ -14,6 +14,9 @@ i18n
       en: { translation: en },
     },
     fallbackLng: "ru",
+    supportedLngs: ["ru", "en"],
+    nonExplicitSupportedLngs: true,
+    load: "languageOnly",
     interpolation: {
       escapeValue: false, // React already escapes
     },
