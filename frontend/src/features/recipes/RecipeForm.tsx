@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import type { SaveRecipeRequest } from "../../api/generated/models";
@@ -43,7 +44,7 @@ export function RecipeForm({
       : Object.values(existing.ingredients ?? {})
     : [];
 
-  const { register, control, handleSubmit, formState } =
+  const { register, control, handleSubmit, setError, reset, formState } =
     useForm<RecipeFormValues>({
       defaultValues: {
         name: existing?.name ?? "",
@@ -56,12 +57,40 @@ export function RecipeForm({
         })),
       },
     });
+
+  // When editing, the recipes query resolves asynchronously after mount.
+  // Re-populate the form once the existing record becomes available.
+  useEffect(() => {
+    if (existing) {
+      const ings = Array.isArray(existing.ingredients)
+        ? existing.ingredients
+        : Object.values(existing.ingredients ?? {});
+      reset({
+        name: existing.name ?? "",
+        instructions: existing.instructions ?? "",
+        source_url: existing.source_url ?? "",
+        ingredients: ings.map((i) => ({
+          product_id: i.product_id,
+          required_count: i.required_count ?? 1,
+          consume_on_cook: i.consume_on_cook ?? true,
+        })),
+      });
+    }
+  }, [existing, reset]);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "ingredients",
   });
 
   const onSubmit = handleSubmit(async (values) => {
+    if (values.ingredients.length === 0) {
+      setError("ingredients", {
+        type: "manual",
+        message: t("recipes.ingredientsRequired"),
+      });
+      return;
+    }
     const payload: SaveRecipeRequest = {
       name: values.name,
       instructions: values.instructions || null,
@@ -165,6 +194,11 @@ export function RecipeForm({
             >
               {t("recipes.addIngredient")}
             </button>
+            {formState.errors.ingredients?.message && (
+              <p className="text-red-600 text-sm mt-1">
+                {formState.errors.ingredients.message}
+              </p>
+            )}
           </div>
 
           <div>

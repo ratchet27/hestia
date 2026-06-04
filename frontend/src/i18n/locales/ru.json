@@ -117,7 +117,8 @@
     "ingredients": "Ингредиенты:",
     "cook": "Приготовить",
     "addToShoppingList": "В список покупок",
-    "staple": "(запас)"
+    "staple": "(запас)",
+    "ingredientsRequired": "Добавьте хотя бы один ингредиент"
   },
   "expiry": {
     "expired": "просрочено",

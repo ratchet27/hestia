@@ -115,7 +115,8 @@
     "ingredients": "Ingredients:",
     "cook": "Cook",
     "addToShoppingList": "Add to shopping list",
-    "staple": "(staple)"
+    "staple": "(staple)",
+    "ingredientsRequired": "Add at least one ingredient"
   },
   "expiry": {
     "expired": "expired",
