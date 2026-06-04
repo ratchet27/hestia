@@ -13,14 +13,18 @@ use App\Repository\StockEntryRepository;
 use App\Service\Telegram\ExpirySummaryBuilder;
 use App\Service\Telegram\TelegramSender;
 use App\Service\Time\AppTimezone;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Clock\MockClock;
 use Psr\Log\NullLogger;
+use Symfony\Component\Clock\MockClock;
 use Symfony\Component\Notifier\ChatterInterface;
 use Symfony\Component\Notifier\Message\ChatMessage;
 
 final class SendDailyExpirySummaryHandlerTest extends TestCase
 {
+    private TestHandler $logHandler;
+
     public function testSendsWhenSummaryNotEmpty(): void
     {
         // Local "today" = 2026-06-04 (09:00 Almaty); a same-day entry yields a non-null summary.
@@ -42,6 +46,7 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
             )));
 
         $this->handler($repo, $chatter)(new SendDailyExpirySummary());
+        self::assertTrue($this->logHandler->hasInfoThatContains('Daily expiry summary sent'));
     }
 
     public function testSendsNothingWhenSummaryIsNull(): void
@@ -54,6 +59,7 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
         $chatter->expects(self::never())->method('send');
 
         $this->handler($repo, $chatter)(new SendDailyExpirySummary());
+        self::assertTrue($this->logHandler->hasInfoThatContains('Daily expiry summary skipped'));
     }
 
     private function handler(StockEntryRepository $repo, ChatterInterface $chatter): SendDailyExpirySummaryHandler
@@ -63,6 +69,13 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
             new AppTimezone()
         );
 
-        return new SendDailyExpirySummaryHandler($repo, $builder, new TelegramSender($chatter, new NullLogger()));
+        $this->logHandler = new TestHandler();
+
+        return new SendDailyExpirySummaryHandler(
+            $repo,
+            $builder,
+            new TelegramSender($chatter, new NullLogger()),
+            new Logger('app', [$this->logHandler])
+        );
     }
 }
