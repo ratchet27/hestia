@@ -40,6 +40,12 @@ final class HouseholdCalendarTest extends TestCase
         self::assertSame('2026-06-13', $this->calendarAt('2026-06-05 22:30:00')->expiryCutoff(7)->format('Y-m-d'));
     }
 
+    public function testTodayAtUtcMidnightIsStillSameDayInAlmaty(): void
+    {
+        // 00:00Z == 05:00 in Almaty (+05) — same calendar day, not the previous one.
+        self::assertSame('2026-06-05', $this->calendarAt('2026-06-05 00:00:00')->today()->format('Y-m-d'));
+    }
+
     public function testNoRegressionAwayFromTheBoundary(): void
     {
         // 06:00Z == 11:00 Almaty, same calendar day -> local today = 2026-06-05.

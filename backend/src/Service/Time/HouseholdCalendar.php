@@ -26,7 +26,12 @@ final readonly class HouseholdCalendar
         return $this->clock->now()->setTimezone($this->appTimezone->get())->setTime(0, 0);
     }
 
-    /** Signed whole-day difference today -> $date, date-only (negative = already past). */
+    /**
+     * Signed whole-day difference today -> $date, date-only (negative = already past).
+     *
+     * The date part of $date is read in $date's own timezone; pass a date-only value
+     * (e.g. a Doctrine DATE, midnight UTC) for unambiguous results.
+     */
     public function daysUntil(\DateTimeImmutable $date): int
     {
         $a = new \DateTimeImmutable($this->today()->format('Y-m-d'));
@@ -38,6 +43,6 @@ final readonly class HouseholdCalendar
     /** Window cutoff date for "expiring within N days" queries. */
     public function expiryCutoff(int $days): \DateTimeImmutable
     {
-        return $this->today()->modify(sprintf('+%d days', $days));
+        return $this->today()->modify(sprintf('%d days', $days));
     }
 }
