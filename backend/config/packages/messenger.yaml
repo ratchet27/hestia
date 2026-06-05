@@ -12,7 +12,6 @@ framework:
             failed: 'doctrine://default?queue_name=failed&auto_setup=false'
 
         routing:
-            'App\Message\StockChangedMessage': async
             'App\Message\SendDailyExpirySummary': async
 
 when@test:

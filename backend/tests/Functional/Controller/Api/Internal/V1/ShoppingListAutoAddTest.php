@@ -15,13 +15,12 @@ use App\Factory\ProductFactory;
 use App\Factory\ShoppingListItemFactory;
 use App\Factory\StockEntryFactory;
 use App\Factory\UserFactory;
+// @mago-ignore lint:no-redundant-use -- kept for later task that slims message fields
 use App\Message\StockChangedMessage;
 use App\Service\ShoppingListService;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Messenger\Envelope;
-use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -409,6 +408,30 @@ class ShoppingListAutoAddTest extends WebTestCase
 
     // ========== Integration with Stock API ==========
 
+    public function testConsumeBelowMinReconcilesInRequestWithoutWorker(): void
+    {
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct(['name' => 'Milk', 'defaultLocation' => $location, 'minStock' => 5]);
+
+        for ($i = 0; $i < 6; $i++) {
+            StockEntryFactory::createOne(['product' => $product, 'location' => $location]);
+        }
+
+        // Consume 3 (6 -> 3, below min of 5). No messenger:consume is run by this test.
+        $response = $this->apiPost('/stocks/consume', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => (string) $location->getId(),
+            'quantity' => 3
+        ]);
+        static::assertJsonResponse($response, Response::HTTP_OK);
+
+        // Reconciliation already happened in-request — the auto item exists now.
+        $data = static::assertJsonResponse($this->apiGet('/shopping-list'), Response::HTTP_OK);
+        static::assertListResponse($data, 1);
+        static::assertSame('auto', $data['data'][0]['source']);
+        static::assertSame(2, $data['data'][0]['amount']); // deficit 5 - 3
+    }
+
     public function testConsumeStockDispatchesMessage(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
@@ -433,12 +456,10 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
         static::assertJsonResponse($response, Response::HTTP_OK);
 
-        // Check that a message was dispatched (in test env, transport is in-memory)
-        /** @var InMemoryTransport $transport */
-        $transport = static::getContainer()->get('messenger.transport.async');
-        $messages = $transport->getSent();
-
-        static::assertGreaterThanOrEqual(1, count($messages));
+        $data = static::assertJsonResponse($this->apiGet('/shopping-list'), Response::HTTP_OK);
+        static::assertListResponse($data, 1);
+        static::assertSame('auto', $data['data'][0]['source']);
+        static::assertSame(2, $data['data'][0]['amount']); // min 5 - remaining 3
     }
 
     public function testAddStockDispatchesMessage(): void
@@ -460,12 +481,10 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
         static::assertJsonResponse($response, Response::HTTP_CREATED);
 
-        // Check that a message was dispatched
-        /** @var InMemoryTransport $transport */
-        $transport = static::getContainer()->get('messenger.transport.async');
-        $messages = $transport->getSent();
-
-        static::assertGreaterThanOrEqual(1, count($messages));
+        $data = static::assertJsonResponse($this->apiGet('/shopping-list'), Response::HTTP_OK);
+        static::assertListResponse($data, 1);
+        static::assertSame('auto', $data['data'][0]['source']);
+        static::assertSame(2, $data['data'][0]['amount']); // min 5 - stock 3
     }
 
     // ========== Mutation Killing Tests ==========
@@ -614,8 +633,7 @@ class ShoppingListAutoAddTest extends WebTestCase
     }
 
     /**
-     * Kills mutants #14, #17-19: Verifies exact newQty calculation in messages.
-     * For addStock: newQty = previousQty + quantity
+     * Verifies add reconciles to the real stock level in-request (no deficit at min).
      */
     public function testAddStockDispatchesMessageWithCorrectQuantities(): void
     {
@@ -640,24 +658,12 @@ class ShoppingListAutoAddTest extends WebTestCase
             'quantity' => 2
         ]);
 
-        /** @var InMemoryTransport $transport */
-        $transport = static::getContainer()->get('messenger.transport.async');
-        $messages = $transport->getSent();
-
-        static::assertCount(1, $messages);
-        /** @var Envelope $envelope */
-        $envelope = $messages[0];
-        /** @var StockChangedMessage $message */
-        $message = $envelope->getMessage();
-
-        static::assertInstanceOf(StockChangedMessage::class, $message);
-        static::assertSame(3, $message->previousQuantity); // Was 3
-        static::assertSame(5, $message->newQuantity); // Now 3 + 2 = 5
+        $data = static::assertJsonResponse($this->apiGet('/shopping-list'), Response::HTTP_OK);
+        static::assertListResponse($data, 0); // 5 == min, nothing to buy
     }
 
     /**
-     * Kills mutants #17-19: Verifies exact newQty calculation for deleteEntry.
-     * For deleteEntry: newQty = previousQty - 1
+     * Verifies delete reconciles to the real stock level in-request.
      */
     public function testDeleteEntryDispatchesMessageWithCorrectQuantities(): void
     {
@@ -679,25 +685,16 @@ class ShoppingListAutoAddTest extends WebTestCase
         // Delete one entry
         $this->apiDelete('/stocks/entries/' . $entries[0]->getId());
 
-        /** @var InMemoryTransport $transport */
-        $transport = static::getContainer()->get('messenger.transport.async');
-        $messages = $transport->getSent();
-
-        static::assertCount(1, $messages);
-        /** @var Envelope $envelope */
-        $envelope = $messages[0];
-        /** @var StockChangedMessage $message */
-        $message = $envelope->getMessage();
-
-        static::assertInstanceOf(StockChangedMessage::class, $message);
-        static::assertSame(5, $message->previousQuantity); // Was 5
-        static::assertSame(4, $message->newQuantity); // Now 5 - 1 = 4
+        $data = static::assertJsonResponse($this->apiGet('/shopping-list'), Response::HTTP_OK);
+        static::assertListResponse($data, 1);
+        static::assertSame('auto', $data['data'][0]['source']);
+        static::assertSame(1, $data['data'][0]['amount']); // min 5 - stock 4
     }
 
     /**
-     * Kills mutant #20: Verifies dispatch() is actually called.
+     * Consuming below min yields exactly one auto item (no duplicates).
      */
-    public function testConsumeStockDispatchesExactlyOneMessage(): void
+    public function testConsumeStockReconcilesOnceInRequest(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -720,13 +717,10 @@ class ShoppingListAutoAddTest extends WebTestCase
             'quantity' => 2
         ]);
 
-        /** @var InMemoryTransport $transport */
-        $transport = static::getContainer()->get('messenger.transport.async');
-        $messages = $transport->getSent();
-
-        // Must have exactly 1 message
-        static::assertCount(1, $messages);
-        static::assertInstanceOf(StockChangedMessage::class, $messages[0]->getMessage());
+        $data = static::assertJsonResponse($this->apiGet('/shopping-list'), Response::HTTP_OK);
+        static::assertListResponse($data, 1); // exactly one item, not duplicated
+        static::assertSame('auto', $data['data'][0]['source']);
+        static::assertSame(2, $data['data'][0]['amount']);
     }
 
     // ========== minStock Change Tests ==========
