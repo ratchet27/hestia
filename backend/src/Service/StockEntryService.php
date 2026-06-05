@@ -205,7 +205,6 @@ class StockEntryService
         }
 
         $productId = $entry->getProduct()->getId();
-
         $this->entityManager->remove($entry);
         $this->entityManager->flush();
 
