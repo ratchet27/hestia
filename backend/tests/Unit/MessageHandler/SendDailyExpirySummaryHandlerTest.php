@@ -13,6 +13,7 @@ use App\Repository\StockEntryRepository;
 use App\Service\Telegram\ExpirySummaryBuilder;
 use App\Service\Telegram\TelegramSender;
 use App\Service\Time\AppTimezone;
+use App\Service\Time\HouseholdCalendar;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -64,10 +65,11 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
 
     private function handler(StockEntryRepository $repo, ChatterInterface $chatter): SendDailyExpirySummaryHandler
     {
-        $builder = new ExpirySummaryBuilder(
+        $calendar = new HouseholdCalendar(
             new MockClock(new \DateTimeImmutable('2026-06-04 04:00:00')),
             new AppTimezone()
         );
+        $builder = new ExpirySummaryBuilder($calendar);
 
         $this->logHandler = new TestHandler();
 
