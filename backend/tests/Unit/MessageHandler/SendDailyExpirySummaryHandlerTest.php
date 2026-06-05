@@ -38,7 +38,9 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
         $repo
             ->expects(self::once())
             ->method('findExpiring')
-            ->with(self::isInstanceOf(\DateTimeImmutable::class))
+            ->with(self::callback(
+                static fn(\DateTimeImmutable $cutoff): bool => $cutoff->format('Y-m-d') === '2026-06-07'
+            ))
             ->willReturn([$entry]);
 
         $chatter = $this->createMock(ChatterInterface::class);
@@ -61,7 +63,9 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
         $repo
             ->expects(self::once())
             ->method('findExpiring')
-            ->with(self::isInstanceOf(\DateTimeImmutable::class))
+            ->with(self::callback(
+                static fn(\DateTimeImmutable $cutoff): bool => $cutoff->format('Y-m-d') === '2026-06-07'
+            ))
             ->willReturn([]);
 
         $chatter = $this->createMock(ChatterInterface::class);

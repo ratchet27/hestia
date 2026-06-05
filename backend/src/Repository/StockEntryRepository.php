@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\StockEntry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -139,7 +140,7 @@ class StockEntryRepository extends ServiceEntityRepository
             ->createQueryBuilder('e')
             ->where('e.bestBefore IS NOT NULL')
             ->andWhere('e.bestBefore <= :cutoffDate')
-            ->setParameter('cutoffDate', $cutoff)
+            ->setParameter('cutoffDate', $cutoff, Types::DATE_IMMUTABLE)
             ->orderBy('e.bestBefore', 'ASC')
             ->getQuery()
             ->getResult();
