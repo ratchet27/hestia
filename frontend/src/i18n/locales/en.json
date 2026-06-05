@@ -116,7 +116,9 @@
     "cook": "Cook",
     "addToShoppingList": "Add to shopping list",
     "staple": "(staple)",
-    "ingredientsRequired": "Add at least one ingredient"
+    "ingredientsRequired": "Add at least one ingredient",
+    "invalidUrl": "Enter a valid URL (http:// or https://)",
+    "saveFailed": "Could not save the recipe. Check the fields."
   },
   "expiry": {
     "expired": "expired",

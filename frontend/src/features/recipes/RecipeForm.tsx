@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import { ApiError } from "../../api/client";
 import type { SaveRecipeRequest } from "../../api/generated/models";
 import { useProducts } from "../../api/queries/products";
 import {
@@ -34,6 +36,7 @@ export function RecipeForm({
   const { data: recipes = [] } = useRecipes();
   const create = useCreateRecipe();
   const update = useUpdateRecipe();
+  const submitError = create.error ?? update.error;
 
   const existing = recipeId
     ? recipes.find((r) => r.id === recipeId)
@@ -78,6 +81,34 @@ export function RecipeForm({
     }
   }, [existing, reset]);
 
+  // Surface backend errors (e.g. a 422 on save): highlight the offending fields
+  // and always show a toast so the failure is never silent.
+  useEffect(() => {
+    if (!(submitError instanceof ApiError)) return;
+
+    if (submitError.isValidationError && submitError.violations?.length) {
+      for (const violation of submitError.violations) {
+        // Symfony paths like "ingredients[0].product_id" -> RHF "ingredients.0.product_id".
+        const path = violation.propertyPath.replace(/\[(\d+)\]/g, ".$1");
+        if (
+          path === "name" ||
+          path === "source_url" ||
+          path === "instructions" ||
+          path.startsWith("ingredients")
+        ) {
+          setError(path as Parameters<typeof setError>[0], {
+            type: "server",
+            message: violation.message,
+          });
+        }
+      }
+      toast.error(t("recipes.saveFailed"));
+      return;
+    }
+
+    toast.error(submitError.message || t("common.error"));
+  }, [submitError, setError, t]);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "ingredients",
@@ -101,12 +132,17 @@ export function RecipeForm({
         consume_on_cook: i.consume_on_cook,
       })),
     };
-    if (recipeId) {
-      await update.mutateAsync({ id: recipeId, data: payload });
-    } else {
-      await create.mutateAsync(payload);
+    try {
+      if (recipeId) {
+        await update.mutateAsync({ id: recipeId, data: payload });
+      } else {
+        await create.mutateAsync(payload);
+      }
+      onClose();
+    } catch {
+      // Failure is surfaced via the submitError effect (field highlight + toast);
+      // keep the form open so the user can correct and retry.
     }
-    onClose();
   });
 
   return (
@@ -225,9 +261,19 @@ export function RecipeForm({
             </label>
             <input
               id="recipe-source"
-              {...register("source_url")}
+              {...register("source_url", {
+                validate: (value) =>
+                  !value ||
+                  /^https?:\/\/.+/.test(value) ||
+                  t("recipes.invalidUrl"),
+              })}
               className="w-full border border-stone-300 rounded-lg px-3 py-2"
             />
+            {formState.errors.source_url && (
+              <p className="text-red-600 text-sm mt-1">
+                {formState.errors.source_url.message}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

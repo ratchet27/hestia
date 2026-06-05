@@ -118,7 +118,9 @@
     "cook": "Приготовить",
     "addToShoppingList": "В список покупок",
     "staple": "(запас)",
-    "ingredientsRequired": "Добавьте хотя бы один ингредиент"
+    "ingredientsRequired": "Добавьте хотя бы один ингредиент",
+    "invalidUrl": "Введите корректную ссылку (http:// или https://)",
+    "saveFailed": "Не удалось сохранить рецепт. Проверьте поля."
   },
   "expiry": {
     "expired": "просрочено",
