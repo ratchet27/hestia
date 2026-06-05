@@ -32,7 +32,6 @@ use Symfony\Component\Uid\Uuid;
 
 // @mago-ignore lint:cyclomatic-complexity
 // @mago-ignore lint:kan-defect
-// @mago-ignore lint:too-many-methods
 class StockEntryService
 {
     // @mago-ignore lint:excessive-parameter-list
