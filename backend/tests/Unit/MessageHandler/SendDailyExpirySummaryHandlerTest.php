@@ -13,6 +13,7 @@ use App\Repository\StockEntryRepository;
 use App\Service\Telegram\ExpirySummaryBuilder;
 use App\Service\Telegram\TelegramSender;
 use App\Service\Time\AppTimezone;
+use App\Service\Time\HouseholdCalendar;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +35,13 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
             ->setBestBefore(new \DateTimeImmutable('2026-06-04'));
 
         $repo = $this->createMock(StockEntryRepository::class);
-        $repo->expects(self::once())->method('findExpiring')->with(3)->willReturn([$entry]);
+        $repo
+            ->expects(self::once())
+            ->method('findExpiring')
+            ->with(self::callback(
+                static fn(\DateTimeImmutable $cutoff): bool => $cutoff->format('Y-m-d') === '2026-06-07'
+            ))
+            ->willReturn([$entry]);
 
         $chatter = $this->createMock(ChatterInterface::class);
         $chatter
@@ -53,7 +60,13 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
     {
         // No expiring entries => builder returns null => nothing is sent.
         $repo = $this->createMock(StockEntryRepository::class);
-        $repo->expects(self::once())->method('findExpiring')->with(3)->willReturn([]);
+        $repo
+            ->expects(self::once())
+            ->method('findExpiring')
+            ->with(self::callback(
+                static fn(\DateTimeImmutable $cutoff): bool => $cutoff->format('Y-m-d') === '2026-06-07'
+            ))
+            ->willReturn([]);
 
         $chatter = $this->createMock(ChatterInterface::class);
         $chatter->expects(self::never())->method('send');
@@ -64,10 +77,11 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
 
     private function handler(StockEntryRepository $repo, ChatterInterface $chatter): SendDailyExpirySummaryHandler
     {
-        $builder = new ExpirySummaryBuilder(
+        $calendar = new HouseholdCalendar(
             new MockClock(new \DateTimeImmutable('2026-06-04 04:00:00')),
             new AppTimezone()
         );
+        $builder = new ExpirySummaryBuilder($calendar);
 
         $this->logHandler = new TestHandler();
 
@@ -75,7 +89,8 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
             $repo,
             $builder,
             new TelegramSender($chatter, new NullLogger()),
-            new Logger('app', [$this->logHandler])
+            new Logger('app', [$this->logHandler]),
+            $calendar
         );
     }
 }

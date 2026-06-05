@@ -5,14 +5,12 @@ declare(strict_types = 1);
 namespace App\Service\Telegram;
 
 use App\Entity\StockEntry;
-use App\Service\Time\AppTimezone;
-use Symfony\Component\Clock\ClockInterface;
+use App\Service\Time\HouseholdCalendar;
 
 final readonly class ExpirySummaryBuilder
 {
     public function __construct(
-        private ClockInterface $clock,
-        private AppTimezone $appTimezone
+        private HouseholdCalendar $calendar
     ) {
     }
 
@@ -21,7 +19,7 @@ final readonly class ExpirySummaryBuilder
      */
     public function build(array $entries): ?string
     {
-        $today = $this->today();
+        $today = $this->calendar->today();
 
         $expired = [];
         $soon = [];
@@ -31,7 +29,7 @@ final readonly class ExpirySummaryBuilder
                 continue;
             }
 
-            $days = $this->dayDelta($today, $bestBefore);
+            $days = $this->calendar->daysUntil($bestBefore);
             $line = sprintf(
                 '• %s (%s) — %s',
                 $this->escape($entry->getProduct()->getName()),
@@ -60,20 +58,6 @@ final readonly class ExpirySummaryBuilder
         }
 
         return implode("\n\n", $sections);
-    }
-
-    private function today(): \DateTimeImmutable
-    {
-        return $this->clock->now()->setTimezone($this->appTimezone->get());
-    }
-
-    /** Signed whole-day difference: bestBefore date minus today's date (negative = past). */
-    private function dayDelta(\DateTimeImmutable $today, \DateTimeImmutable $bestBefore): int
-    {
-        $a = new \DateTimeImmutable($today->format('Y-m-d'));
-        $b = new \DateTimeImmutable($bestBefore->format('Y-m-d'));
-
-        return (int) $a->diff($b)->format('%r%a');
     }
 
     private function relative(int $days): string

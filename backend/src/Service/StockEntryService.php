@@ -25,21 +25,23 @@ use App\Response\Stock\ProductSummaryResponse;
 use App\Response\Stock\StockEntryResponse;
 use App\Response\Stock\StockSummaryResponse;
 use App\Message\StockChangedMessage;
+use App\Service\Time\HouseholdCalendar;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 
 // @mago-ignore lint:cyclomatic-complexity
 // @mago-ignore lint:kan-defect
-// @mago-ignore lint:too-many-methods
 class StockEntryService
 {
+    // @mago-ignore lint:excessive-parameter-list
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly StockEntryRepository $stockEntryRepository,
         private readonly ProductRepository $productRepository,
         private readonly LocationRepository $locationRepository,
-        private readonly MessageBusInterface $messageBus
+        private readonly MessageBusInterface $messageBus,
+        private readonly HouseholdCalendar $householdCalendar
     ) {
     }
 
@@ -73,10 +75,9 @@ class StockEntryService
         // Calculate best_before
         $bestBefore = match (true) {
             $request->best_before !== null => new \DateTimeImmutable($request->best_before),
-            $product->getDefaultExpiryDays() !== null => new \DateTimeImmutable()->modify(sprintf(
-                '+%d days',
-                (int) $product->getDefaultExpiryDays()
-            )),
+            $product->getDefaultExpiryDays() !== null => $this->householdCalendar
+                ->today()
+                ->modify(sprintf('+%d days', (int) $product->getDefaultExpiryDays())),
             default => null
         };
 
@@ -307,14 +308,12 @@ class StockEntryService
      */
     public function getExpiringEntries(int $days): array
     {
-        $entries = $this->stockEntryRepository->findExpiring($days);
-        $today = new \DateTimeImmutable('today');
+        $entries = $this->stockEntryRepository->findExpiring($this->householdCalendar->expiryCutoff($days));
 
         return array_map(
-            static function (StockEntry $entry) use ($today): ExpiringEntryResponse {
+            function (StockEntry $entry): ExpiringEntryResponse {
                 /** @var \DateTimeImmutable $bestBefore - guaranteed non-null by findExpiring query */
                 $bestBefore = $entry->getBestBefore();
-                $daysUntilExpiry = (int) $today->diff($bestBefore)->format('%r%a');
 
                 return new ExpiringEntryResponse(
                     id: $entry->getId(),
@@ -328,7 +327,7 @@ class StockEntryService
                         name: $entry->getLocation()->getName()
                     ),
                     best_before: $bestBefore->format('Y-m-d'),
-                    days_until_expiry: $daysUntilExpiry
+                    days_until_expiry: $this->householdCalendar->daysUntil($bestBefore)
                 );
             },
             $entries
@@ -374,6 +373,8 @@ class StockEntryService
 
     private function mapEntryToResponse(StockEntry $entry): StockEntryResponse
     {
+        $bestBefore = $entry->getBestBefore();
+
         return new StockEntryResponse(
             id: $entry->getId(),
             product: new ProductBriefResponse(
@@ -382,8 +383,9 @@ class StockEntryService
                 unit: $entry->getProduct()->getUnit()
             ),
             location: new LocationResponse(id: $entry->getLocation()->getId(), name: $entry->getLocation()->getName()),
-            best_before: $entry->getBestBefore()?->format('Y-m-d'),
-            created_at: $entry->getCreatedAt()
+            best_before: $bestBefore?->format('Y-m-d'),
+            created_at: $entry->getCreatedAt(),
+            days_until_expiry: $bestBefore !== null ? $this->householdCalendar->daysUntil($bestBefore) : null
         );
     }
 }

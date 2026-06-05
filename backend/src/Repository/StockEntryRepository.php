@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\StockEntry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -128,21 +129,18 @@ class StockEntryRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find entries expiring within N days (includes already expired, ordered by urgency).
+     * Find entries expiring up to and including the given cutoff date (includes already expired, ordered by urgency).
      *
      * @return StockEntry[]
      */
-    public function findExpiring(int $days): array
+    public function findExpiring(\DateTimeImmutable $cutoff): array
     {
-        $now = new \DateTimeImmutable();
-        $cutoffDate = $now->modify(sprintf('+%d days', $days));
-
         // @mago-ignore analysis:mixed-return-statement
         return $this
             ->createQueryBuilder('e')
             ->where('e.bestBefore IS NOT NULL')
             ->andWhere('e.bestBefore <= :cutoffDate')
-            ->setParameter('cutoffDate', $cutoffDate)
+            ->setParameter('cutoffDate', $cutoff, Types::DATE_IMMUTABLE)
             ->orderBy('e.bestBefore', 'ASC')
             ->getQuery()
             ->getResult();

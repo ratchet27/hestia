@@ -8,6 +8,7 @@ use App\Message\SendDailyExpirySummary;
 use App\Repository\StockEntryRepository;
 use App\Service\Telegram\ExpirySummaryBuilder;
 use App\Service\Telegram\TelegramSender;
+use App\Service\Time\HouseholdCalendar;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -20,13 +21,14 @@ final readonly class SendDailyExpirySummaryHandler
         private StockEntryRepository $stockEntryRepository,
         private ExpirySummaryBuilder $builder,
         private TelegramSender $sender,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private HouseholdCalendar $calendar
     ) {
     }
 
     public function __invoke(SendDailyExpirySummary $message): void
     {
-        $entries = $this->stockEntryRepository->findExpiring(self::WINDOW_DAYS);
+        $entries = $this->stockEntryRepository->findExpiring($this->calendar->expiryCutoff(self::WINDOW_DAYS));
         $summary = $this->builder->build($entries);
 
         if ($summary === null) {

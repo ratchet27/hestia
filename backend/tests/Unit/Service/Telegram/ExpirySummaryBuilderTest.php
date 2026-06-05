@@ -9,6 +9,7 @@ use App\Entity\Product;
 use App\Entity\StockEntry;
 use App\Service\Telegram\ExpirySummaryBuilder;
 use App\Service\Time\AppTimezone;
+use App\Service\Time\HouseholdCalendar;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Clock\MockClock;
 
@@ -16,8 +17,10 @@ final class ExpirySummaryBuilderTest extends TestCase
 {
     private function builderAt(string $utc): ExpirySummaryBuilder
     {
-        // Clock is UTC; AppTimezone converts to Asia/Almaty (+05) for "today".
-        return new ExpirySummaryBuilder(new MockClock(new \DateTimeImmutable($utc)), new AppTimezone());
+        // Clock is UTC; HouseholdCalendar converts to Asia/Almaty (+05) for "today".
+        return new ExpirySummaryBuilder(
+            new HouseholdCalendar(new MockClock(new \DateTimeImmutable($utc)), new AppTimezone())
+        );
     }
 
     private function entry(string $product, string $location, string $bestBefore): StockEntry

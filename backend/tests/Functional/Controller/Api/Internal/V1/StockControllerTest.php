@@ -192,6 +192,36 @@ class StockControllerTest extends WebTestCase
         static::assertListResponse($data, 2);
     }
 
+    /**
+     * Regression for C1 (#53): between 00:00–05:00 Almaty the API must report the household day,
+     * not UTC. At 22:30Z (= 03:30 on 2026-06-06 Almaty) an item dated 2026-06-06 is "today" (0),
+     * not "tomorrow" (1). Mirrors testExpiringDaysUntilExpiryUsesHouseholdTimezone for the
+     * entry-list path (/stocks/entries → mapEntryToResponse).
+     */
+    public function testListEntriesDaysUntilExpiryUsesHouseholdTimezone(): void
+    {
+        static::mockTime(new \DateTimeImmutable('2026-06-05 22:30:00', new \DateTimeZone('UTC')));
+
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-06-06')
+        ]);
+
+        $response = $this->apiGet('/stocks/entries');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 1);
+        static::assertSame(0, $data['data'][0]['days_until_expiry']);
+    }
+
     // ========== Add Stock Tests ==========
 
     public function testAddStockCreatesEntries(): void
@@ -445,6 +475,72 @@ class StockControllerTest extends WebTestCase
         static::assertLessThan(0, $data['data'][0]['days_until_expiry']);
     }
 
+    /**
+     * Regression for C1 (#53): between 00:00–05:00 Almaty the API must report the household day,
+     * not UTC. At 22:30Z (= 03:30 on 2026-06-06 Almaty) an item dated 2026-06-06 is "today" (0),
+     * not "tomorrow" (1).
+     */
+    public function testExpiringDaysUntilExpiryUsesHouseholdTimezone(): void
+    {
+        static::mockTime(new \DateTimeImmutable('2026-06-05 22:30:00', new \DateTimeZone('UTC')));
+
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-06-06')
+        ]);
+
+        $response = $this->apiGet('/stocks/expiring', ['days' => '7']);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 1);
+        static::assertSame(0, $data['data'][0]['days_until_expiry']);
+    }
+
+    /**
+     * Locks the cutoff inclusivity (findExpiring uses `bestBefore <= cutoff`, cutoff bound as DATE):
+     * at 22:30Z (= 2026-06-06 Almaty), days=7 -> cutoff 2026-06-13. An item dated exactly on the
+     * cutoff is included (delta 7); an item one day past it is excluded.
+     */
+    public function testExpiringIncludesItemExactlyOnCutoffAndExcludesBeyond(): void
+    {
+        static::mockTime(new \DateTimeImmutable('2026-06-05 22:30:00', new \DateTimeZone('UTC')));
+
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+        // Exactly on the cutoff (today + 7 = 2026-06-13) -> included.
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-06-13')
+        ]);
+        // One day past the cutoff -> excluded.
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-06-14')
+        ]);
+
+        $response = $this->apiGet('/stocks/expiring', ['days' => '7']);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 1);
+        static::assertSame('2026-06-13', $data['data'][0]['best_before']);
+        static::assertSame(7, $data['data'][0]['days_until_expiry']);
+    }
+
     // ========== FIFO Edge Cases ==========
 
     public function testConsumeFifoNullBestBeforeConsumedLast(): void
@@ -527,6 +623,9 @@ class StockControllerTest extends WebTestCase
 
     public function testAddStockAutoCalculatesBestBeforeFromProduct(): void
     {
+        // 22:30Z == 03:30 on 2026-06-06 Almaty -> "today" is the 6th; +14d = 2026-06-20.
+        static::mockTime(new \DateTimeImmutable('2026-06-05 22:30:00', new \DateTimeZone('UTC')));
+
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
         $product = $this->createProduct([
@@ -543,10 +642,7 @@ class StockControllerTest extends WebTestCase
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
 
-        $expectedDate = new \DateTimeImmutable()
-            ->modify('+14 days')
-            ->format('Y-m-d');
-        static::assertSame($expectedDate, $data['data']['entries'][0]['best_before']);
+        static::assertSame('2026-06-20', $data['data']['entries'][0]['best_before']);
     }
 
     // ========== Mutation Killing Tests ==========
@@ -600,6 +696,7 @@ class StockControllerTest extends WebTestCase
 
         static::assertListResponse($data, 1);
         static::assertNull($data['data'][0]['best_before']);
+        static::assertNull($data['data'][0]['days_until_expiry']);
     }
 
     /**

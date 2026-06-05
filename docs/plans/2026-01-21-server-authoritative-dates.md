@@ -40,6 +40,11 @@ private function calculateDaysUntilExpiry(?\DateTimeInterface $bestBefore): ?int
 }
 ```
 
+> **Correction (2026-06-05, #53):** "today" MUST be resolved in the household timezone, not the
+> server zone. Use `HouseholdCalendar::today()` (injected `ClockInterface` + `AppTimezone`),
+> never a bare `new \DateTimeImmutable('today')`, which resolves in the UTC server zone and
+> reintroduces the very off-by-one this plan set out to eliminate.
+
 **Step 2: Run backend tests**
 
 Run: `cd /home/pavel/projects/hestia/backend && make test`

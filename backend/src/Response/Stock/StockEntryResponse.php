@@ -7,32 +7,16 @@ namespace App\Response\Stock;
 use App\Response\Location\LocationResponse;
 use Symfony\Component\Uid\Uuid;
 
+// @mago-ignore lint:excessive-parameter-list
 final readonly class StockEntryResponse
 {
-    public ?int $days_until_expiry;
-
     public function __construct(
         public Uuid $id,
         public ProductBriefResponse $product,
         public LocationResponse $location,
         public ?string $best_before,
-        public \DateTimeImmutable $created_at
+        public \DateTimeImmutable $created_at,
+        public ?int $days_until_expiry
     ) {
-        $this->days_until_expiry = $this->calculateDaysUntilExpiry($best_before);
-    }
-
-    private function calculateDaysUntilExpiry(?string $bestBefore): ?int
-    {
-        if ($bestBefore === null) {
-            return null;
-        }
-
-        $today = new \DateTimeImmutable('today');
-        $bestBeforeDate = new \DateTimeImmutable($bestBefore);
-        $diff = $today->diff($bestBeforeDate);
-
-        $days = (int) $diff->days;
-
-        return $diff->invert ? -$days : $days;
     }
 }
