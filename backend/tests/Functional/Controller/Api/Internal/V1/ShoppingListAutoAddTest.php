@@ -68,6 +68,11 @@ class ShoppingListAutoAddTest extends WebTestCase
         return ShoppingListItemFactory::createOne($attributes);
     }
 
+    /**
+     * Drive a product's stock to an absolute count.
+     * $location is used only when creating entries (increase path); the decrease
+     * path removes entries across all locations for the product.
+     */
     private function setStockLevel(Product $product, Location $location, int $target): void
     {
         /** @var StockEntryRepository $repo */
@@ -836,12 +841,7 @@ class ShoppingListAutoAddTest extends WebTestCase
             'minStock' => 5
         ]);
 
-        // Create 3 stock entries - below minStock, deficit is 2
-        for ($i = 0; $i < 3; $i++) {
-            StockEntryFactory::createOne(['product' => $product, 'location' => $location]);
-        }
-
-        // Trigger initial shopping list calculation
+        // Seed 3 stock entries - below minStock, deficit is 2
         $this->setStockLevel($product, $location, 3);
         $this->shoppingListService->handleStockChange($product->getId());
 

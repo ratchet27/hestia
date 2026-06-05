@@ -16,7 +16,6 @@ use App\Repository\BarcodeRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\LocationRepository;
 use App\Repository\ProductRepository;
-use App\Repository\StockEntryRepository;
 use App\Request\CreateProductRequest;
 use App\Request\UpdateProductRequest;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,7 +33,6 @@ class ProductService
         private readonly ProductRepository $productRepository,
         private readonly CategoryRepository $categoryRepository,
         private readonly LocationRepository $locationRepository,
-        private readonly StockEntryRepository $stockEntryRepository, // @phpstan-ignore property.onlyWritten
         private readonly BarcodeRepository $barcodeRepository,
         private readonly ShoppingListService $shoppingListService,
         private readonly ValidatorInterface $validator
