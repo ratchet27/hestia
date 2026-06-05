@@ -19,9 +19,14 @@
 **You MUST run BOTH before claiming any work is complete:**
 
 ```bash
-bun run check     # biome check src && tsc --noEmit
-bun run test:run  # vitest run — all tests must pass
+bun run check:write  # biome check --write src (auto-fixes format + safe lint) && tsc --noEmit
+bun run test:run     # vitest run — all tests must pass
 ```
+
+`check:write` is the working gate: it fixes formatting/imports/safe-lint **and** type-checks in
+one pass (the frontend analogue of backend `make lint`, which also auto-fixes). Don't run a
+verify-only check and then format separately — that's two passes for one job. Plain `bun run check`
+(no `:write`) is the verify-only, CI-parity command; use it to confirm a clean tree, not to iterate.
 
 Use the `frontend-lint` skill for the full lint workflow.
 

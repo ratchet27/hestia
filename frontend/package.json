@@ -11,6 +11,7 @@
     "lint": "biome lint src",
     "lint:fix": "biome lint --write src",
     "check": "biome check src && tsc --noEmit",
+    "check:write": "biome check --write src && tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",

@@ -37,7 +37,8 @@ Always run from the correct directory. Use full paths to avoid mistakes.
 
 | Task | Command |
 |------|---------|
-| Frontend check | `cd /home/pavel/projects/personal/hestia/frontend && bun run check` |
+| Frontend check (auto-fix) | `cd /home/pavel/projects/personal/hestia/frontend && bun run check:write` |
+| Frontend check (verify only / CI parity) | `cd /home/pavel/projects/personal/hestia/frontend && bun run check` |
 | Frontend test | `cd /home/pavel/projects/personal/hestia/frontend && bun run test:run` |
 | Backend check | `cd /home/pavel/projects/personal/hestia/backend && make lint` |
 | Backend test | `cd /home/pavel/projects/personal/hestia/backend && make test` |
@@ -48,6 +49,7 @@ Always run from the correct directory. Use full paths to avoid mistakes.
 - **NEVER** use `npm` in frontend → use `bun`
 - **NEVER** run `mago` inside Docker → it runs locally on host
 - **NEVER** run `bun run check` without `cd frontend` first
+- **Use `bun run check:write` while working** (auto-fixes formatting/lint **and** type-checks in one pass, mirroring how backend `make lint` auto-fixes) — don't run verify-only `bun run check` and then format separately. Reserve plain `bun run check` for confirming CI parity.
 - **NEVER** run `php` or `composer` on host → use `docker compose exec php`
 - **NEVER** use a subset (e.g. bare `mago format && mago lint`) as the backend gate → run **`make lint`**. It runs `rector → mago format → mago lint → mago analyze → phpstan`, a superset of CI's Code Quality job. Bare `mago lint` skips `mago analyze`, so analyzer errors (`invalid-return-statement`, `mixed-argument`, …) pass locally but fail CI.
 - **`config/reference.php` is generated** (Symfony IDE-autocomplete dump, non-deterministic union ordering) and **gitignored** — never commit it or treat its churn as a real change.
