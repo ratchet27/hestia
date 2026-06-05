@@ -15,8 +15,6 @@ use App\Factory\ProductFactory;
 use App\Factory\ShoppingListItemFactory;
 use App\Factory\StockEntryFactory;
 use App\Factory\UserFactory;
-// @mago-ignore lint:no-redundant-use -- kept for later task that slims message fields
-use App\Message\StockChangedMessage;
 use App\Service\ShoppingListService;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
