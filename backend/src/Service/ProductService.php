@@ -34,7 +34,7 @@ class ProductService
         private readonly ProductRepository $productRepository,
         private readonly CategoryRepository $categoryRepository,
         private readonly LocationRepository $locationRepository,
-        private readonly StockEntryRepository $stockEntryRepository,
+        private readonly StockEntryRepository $stockEntryRepository, // @phpstan-ignore property.onlyWritten
         private readonly BarcodeRepository $barcodeRepository,
         private readonly ShoppingListService $shoppingListService,
         private readonly ValidatorInterface $validator
@@ -143,8 +143,7 @@ class ProductService
 
         // Recalculate shopping list if minStock changed
         if ($request->minStock !== $oldMinStock) {
-            $currentStock = $this->stockEntryRepository->countByProduct($id);
-            $this->shoppingListService->handleStockChange($id, $currentStock, $currentStock);
+            $this->shoppingListService->handleStockChange($id);
         }
 
         return $product;

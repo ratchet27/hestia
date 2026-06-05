@@ -15,8 +15,10 @@ use App\Factory\ProductFactory;
 use App\Factory\ShoppingListItemFactory;
 use App\Factory\StockEntryFactory;
 use App\Factory\UserFactory;
+use App\Repository\StockEntryRepository;
 use App\Service\ShoppingListService;
 use App\Tests\Functional\Trait\ApiTestTrait;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
@@ -66,6 +68,33 @@ class ShoppingListAutoAddTest extends WebTestCase
         return ShoppingListItemFactory::createOne($attributes);
     }
 
+    private function setStockLevel(Product $product, Location $location, int $target): void
+    {
+        /** @var StockEntryRepository $repo */
+        $repo = static::getContainer()->get(StockEntryRepository::class);
+        $current = $repo->countByProduct($product->getId());
+
+        if ($target > $current) {
+            StockEntryFactory::createMany($target - $current, [
+                'product' => $product,
+                'location' => $location
+            ]);
+
+            return;
+        }
+
+        if ($target < $current) {
+            /** @var EntityManagerInterface $em */
+            $em = static::getContainer()->get(EntityManagerInterface::class);
+            $entries = $repo->findBy(['product' => $product]);
+            foreach (array_slice($entries, 0, $current - $target) as $entry) {
+                $em->remove($entry);
+            }
+
+            $em->flush();
+        }
+    }
+
     // ========== handleStockChange Direct Tests ==========
 
     public function testAutoAddWhenStockBelowMinimum(): void
@@ -79,8 +108,9 @@ class ShoppingListAutoAddTest extends WebTestCase
             'minStock' => 5
         ]);
 
-        // Simulate stock change: was 3, now 2
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 2);
+        // Simulate stock level: 2 entries (deficit 5 - 2 = 3)
+        $this->setStockLevel($product, $location, 2);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Should create auto item with deficit amount (5 - 2 = 3)
         $response = $this->apiGet('/shopping-list');
@@ -103,15 +133,17 @@ class ShoppingListAutoAddTest extends WebTestCase
             'minStock' => 10
         ]);
 
-        // First change: stock is 8, deficit is 2
-        $this->shoppingListService->handleStockChange($product->getId(), 10, 8);
+        // First: stock is 8, deficit is 2
+        $this->setStockLevel($product, $location, 8);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         $response = $this->apiGet('/shopping-list');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
         static::assertSame(2, $data['data'][0]['amount']);
 
-        // Second change: stock is 3, deficit is 7
-        $this->shoppingListService->handleStockChange($product->getId(), 8, 3);
+        // Second: stock is 3, deficit is 7
+        $this->setStockLevel($product, $location, 3);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         $response = $this->apiGet('/shopping-list');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -129,15 +161,17 @@ class ShoppingListAutoAddTest extends WebTestCase
             'minStock' => 10
         ]);
 
-        // First change: stock is 2, deficit is 8
-        $this->shoppingListService->handleStockChange($product->getId(), 10, 2);
+        // First: stock is 2, deficit is 8
+        $this->setStockLevel($product, $location, 2);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         $response = $this->apiGet('/shopping-list');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
         static::assertSame(8, $data['data'][0]['amount']);
 
-        // Second change: stock is 5, deficit is 5 (user bought 3)
-        $this->shoppingListService->handleStockChange($product->getId(), 2, 5);
+        // Second: stock is 5, deficit is 5 (user bought 3)
+        $this->setStockLevel($product, $location, 5);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         $response = $this->apiGet('/shopping-list');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -164,7 +198,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Stock reaches minimum
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 5);
+        $this->setStockLevel($product, $location, 5);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Auto item should be removed
         $response = $this->apiGet('/shopping-list');
@@ -191,7 +226,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Stock exceeds minimum
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 10);
+        $this->setStockLevel($product, $location, 10);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Auto item should be removed
         $response = $this->apiGet('/shopping-list');
@@ -218,7 +254,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Stock reaches minimum
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 5);
+        $this->setStockLevel($product, $location, 5);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Manual item should NOT be removed
         $response = $this->apiGet('/shopping-list');
@@ -246,7 +283,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Stock reaches minimum
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 5);
+        $this->setStockLevel($product, $location, 5);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Recipe item should NOT be removed
         $response = $this->apiGet('/shopping-list');
@@ -266,8 +304,9 @@ class ShoppingListAutoAddTest extends WebTestCase
             'minStock' => 0
         ]);
 
-        // Stock change on product with no minStock
-        $this->shoppingListService->handleStockChange($product->getId(), 5, 0);
+        // Stock change on product with no minStock (setStockLevel with 0 is a no-op)
+        $this->setStockLevel($product, $location, 0);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // No shopping item should be created
         $response = $this->apiGet('/shopping-list');
@@ -287,8 +326,9 @@ class ShoppingListAutoAddTest extends WebTestCase
             'active' => false
         ]);
 
-        // Stock change on inactive product
-        $this->shoppingListService->handleStockChange($product->getId(), 5, 0);
+        // Stock change on inactive product (guard returns before count; setStockLevel with 0 is a no-op)
+        $this->setStockLevel($product, $location, 0);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // No shopping item should be created
         $response = $this->apiGet('/shopping-list');
@@ -301,7 +341,7 @@ class ShoppingListAutoAddTest extends WebTestCase
         $fakeId = Uuid::v7();
 
         // Should not throw, just silently return
-        $this->shoppingListService->handleStockChange($fakeId, 5, 0);
+        $this->shoppingListService->handleStockChange($fakeId);
 
         $response = $this->apiGet('/shopping-list');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -320,7 +360,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Stock equals minStock - no deficit
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 5);
+        $this->setStockLevel($product, $location, 5);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Should NOT create an item (deficit is 0)
         $response = $this->apiGet('/shopping-list');
@@ -340,7 +381,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Stock is 4, minStock is 5 - deficit of exactly 1
-        $this->shoppingListService->handleStockChange($product->getId(), 5, 4);
+        $this->setStockLevel($product, $location, 4);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         $response = $this->apiGet('/shopping-list');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
@@ -367,7 +409,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Stock change results in deficit of exactly 5 (same as current)
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 5);
+        $this->setStockLevel($product, $location, 5);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Amount should stay at 5 (> not >=)
         $response = $this->apiGet('/shopping-list');
@@ -393,8 +436,9 @@ class ShoppingListAutoAddTest extends WebTestCase
             'source' => ShoppingListSource::MANUAL
         ]);
 
-        // Stock change would suggest deficit of 8
-        $this->shoppingListService->handleStockChange($product->getId(), 10, 2);
+        // Stock would suggest deficit of 8 (minStock 10 - stock 2 = 8)
+        $this->setStockLevel($product, $location, 2);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Manual item should remain unchanged
         $response = $this->apiGet('/shopping-list');
@@ -402,6 +446,21 @@ class ShoppingListAutoAddTest extends WebTestCase
         static::assertListResponse($data, 1);
         static::assertSame(5, $data['data'][0]['amount']);
         static::assertSame('manual', $data['data'][0]['source']);
+    }
+
+    public function testHandleStockChangeIsIdempotentAcrossRepeatedCalls(): void
+    {
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct(['name' => 'Eggs', 'defaultLocation' => $location, 'minStock' => 5]);
+        $this->setStockLevel($product, $location, 2); // deficit 3
+
+        $this->shoppingListService->handleStockChange($product->getId());
+        $this->shoppingListService->handleStockChange($product->getId());
+        $this->shoppingListService->handleStockChange($product->getId());
+
+        $data = static::assertJsonResponse($this->apiGet('/shopping-list'), Response::HTTP_OK);
+        static::assertListResponse($data, 1); // exactly one auto item despite repeated calls
+        static::assertSame(3, $data['data'][0]['amount']);
     }
 
     // ========== Integration with Stock API ==========
@@ -430,7 +489,7 @@ class ShoppingListAutoAddTest extends WebTestCase
         static::assertSame(2, $data['data'][0]['amount']); // deficit 5 - 3
     }
 
-    public function testConsumeStockDispatchesMessage(): void
+    public function testConsumeStockReconcilesInRequest(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -460,7 +519,7 @@ class ShoppingListAutoAddTest extends WebTestCase
         static::assertSame(2, $data['data'][0]['amount']); // min 5 - remaining 3
     }
 
-    public function testAddStockDispatchesMessage(): void
+    public function testAddStockReconcilesInRequest(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -502,7 +561,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Even with stock at 0, no item should be created when minStock is 0
-        $this->shoppingListService->handleStockChange($product->getId(), 10, 0);
+        $this->setStockLevel($product, $location, 0);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Verify via database - no shopping list items should exist
         $this->assertDatabaseMissing(ShoppingListItem::class, [
@@ -540,7 +600,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         $em->flush();
 
         // Trigger a stock change - with minStock=0, auto item should be cleaned up
-        $this->shoppingListService->handleStockChange($product->getId(), 5, 10);
+        $this->setStockLevel($product, $location, 10);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Auto item should be removed - minStock=0 means no threshold, stale items cleaned up
         $this->assertDatabaseMissing(ShoppingListItem::class, ['id' => $autoItemId]);
@@ -562,7 +623,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Stock is 10, minStock is 5 - deficit would be -5, but max(0, -5) = 0
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 10);
+        $this->setStockLevel($product, $location, 10);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // No item should be created (deficit is 0, not -5)
         $this->assertDatabaseMissing(ShoppingListItem::class, [
@@ -590,7 +652,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         $itemId = $item->getId();
 
         // Stock is 7, minStock is 10 - deficit is 3 (less than current 5)
-        $this->shoppingListService->handleStockChange($product->getId(), 5, 7);
+        $this->setStockLevel($product, $location, 7);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Amount should update to 3 (current deficit)
         $this->assertDatabaseHas(ShoppingListItem::class, [
@@ -622,7 +685,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         ]);
 
         // Trigger with lower deficit (5) - should not create new item
-        $this->shoppingListService->handleStockChange($product->getId(), 3, 5);
+        $this->setStockLevel($product, $location, 5);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Should still have exactly 1 item
         $response = $this->apiGet('/shopping-list');
@@ -633,7 +697,7 @@ class ShoppingListAutoAddTest extends WebTestCase
     /**
      * Verifies add reconciles to the real stock level in-request (no deficit at min).
      */
-    public function testAddStockDispatchesMessageWithCorrectQuantities(): void
+    public function testAddStockNoDeficitAtMin(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -663,7 +727,7 @@ class ShoppingListAutoAddTest extends WebTestCase
     /**
      * Verifies delete reconciles to the real stock level in-request.
      */
-    public function testDeleteEntryDispatchesMessageWithCorrectQuantities(): void
+    public function testDeleteStockReconcilesInRequest(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -778,7 +842,8 @@ class ShoppingListAutoAddTest extends WebTestCase
         }
 
         // Trigger initial shopping list calculation
-        $this->shoppingListService->handleStockChange($product->getId(), 0, 3);
+        $this->setStockLevel($product, $location, 3);
+        $this->shoppingListService->handleStockChange($product->getId());
 
         // Verify auto item exists with amount 2
         $response = $this->apiGet('/shopping-list');

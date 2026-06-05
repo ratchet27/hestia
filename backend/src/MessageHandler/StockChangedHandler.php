@@ -18,10 +18,6 @@ final readonly class StockChangedHandler
 
     public function __invoke(StockChangedMessage $message): void
     {
-        $this->shoppingListService->handleStockChange(
-            $message->productId,
-            $message->previousQuantity,
-            $message->newQuantity
-        );
+        $this->shoppingListService->handleStockChange($message->productId);
     }
 }
