@@ -180,6 +180,7 @@ counting) live in SQL where they belong (defended below).
   `.env:48` → `APP_TIMEZONE=+05:00`;
   `src/Response/Stock/StockEntryResponse.php:30`;
   `src/Service/StockEntryService.php:311` and `:76` (write-side suggestion);
+  `src/Repository/StockEntryRepository.php:137` (`findExpiring()` — raw, uninjected `new \DateTimeImmutable()`, same root cause, also untestable; fixed in #53);
   correct path: `src/Service/Telegram/ExpirySummaryBuilder.php:65-68,71-77`;
   the rule: `docs/plans/2026-01-21-server-authoritative-dates.md`.
 - **Effect.** Between 00:00–05:00 Asia/Almaty, UTC is still "yesterday," so the
