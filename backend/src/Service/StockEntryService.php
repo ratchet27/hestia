@@ -76,10 +76,9 @@ class StockEntryService
         // Calculate best_before
         $bestBefore = match (true) {
             $request->best_before !== null => new \DateTimeImmutable($request->best_before),
-            $product->getDefaultExpiryDays() !== null => new \DateTimeImmutable()->modify(sprintf(
-                '+%d days',
-                (int) $product->getDefaultExpiryDays()
-            )),
+            $product->getDefaultExpiryDays() !== null => $this->householdCalendar
+                ->today()
+                ->modify(sprintf('+%d days', (int) $product->getDefaultExpiryDays())),
             default => null
         };
 

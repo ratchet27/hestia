@@ -586,6 +586,9 @@ class StockControllerTest extends WebTestCase
 
     public function testAddStockAutoCalculatesBestBeforeFromProduct(): void
     {
+        // 22:30Z == 03:30 on 2026-06-06 Almaty -> "today" is the 6th; +14d = 2026-06-20.
+        static::mockTime(new \DateTimeImmutable('2026-06-05 22:30:00', new \DateTimeZone('UTC')));
+
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
         $product = $this->createProduct([
@@ -602,10 +605,7 @@ class StockControllerTest extends WebTestCase
         ]);
         $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
 
-        $expectedDate = new \DateTimeImmutable()
-            ->modify('+14 days')
-            ->format('Y-m-d');
-        static::assertSame($expectedDate, $data['data']['entries'][0]['best_before']);
+        static::assertSame('2026-06-20', $data['data']['entries'][0]['best_before']);
     }
 
     // ========== Mutation Killing Tests ==========
