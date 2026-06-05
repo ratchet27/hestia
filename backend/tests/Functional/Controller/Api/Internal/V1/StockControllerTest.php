@@ -504,6 +504,43 @@ class StockControllerTest extends WebTestCase
         static::assertSame(0, $data['data'][0]['days_until_expiry']);
     }
 
+    /**
+     * Locks the cutoff inclusivity (findExpiring uses `bestBefore <= cutoff`, cutoff bound as DATE):
+     * at 22:30Z (= 2026-06-06 Almaty), days=7 -> cutoff 2026-06-13. An item dated exactly on the
+     * cutoff is included (delta 7); an item one day past it is excluded.
+     */
+    public function testExpiringIncludesItemExactlyOnCutoffAndExcludesBeyond(): void
+    {
+        static::mockTime(new \DateTimeImmutable('2026-06-05 22:30:00', new \DateTimeZone('UTC')));
+
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+        // Exactly on the cutoff (today + 7 = 2026-06-13) -> included.
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-06-13')
+        ]);
+        // One day past the cutoff -> excluded.
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-06-14')
+        ]);
+
+        $response = $this->apiGet('/stocks/expiring', ['days' => '7']);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 1);
+        static::assertSame('2026-06-13', $data['data'][0]['best_before']);
+        static::assertSame(7, $data['data'][0]['days_until_expiry']);
+    }
+
     // ========== FIFO Edge Cases ==========
 
     public function testConsumeFifoNullBestBeforeConsumedLast(): void
