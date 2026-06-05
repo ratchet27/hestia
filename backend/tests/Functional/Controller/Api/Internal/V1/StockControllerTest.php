@@ -445,6 +445,35 @@ class StockControllerTest extends WebTestCase
         static::assertLessThan(0, $data['data'][0]['days_until_expiry']);
     }
 
+    /**
+     * Regression for C1 (#53): between 00:00–05:00 Almaty the API must report the household day,
+     * not UTC. At 22:30Z (= 03:30 on 2026-06-06 Almaty) an item dated 2026-06-06 is "today" (0),
+     * not "tomorrow" (1).
+     */
+    public function testExpiringDaysUntilExpiryUsesHouseholdTimezone(): void
+    {
+        static::mockTime(new \DateTimeImmutable('2026-06-05 22:30:00', new \DateTimeZone('UTC')));
+
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('2026-06-06')
+        ]);
+
+        $response = $this->apiGet('/stocks/expiring', ['days' => '7']);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 1);
+        static::assertSame(0, $data['data'][0]['days_until_expiry']);
+    }
+
     // ========== FIFO Edge Cases ==========
 
     public function testConsumeFifoNullBestBeforeConsumedLast(): void

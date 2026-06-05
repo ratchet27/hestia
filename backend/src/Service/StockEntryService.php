@@ -311,13 +311,11 @@ class StockEntryService
     public function getExpiringEntries(int $days): array
     {
         $entries = $this->stockEntryRepository->findExpiring($this->householdCalendar->expiryCutoff($days));
-        $today = new \DateTimeImmutable('today');
 
         return array_map(
-            static function (StockEntry $entry) use ($today): ExpiringEntryResponse {
+            function (StockEntry $entry): ExpiringEntryResponse {
                 /** @var \DateTimeImmutable $bestBefore - guaranteed non-null by findExpiring query */
                 $bestBefore = $entry->getBestBefore();
-                $daysUntilExpiry = (int) $today->diff($bestBefore)->format('%r%a');
 
                 return new ExpiringEntryResponse(
                     id: $entry->getId(),
@@ -331,7 +329,7 @@ class StockEntryService
                         name: $entry->getLocation()->getName()
                     ),
                     best_before: $bestBefore->format('Y-m-d'),
-                    days_until_expiry: $daysUntilExpiry
+                    days_until_expiry: $this->householdCalendar->daysUntil($bestBefore)
                 );
             },
             $entries
@@ -377,6 +375,8 @@ class StockEntryService
 
     private function mapEntryToResponse(StockEntry $entry): StockEntryResponse
     {
+        $bestBefore = $entry->getBestBefore();
+
         return new StockEntryResponse(
             id: $entry->getId(),
             product: new ProductBriefResponse(
@@ -385,8 +385,9 @@ class StockEntryService
                 unit: $entry->getProduct()->getUnit()
             ),
             location: new LocationResponse(id: $entry->getLocation()->getId(), name: $entry->getLocation()->getName()),
-            best_before: $entry->getBestBefore()?->format('Y-m-d'),
-            created_at: $entry->getCreatedAt()
+            best_before: $bestBefore?->format('Y-m-d'),
+            created_at: $entry->getCreatedAt(),
+            days_until_expiry: $bestBefore !== null ? $this->householdCalendar->daysUntil($bestBefore) : null
         );
     }
 }
