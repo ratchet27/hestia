@@ -25,6 +25,7 @@ use App\Response\Stock\ProductSummaryResponse;
 use App\Response\Stock\StockEntryResponse;
 use App\Response\Stock\StockSummaryResponse;
 use App\Message\StockChangedMessage;
+use App\Service\Time\HouseholdCalendar;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
@@ -34,12 +35,14 @@ use Symfony\Component\Uid\Uuid;
 // @mago-ignore lint:too-many-methods
 class StockEntryService
 {
+    // @mago-ignore lint:excessive-parameter-list
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly StockEntryRepository $stockEntryRepository,
         private readonly ProductRepository $productRepository,
         private readonly LocationRepository $locationRepository,
-        private readonly MessageBusInterface $messageBus
+        private readonly MessageBusInterface $messageBus,
+        private readonly HouseholdCalendar $householdCalendar
     ) {
     }
 
@@ -307,7 +310,7 @@ class StockEntryService
      */
     public function getExpiringEntries(int $days): array
     {
-        $entries = $this->stockEntryRepository->findExpiring($days);
+        $entries = $this->stockEntryRepository->findExpiring($this->householdCalendar->expiryCutoff($days));
         $today = new \DateTimeImmutable('today');
 
         return array_map(
