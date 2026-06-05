@@ -830,6 +830,34 @@ class ShoppingListAutoAddTest extends WebTestCase
         static::assertSame('auto', $data['data'][0]['source']);
     }
 
+    public function testRaisingMinStockViaApiAddsAutoItemInRequest(): void
+    {
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $category = $this->createCategory(['name' => 'Dairy']);
+        $product = $this->createProduct([
+            'name' => 'Butter',
+            'category' => $category,
+            'defaultLocation' => $location,
+            'minStock' => 1
+        ]);
+        $this->setStockLevel($product, $location, 2); // at min 1, no deficit
+
+        // Raise min to 5 -> deficit 3, must reconcile in-request via the same mechanism.
+        $response = $this->apiPut('/products/' . $product->getId(), [
+            'name' => 'Butter',
+            'category_id' => (string) $category->getId(),
+            'default_location_id' => (string) $location->getId(),
+            'min_stock' => 5,
+            'active' => true
+        ]);
+        static::assertJsonResponse($response, Response::HTTP_OK);
+
+        $data = static::assertJsonResponse($this->apiGet('/shopping-list'), Response::HTTP_OK);
+        static::assertListResponse($data, 1);
+        static::assertSame('auto', $data['data'][0]['source']);
+        static::assertSame(3, $data['data'][0]['amount']);
+    }
+
     public function testMinStockDecreaseRemovesAutoItem(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);

@@ -16,9 +16,11 @@ use App\Repository\BarcodeRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\LocationRepository;
 use App\Repository\ProductRepository;
+use App\Message\StockChangedMessage;
 use App\Request\CreateProductRequest;
 use App\Request\UpdateProductRequest;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -34,7 +36,7 @@ class ProductService
         private readonly CategoryRepository $categoryRepository,
         private readonly LocationRepository $locationRepository,
         private readonly BarcodeRepository $barcodeRepository,
-        private readonly ShoppingListService $shoppingListService,
+        private readonly MessageBusInterface $messageBus,
         private readonly ValidatorInterface $validator
     ) {
     }
@@ -139,9 +141,9 @@ class ProductService
 
         $this->em->flush();
 
-        // Recalculate shopping list if minStock changed
+        // Reconcile shopping list if minStock changed (same mechanism as stock changes)
         if ($request->minStock !== $oldMinStock) {
-            $this->shoppingListService->handleStockChange($id);
+            $this->messageBus->dispatch(new StockChangedMessage($id));
         }
 
         return $product;
