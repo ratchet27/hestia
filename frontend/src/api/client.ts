@@ -108,15 +108,25 @@ export async function apiFetch<T>(
       message?: string;
       title?: string;
       violations?: Array<{ propertyPath: string; message: string }>;
+      errors?: Array<{ property: string; violation: string }>;
       productName?: string;
     };
+    // The backend emits validation problems as `errors: [{property, violation}]`
+    // (see ApiExceptionListener::createValidationProblem). Normalize to the
+    // `violations: [{propertyPath, message}]` shape the UI consumes.
+    const violations =
+      errorData.violations ??
+      errorData.errors?.map((e) => ({
+        propertyPath: e.property,
+        message: e.violation,
+      }));
     throw new ApiError(
       response.status,
       errorData.detail ||
         errorData.message ||
         errorData.title ||
         "Request failed",
-      errorData.violations,
+      violations,
       errorData.productName,
     );
   }

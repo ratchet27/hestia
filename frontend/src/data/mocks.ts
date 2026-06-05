@@ -1,4 +1,4 @@
-import type { Recipe, StockEntry } from "./types";
+import type { StockEntry } from "./types";
 
 export const mockStockEntries: StockEntry[] = [
   {
@@ -90,31 +90,5 @@ export const mockStockEntries: StockEntry[] = [
     purchasedDate: "2026-01-12",
     location: "fridge",
     note: "Скоро истекает!",
-  },
-];
-
-export const mockRecipes: Recipe[] = [
-  {
-    id: 1,
-    name: "Паста с курицей",
-    ingredients: [
-      { productId: 8, amount: 1 },
-      { productId: 6, amount: 0.3 },
-      { productId: 9, amount: 0.5 },
-    ],
-  },
-  {
-    id: 2,
-    name: "Омлет с сыром",
-    ingredients: [
-      { productId: 3, amount: 0.3 },
-      { productId: 4, amount: 0.1 },
-      { productId: 5, amount: 0.05 },
-    ],
-  },
-  {
-    id: 3,
-    name: "Рис с овощами",
-    ingredients: [{ productId: 7, amount: 0.2 }],
   },
 ];

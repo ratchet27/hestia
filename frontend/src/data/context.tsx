@@ -1,12 +1,6 @@
 import { createContext, type ReactNode, useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
-import { mockRecipes } from "./mocks";
-import type { Recipe, User } from "./types";
-
-export interface RecipesContextValue {
-  recipes: Recipe[];
-  setRecipes: React.Dispatch<React.SetStateAction<Recipe[]>>;
-}
+import type { User } from "./types";
 
 export interface AuthContextValue {
   user: User | null;
@@ -15,7 +9,6 @@ export interface AuthContextValue {
   logout: () => Promise<void>;
 }
 
-export const RecipesContext = createContext<RecipesContextValue | null>(null);
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
 interface DataProviderProps {
@@ -25,13 +18,7 @@ interface DataProviderProps {
 export function DataProvider({
   children,
 }: DataProviderProps): React.ReactElement {
-  const [recipes, setRecipes] = useState<Recipe[]>(mockRecipes);
-
-  return (
-    <RecipesContext.Provider value={{ recipes, setRecipes }}>
-      {children}
-    </RecipesContext.Provider>
-  );
+  return <>{children}</>;
 }
 
 interface AuthProviderProps {

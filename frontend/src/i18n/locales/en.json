@@ -103,11 +103,22 @@
     "title": "Recipes",
     "subtitle": "Check ingredient availability",
     "newRecipe": "New recipe",
+    "editRecipe": "Edit recipe",
+    "name": "Name",
+    "nameRequired": "Name is required",
+    "addIngredient": "Add ingredient",
+    "consumeOnCook": "Consumed",
+    "instructions": "Instructions",
+    "sourceUrl": "Source URL",
     "canCook": "Ready to cook",
     "missingIngredients": "Missing {{count}} ingr.",
     "ingredients": "Ingredients:",
     "cook": "Cook",
-    "addToShoppingList": "Add to shopping list"
+    "addToShoppingList": "Add to shopping list",
+    "staple": "(staple)",
+    "ingredientsRequired": "Add at least one ingredient",
+    "invalidUrl": "Enter a valid URL (http:// or https://)",
+    "saveFailed": "Could not save the recipe. Check the fields."
   },
   "expiry": {
     "expired": "expired",

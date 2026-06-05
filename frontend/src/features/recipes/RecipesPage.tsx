@@ -1,37 +1,20 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useStockEntries } from "../../api/queries/stocks";
+import {
+  useAddMissingToShoppingList,
+  useCookRecipe,
+  useRecipes,
+} from "../../api/queries/recipes";
 import { Icons } from "../../components/Icons";
-import { useRecipes } from "../../data/hooks";
-import type { Recipe } from "../../data/types";
-
-interface CheckedIngredient {
-  productId: number;
-  amount: number;
-  product: { name: string } | undefined;
-  inStock: number;
-  hasEnough: boolean;
-}
+import { RecipeForm } from "./RecipeForm";
 
 export function RecipesPage(): React.ReactElement {
   const { t } = useTranslation();
-  const { data: stockEntries = [] } = useStockEntries();
-  const { recipes } = useRecipes();
-
-  const checkIngredients = (recipe: Recipe): CheckedIngredient[] => {
-    return recipe.ingredients.map((ing) => {
-      // Note: recipes use number IDs, stock API uses UUIDs
-      // This won't match until recipes are migrated to UUID product IDs
-      const totalStock = stockEntries.filter(
-        (e) => e.product.id === String(ing.productId),
-      ).length;
-      return {
-        ...ing,
-        product: undefined,
-        inStock: totalStock,
-        hasEnough: totalStock >= ing.amount,
-      };
-    });
-  };
+  const { data: recipes = [], isLoading } = useRecipes();
+  const cook = useCookRecipe();
+  const addMissing = useAddMissingToShoppingList();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
   return (
     <div className="p-8">
@@ -44,6 +27,7 @@ export function RecipesPage(): React.ReactElement {
         </div>
         <button
           type="button"
+          onClick={() => setCreating(true)}
           className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors"
         >
           <Icons.Plus />
@@ -51,11 +35,14 @@ export function RecipesPage(): React.ReactElement {
         </button>
       </div>
 
+      {isLoading && <p className="text-stone-500">{t("common.loading")}</p>}
+
       <div className="grid grid-cols-2 gap-6">
         {recipes.map((recipe) => {
-          const ingredients = checkIngredients(recipe);
-          const canMake = ingredients.every((i) => i.hasEnough);
-          const missingCount = ingredients.filter((i) => !i.hasEnough).length;
+          const ingredients = Array.isArray(recipe.ingredients)
+            ? recipe.ingredients
+            : Object.values(recipe.ingredients ?? {});
+          const missingCount = ingredients.filter((i) => !i.has_enough).length;
 
           return (
             <div
@@ -66,7 +53,7 @@ export function RecipesPage(): React.ReactElement {
                 <h3 className="font-semibold text-stone-800 text-lg">
                   {recipe.name}
                 </h3>
-                {canMake ? (
+                {recipe.cookable ? (
                   <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                     {t("recipes.canCook")}
                   </span>
@@ -81,21 +68,24 @@ export function RecipesPage(): React.ReactElement {
                   {t("recipes.ingredients")}
                 </h4>
                 <div className="space-y-2">
-                  {ingredients.map((ing, idx) => (
+                  {ingredients.map((ing) => (
                     <div
-                      key={idx}
+                      key={ing.id}
                       className="flex items-center justify-between"
                     >
                       <span
-                        className={`${ing.hasEnough ? "text-stone-800" : "text-red-600"}`}
+                        className={
+                          ing.has_enough ? "text-stone-800" : "text-red-600"
+                        }
                       >
-                        {ing.product?.name ?? `Продукт #${ing.productId}`}
+                        {ing.product_name}
+                        {ing.consume_on_cook ? "" : ` ${t("recipes.staple")}`}
                       </span>
                       <span
-                        className={`text-sm ${ing.hasEnough ? "text-green-600" : "text-red-600"}`}
+                        className={`text-sm ${ing.has_enough ? "text-green-600" : "text-red-600"}`}
                       >
-                        {ing.inStock} / {ing.amount}
-                        {ing.hasEnough ? " \u2713" : " \u2717"}
+                        {ing.in_stock} / {ing.required_count}
+                        {ing.has_enough ? " ✓" : " ✗"}
                       </span>
                     </div>
                   ))}
@@ -104,24 +94,49 @@ export function RecipesPage(): React.ReactElement {
               <div className="p-4 bg-stone-50 border-t border-stone-100 flex gap-2">
                 <button
                   type="button"
+                  disabled={
+                    !recipe.cookable ||
+                    (cook.isPending && cook.variables === recipe.id)
+                  }
+                  onClick={() => cook.mutate(recipe.id)}
                   className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={!canMake}
                 >
                   {t("recipes.cook")}
                 </button>
-                {!canMake && (
+                {!recipe.cookable && (
                   <button
                     type="button"
+                    disabled={
+                      addMissing.isPending && addMissing.variables === recipe.id
+                    }
+                    onClick={() => addMissing.mutate(recipe.id)}
                     className="px-4 py-2 border border-stone-300 rounded-lg hover:bg-white transition-colors"
                   >
                     {t("recipes.addToShoppingList")}
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setEditingId(recipe.id)}
+                  className="px-4 py-2 border border-stone-300 rounded-lg hover:bg-white transition-colors"
+                >
+                  {t("common.edit")}
+                </button>
               </div>
             </div>
           );
         })}
       </div>
+
+      {(creating || editingId) && (
+        <RecipeForm
+          recipeId={editingId}
+          onClose={() => {
+            setCreating(false);
+            setEditingId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

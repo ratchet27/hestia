@@ -1,18 +1,5 @@
 import { useContext } from "react";
-import {
-  AuthContext,
-  type AuthContextValue,
-  RecipesContext,
-  type RecipesContextValue,
-} from "./context";
-
-export function useRecipes(): RecipesContextValue {
-  const context = useContext(RecipesContext);
-  if (!context) {
-    throw new Error("useRecipes must be used within a DataProvider");
-  }
-  return context;
-}
+import { AuthContext, type AuthContextValue } from "./context";
 
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);

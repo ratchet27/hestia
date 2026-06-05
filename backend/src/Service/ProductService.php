@@ -6,9 +6,11 @@ namespace App\Service;
 
 use App\Entity\Barcode;
 use App\Entity\Product;
+use App\Entity\RecipeIngredient;
 use App\Exception\Barcode\BarcodeAlreadyExistsException;
 use App\Exception\Product\CategoryNotFoundException;
 use App\Exception\Product\LocationNotFoundException;
+use App\Exception\Product\ProductInUseException;
 use App\Exception\Product\ProductNotFoundException;
 use App\Repository\BarcodeRepository;
 use App\Repository\CategoryRepository;
@@ -23,6 +25,7 @@ use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 // @mago-ignore lint:cyclomatic-complexity
+// @mago-ignore lint:kan-defect
 class ProductService
 {
     // @mago-ignore lint:excessive-parameter-list
@@ -158,6 +161,11 @@ class ProductService
     public function hardDelete(Uuid $id): void
     {
         $product = $this->getProduct($id);
+
+        $usedByRecipe = $this->em->getRepository(RecipeIngredient::class)->count(['product' => $product]) > 0;
+        if ($usedByRecipe) {
+            throw new ProductInUseException($id, 'a recipe');
+        }
 
         $this->em->remove($product);
         $this->em->flush();

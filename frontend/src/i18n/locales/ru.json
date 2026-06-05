@@ -105,11 +105,22 @@
     "title": "Рецепты",
     "subtitle": "Проверка наличия ингредиентов",
     "newRecipe": "Новый рецепт",
+    "editRecipe": "Изменить рецепт",
+    "name": "Название",
+    "nameRequired": "Укажите название",
+    "addIngredient": "Добавить ингредиент",
+    "consumeOnCook": "Расходуется",
+    "instructions": "Инструкция",
+    "sourceUrl": "Ссылка на источник",
     "canCook": "Можно готовить",
     "missingIngredients": "Не хватает {{count}} ингр.",
     "ingredients": "Ингредиенты:",
     "cook": "Приготовить",
-    "addToShoppingList": "В список покупок"
+    "addToShoppingList": "В список покупок",
+    "staple": "(запас)",
+    "ingredientsRequired": "Добавьте хотя бы один ингредиент",
+    "invalidUrl": "Введите корректную ссылку (http:// или https://)",
+    "saveFailed": "Не удалось сохранить рецепт. Проверьте поля."
   },
   "expiry": {
     "expired": "просрочено",
