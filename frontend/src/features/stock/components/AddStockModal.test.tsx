@@ -90,6 +90,38 @@ describe("AddStockModal", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it("rejects quantity above the limit of 50", async () => {
+    const onSubmit = vi.fn();
+
+    const { user } = render(
+      <AddStockModal
+        products={products}
+        locations={locations}
+        preselectedProduct={products[0]}
+        onSubmit={onSubmit}
+        onClose={vi.fn()}
+      />,
+    );
+
+    // Wait for location auto-fill so only quantity can block submit
+    await waitFor(() => {
+      const locationSelect = screen.getByLabelText(
+        /Место/i,
+      ) as HTMLSelectElement;
+      expect(locationSelect.value).toBe("loc-1");
+    });
+
+    const quantityInput = screen.getByLabelText(/Количество/i);
+    await user.clear(quantityInput);
+    await user.type(quantityInput, "51");
+    await user.click(screen.getByRole("button", { name: /Добавить/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Максимум 50/i)).toBeInTheDocument();
+    });
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it("calls onSubmit with form data", async () => {
     const onSubmit = vi.fn();
 

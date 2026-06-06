@@ -97,6 +97,7 @@
     "quantity": "Quantity",
     "quantityRequired": "Enter quantity",
     "quantityMin": "Minimum 1",
+    "quantityMax": "Maximum 50",
     "bestBefore": "Best before"
   },
   "recipes": {

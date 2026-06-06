@@ -99,6 +99,7 @@
     "quantity": "Количество",
     "quantityRequired": "Укажите количество",
     "quantityMin": "Минимум 1",
+    "quantityMax": "Максимум 50",
     "bestBefore": "Годен до"
   },
   "recipes": {
