@@ -250,6 +250,7 @@ Features:
 - optional assignee
 - tracks last-done and next-due
 - "mark done" advances the next-due date (timezone-aware)
+- editing a chore's schedule (type or value) recomputes next-due from now (clock restart, timezone-aware); editing only name/assignee leaves next-due unchanged
 
 > Per-chore reminders and product consumption on completion are **not built** — §18.
 

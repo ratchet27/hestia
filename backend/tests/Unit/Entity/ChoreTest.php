@@ -131,6 +131,62 @@ class ChoreTest extends TestCase
         static::assertSame('2026-06-09', $chore->getNextDueAt()->format('Y-m-d'));
     }
 
+    #[DataProvider('rescheduleProvider')]
+    public function testRescheduleRecomputesNextDueAtFromNow(
+        ScheduleType $type,
+        int $value,
+        string $now,
+        string $expectedNextDue
+    ): void {
+        $chore = $this->createChore(ScheduleType::INTERVAL, 14);
+        $chore->initializeNextDueAt(new \DateTimeImmutable('2026-01-01'));
+
+        $chore->reschedule($type, $value, new \DateTimeImmutable($now));
+
+        static::assertSame($type, $chore->getScheduleType());
+        static::assertSame($value, $chore->getScheduleValue());
+        static::assertSame($expectedNextDue, $chore->getNextDueAt()->format('Y-m-d'));
+    }
+
+    /** @return iterable<string, array{ScheduleType, int, string, string}> */
+    public static function rescheduleProvider(): iterable
+    {
+        // INTERVAL: anchored to "now", not to the old next-due or any completion.
+        yield 'interval from now' => [ScheduleType::INTERVAL, 2, '2026-06-06', '2026-06-08'];
+        // FIXED_WEEKLY: 2026-06-06 is Saturday (6); next Monday (1) is 2026-06-08.
+        yield 'weekly Monday from Saturday' => [ScheduleType::FIXED_WEEKLY, 1, '2026-06-06', '2026-06-08'];
+        // FIXED_MONTHLY: day 15 later this month.
+        yield 'monthly day 15' => [ScheduleType::FIXED_MONTHLY, 15, '2026-06-06', '2026-06-15'];
+        // FIXED_MONTHLY clamping still holds when reached via reschedule.
+        yield 'monthly day 31 clamps in June' => [ScheduleType::FIXED_MONTHLY, 28, '2026-06-06', '2026-06-28'];
+    }
+
+    public function testRescheduleLeavesLastDoneAtUnchanged(): void
+    {
+        $chore = $this->createChore(ScheduleType::INTERVAL, 14);
+        $doneAt = new \DateTimeImmutable('2026-01-01 09:00:00');
+        $chore->setLastDoneAt($doneAt);
+
+        $chore->reschedule(ScheduleType::INTERVAL, 2, new \DateTimeImmutable('2026-06-06'));
+
+        $lastDoneAt = $chore->getLastDoneAt();
+        static::assertNotNull($lastDoneAt);
+        static::assertSame('2026-01-01 09:00:00', $lastDoneAt->format('Y-m-d H:i:s'));
+    }
+
+    public function testRescheduleAnchorsToNowNotToLongPastCompletion(): void
+    {
+        // Done 90 days ago on a long interval, re-set to "every 2 days" today.
+        // Anchored to now → due in 2 days, NOT retroactively overdue from lastDoneAt.
+        $chore = $this->createChore(ScheduleType::INTERVAL, 90);
+        $chore->setLastDoneAt(new \DateTimeImmutable('2026-03-08'));
+        $chore->initializeNextDueAt(new \DateTimeImmutable('2026-03-08'));
+
+        $chore->reschedule(ScheduleType::INTERVAL, 2, new \DateTimeImmutable('2026-06-06'));
+
+        static::assertSame('2026-06-08', $chore->getNextDueAt()->format('Y-m-d'));
+    }
+
     private function createChore(ScheduleType $type, int $value): Chore
     {
         $chore = new Chore();

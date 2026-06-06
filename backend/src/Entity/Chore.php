@@ -159,6 +159,21 @@ class Chore
         return $this;
     }
 
+    /**
+     * Apply a new schedule and restart the next-due clock from $now.
+     *
+     * Anchored to $now (not lastDoneAt): an explicit schedule edit means "from now on,
+     * this cadence", so it never lands in the past. lastDoneAt (completion history) is
+     * deliberately left untouched.
+     */
+    public function reschedule(ScheduleType $type, int $value, \DateTimeImmutable $now): static
+    {
+        $this->scheduleType = $type;
+        $this->scheduleValue = $value;
+        $this->nextDueAt = $this->calculateNextDueAt($now);
+        return $this;
+    }
+
     private function calculateNextDueAt(\DateTimeImmutable $from): \DateTimeImmutable
     {
         $date = $from->setTime(0, 0);
