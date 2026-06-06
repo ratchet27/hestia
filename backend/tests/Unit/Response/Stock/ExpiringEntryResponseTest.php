@@ -25,6 +25,7 @@ final class ExpiringEntryResponseTest extends TestCase
 
         $response = ExpiringEntryResponse::fromEntity($entry, 1);
 
+        static::assertSame($entry->getId(), $response->id);
         static::assertSame('2026-06-07', $response->best_before);
         static::assertSame(1, $response->days_until_expiry);
         static::assertSame('Yogurt', $response->product->name);

@@ -196,7 +196,7 @@ class StockControllerTest extends WebTestCase
      * Regression for C1 (#53): between 00:00–05:00 Almaty the API must report the household day,
      * not UTC. At 22:30Z (= 03:30 on 2026-06-06 Almaty) an item dated 2026-06-06 is "today" (0),
      * not "tomorrow" (1). Mirrors testExpiringDaysUntilExpiryUsesHouseholdTimezone for the
-     * entry-list path (/stocks/entries → mapEntryToResponse).
+     * entry-list path (/stocks/entries → StockEntryResponse::fromEntity).
      */
     public function testListEntriesDaysUntilExpiryUsesHouseholdTimezone(): void
     {
@@ -717,7 +717,7 @@ class StockControllerTest extends WebTestCase
     }
 
     /**
-     * Kills mutant: Removes ?-> null-safe operator in mapEntryToResponse.
+     * Kills mutant: Removes ?-> null-safe operator in StockEntryResponse::fromEntity.
      * Verifies entries with null best_before are returned correctly via list endpoint.
      */
     public function testListEntriesReturnsNullBestBeforeCorrectly(): void
