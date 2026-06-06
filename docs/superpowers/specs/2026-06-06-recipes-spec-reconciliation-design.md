@@ -47,7 +47,7 @@ absent from code.
 | 2 | spec §15 (UI Structure), Pages list | Recipes page not listed | Add Recipes to Pages |
 | 3 | spec §15, lines ~284–285 | "Recipes page … **placeholder** running on mock data; not backend-integrated — §18" | Delete the note |
 | 4 | spec §18 (Roadmap) v2, lines ~316–317 | "**Recipes**: fulfillment check, shopping-list generation, stock consumption …" | Remove (built) |
-| 5 | `features_overview.md`, Postponed (v2+), line ~43 | "recipe fulfillment UI" | Remove; add recipes to built-features list |
+| 5 | `features_overview.md`, Postponed (v2+), line ~43 | "recipe fulfillment UI" | Remove (recipes shipped) |
 
 ## Design decisions (approved)
 
@@ -113,8 +113,10 @@ Backend-integrated end to end, with a dedicated Recipes page in the SPA.
 
 ### Edit F — `features_overview.md`
 
-- Remove "recipe fulfillment UI" from **Postponed (v2+)**.
-- Add recipes to the built-features list (mirroring the spec's feature framing).
+- Remove "recipe fulfillment UI" from **Postponed (v2+)** (recipes shipped).
+- Do **not** add a recipes entry to "Included in **v1**" — recipes shipped as a
+  v2 feature, and `features_overview.md` is a scope guardrail (v1 / postponed /
+  dropped buckets), not an as-built inventory. The spec owns "what exists."
 - Leave "meal planning calendar" under Postponed (genuinely unbuilt).
 
 ## Out of scope (do NOT)
