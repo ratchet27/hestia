@@ -192,6 +192,18 @@ make mutate
 
 Reports saved to `var/infection.log` and `var/infection.html`.
 
+**When to run it (finishing check).** CI does **not** run Infection — `make lint` and
+`make test` are the only automated gates. So after any substantial change to business
+logic (anything in `src/Service` or `src/Entity` — the configured scope in
+`infection.json5`), run a full `make mutate` **once** before considering the work done,
+in addition to `make lint`/`make test`. It catches tests that pass but don't actually
+assert the behavior they cover. A full pass takes ~5 min; the MSI floor is **90%**
+(`minMsi` / `minCoveredMsi`) and the run fails if you drop below it. Trivial changes
+(docs, config, plain controller wiring with no new logic) don't need it.
+
+For fast iteration on a single file, scope it: `vendor/bin/infection --filter=src/Service/File.php`.
+Reserve the full `make mutate` for the final gate.
+
 ## Code Quality
 
 **You MUST run `make lint` before claiming any backend work is complete.** It runs the full
