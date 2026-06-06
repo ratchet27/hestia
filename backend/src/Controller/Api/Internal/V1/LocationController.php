@@ -5,16 +5,10 @@ declare(strict_types = 1);
 namespace App\Controller\Api\Internal\V1;
 
 use App\Entity\Location;
-use App\Entity\Product;
-use App\Entity\StockEntry;
-use App\Exception\Location\LocationInUseException;
-use App\Exception\Location\LocationNameTakenException;
-use App\Exception\Location\LocationNotFoundException;
-use App\Repository\LocationRepository;
 use App\Request\CreateLocationRequest;
 use App\Request\UpdateLocationRequest;
 use App\Response\Location\LocationListItemResponse;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\LocationService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,8 +23,7 @@ use Symfony\Component\Uid\Uuid;
 final class LocationController extends AbstractController
 {
     public function __construct(
-        private readonly LocationRepository $locationRepository,
-        private readonly EntityManagerInterface $em
+        private readonly LocationService $locationService
     ) {
     }
 
@@ -50,8 +43,7 @@ final class LocationController extends AbstractController
     ]))]
     public function list(): JsonResponse
     {
-        $locations = $this->locationRepository->findAllOrderedByName();
-        $data = array_map($this->toResponse(...), $locations);
+        $data = array_map($this->toResponse(...), $this->locationService->list());
 
         return $this->json([
             'data' => $data,
@@ -69,13 +61,7 @@ final class LocationController extends AbstractController
     #[OA\Response(response: 422, description: 'Validation error')]
     public function create(#[MapRequestPayload] CreateLocationRequest $request): JsonResponse
     {
-        $this->assertNameAvailable($request->name);
-
-        $location = new Location();
-        $location->setName($request->name);
-
-        $this->em->persist($location);
-        $this->em->flush();
+        $location = $this->locationService->create($request);
 
         return $this->json(['data' => $this->toResponse($location)], Response::HTTP_CREATED);
     }
@@ -95,13 +81,7 @@ final class LocationController extends AbstractController
     #[OA\Response(response: 409, description: 'Name already exists')]
     public function update(Uuid $uuid, #[MapRequestPayload] UpdateLocationRequest $request): JsonResponse
     {
-        $location = $this->locationRepository->find($uuid) ?? throw new LocationNotFoundException($uuid);
-
-        if ($request->name !== $location->getName()) {
-            $this->assertNameAvailable($request->name);
-            $location->setName($request->name);
-            $this->em->flush();
-        }
+        $location = $this->locationService->update($uuid, $request);
 
         return $this->json(['data' => $this->toResponse($location)]);
     }
@@ -118,36 +98,17 @@ final class LocationController extends AbstractController
     #[OA\Response(response: 409, description: 'Location is in use')]
     public function delete(Uuid $uuid): JsonResponse
     {
-        $location = $this->locationRepository->find($uuid) ?? throw new LocationNotFoundException($uuid);
-
-        $usage = $this->usageCount($location);
-        if ($usage > 0) {
-            throw new LocationInUseException($usage);
-        }
-
-        $this->em->remove($location);
-        $this->em->flush();
+        $this->locationService->delete($uuid);
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 
     private function toResponse(Location $location): LocationListItemResponse
     {
-        return new LocationListItemResponse($location->getId(), $location->getName(), $this->usageCount($location));
-    }
-
-    private function usageCount(Location $location): int
-    {
-        return (
-            $this->em->getRepository(Product::class)->count(['defaultLocation' => $location])
-            + $this->em->getRepository(StockEntry::class)->count(['location' => $location])
+        return new LocationListItemResponse(
+            $location->getId(),
+            $location->getName(),
+            $this->locationService->usageCount($location)
         );
-    }
-
-    private function assertNameAvailable(string $name): void
-    {
-        if ($this->locationRepository->findOneBy(['name' => $name]) !== null) {
-            throw new LocationNameTakenException($name);
-        }
     }
 }

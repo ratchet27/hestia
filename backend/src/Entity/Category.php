@@ -17,6 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 #[ORM\Table(name: 'categories')]
+// Runtime uniqueness is enforced by the DB constraint (translated to 409 in the service); this documents the invariant and guards any non-service write path.
 #[UniqueEntity(fields: ['name'], message: 'Category with this name already exists')]
 #[Map(target: CategoryResponse::class)]
 class Category
