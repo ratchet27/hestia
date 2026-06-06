@@ -114,6 +114,28 @@ class LocationServiceTest extends TestCase
         $service->update(Uuid::v7(), new UpdateLocationRequest('Кладовка'));
     }
 
+    public function testUpdateTranslatesUniqueViolationToNameTaken(): void
+    {
+        $existing = new Location();
+        $existing->setName('Балкон');
+
+        $repo = $this->createStub(LocationRepository::class);
+        $repo->method('find')->willReturn($existing);
+
+        $em = $this->createStub(EntityManagerInterface::class);
+        $em->method('flush')->willThrowException($this->createStub(UniqueConstraintViolationException::class));
+
+        $service = new LocationService(
+            $em,
+            $repo,
+            $this->createStub(ProductRepository::class),
+            $this->createStub(StockEntryRepository::class)
+        );
+
+        $this->expectException(LocationNameTakenException::class);
+        $service->update(Uuid::v7(), new UpdateLocationRequest('Кладовка'));
+    }
+
     public function testDeleteInUseThrowsConflict(): void
     {
         $location = new Location();
@@ -126,6 +148,29 @@ class LocationServiceTest extends TestCase
         $products->method('count')->willReturn(1);
         $stock = $this->createStub(StockEntryRepository::class);
         $stock->method('count')->willReturn(0);
+
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->expects($this->never())->method('remove');
+        $em->expects($this->never())->method('flush');
+
+        $service = new LocationService($em, $repo, $products, $stock);
+
+        $this->expectException(LocationInUseException::class);
+        $service->delete(Uuid::v7());
+    }
+
+    public function testDeleteBlockedByStockEntriesAlone(): void
+    {
+        $location = new Location();
+        $location->setName('Кладовка');
+
+        $repo = $this->createStub(LocationRepository::class);
+        $repo->method('find')->willReturn($location);
+
+        $products = $this->createStub(ProductRepository::class);
+        $products->method('count')->willReturn(0);
+        $stock = $this->createStub(StockEntryRepository::class);
+        $stock->method('count')->willReturn(1);
 
         $em = $this->createMock(EntityManagerInterface::class);
         $em->expects($this->never())->method('remove');
