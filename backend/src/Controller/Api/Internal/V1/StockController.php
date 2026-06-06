@@ -6,6 +6,7 @@ namespace App\Controller\Api\Internal\V1;
 
 use App\Request\AddStockRequest;
 use App\Request\ConsumeStockRequest;
+use App\Request\ExpiringStockQuery;
 use App\Request\UpdateStockEntryRequest;
 use App\Response\Stock\AddedStockEntryResponse;
 use App\Response\Stock\ConsumeResultResponse;
@@ -19,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
@@ -126,7 +128,6 @@ final class StockController extends AbstractController
         summary: 'Get expiring entries',
         description: 'Returns entries expiring within N days, including already expired. Ordered by urgency.'
     )]
-    #[OA\Parameter(name: 'days', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 7))]
     #[OA\Response(response: 200, description: 'Expiring entries', content: new OA\JsonContent(properties: [
         new OA\Property(
             property: 'data',
@@ -139,10 +140,11 @@ final class StockController extends AbstractController
             type: 'object'
         )
     ]))]
-    public function expiring(Request $request): JsonResponse
-    {
-        $days = $request->query->getInt('days', 7);
-        $data = $this->stockEntryService->getExpiringEntries($days);
+    public function expiring(
+        #[MapQueryString]
+        ExpiringStockQuery $query = new ExpiringStockQuery()
+    ): JsonResponse {
+        $data = $this->stockEntryService->getExpiringEntries($query->days);
 
         return $this->json([
             'data' => $data,
