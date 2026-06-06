@@ -106,7 +106,9 @@ final class ShoppingListItemTest extends TestCase
         $product->setName('Milk');
 
         // Product present → product name wins.
-        $withProduct = new ShoppingListItem()->setProduct($product)->setCustomName('ignored');
+        $withProduct = new ShoppingListItem()
+            ->setProduct($product)
+            ->setCustomName('ignored');
         static::assertSame('Milk', $withProduct->getDisplayName());
 
         // No product, custom name set → custom name.

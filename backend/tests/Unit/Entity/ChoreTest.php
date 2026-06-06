@@ -108,7 +108,7 @@ class ChoreTest extends TestCase
             static::assertSame(
                 '00:00:00',
                 $chore->getNextDueAt()->format('H:i:s'),
-                sprintf('nextDueAt must be midnight for %s', $type->value),
+                sprintf('nextDueAt must be midnight for %s', $type->value)
             );
         }
     }
