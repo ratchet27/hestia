@@ -62,8 +62,8 @@ readonly class ShoppingListService
         $existing = $this->shoppingListItemRepository->findByProduct($product);
 
         if ($existing !== null) {
-            // If it's a manual item, don't touch it
-            if ($existing->getSource() !== ShoppingListSource::AUTO) {
+            // If it's not an auto item (manual/recipe), don't touch it
+            if (!$existing->isAuto()) {
                 return;
             }
 
@@ -117,9 +117,7 @@ readonly class ShoppingListService
         if ($product !== null) {
             $existing = $this->shoppingListItemRepository->findByProduct($product);
             if ($existing !== null) {
-                // Merge: use max amount, convert to manual
-                $existing->setAmount(max($existing->getAmount(), $request->amount));
-                $existing->setSource(ShoppingListSource::MANUAL);
+                $existing->setAmount(max($existing->getAmount(), $request->amount))->claimManual();
                 if ($request->note !== null) {
                     $existing->setNote($request->note);
                 }
@@ -147,7 +145,8 @@ readonly class ShoppingListService
 
     /**
      * Update an existing shopping list item.
-     * Converting AUTO to MANUAL if amount is changed.
+     * Amount edits go through ShoppingListItem::reviseAmount, which flips an
+     * AUTO item to MANUAL on a real change.
      */
     public function updateItem(Uuid $id, UpdateShoppingItemRequest $request): ShoppingListItem
     {
@@ -156,17 +155,8 @@ readonly class ShoppingListService
             throw new ShoppingListItemNotFoundException($id);
         }
 
-        // If user manually changes amount on an AUTO item, convert to MANUAL
-        if (
-            $request->amount !== null
-            && $item->getSource() === ShoppingListSource::AUTO
-            && $request->amount !== $item->getAmount()
-        ) {
-            $item->setSource(ShoppingListSource::MANUAL);
-        }
-
         if ($request->amount !== null) {
-            $item->setAmount($request->amount);
+            $item->reviseAmount($request->amount);
         }
 
         if ($request->note !== null) {

@@ -124,6 +124,37 @@ class ShoppingListItem
         return $this;
     }
 
+    public function isAuto(): bool
+    {
+        return $this->source === ShoppingListSource::AUTO;
+    }
+
+    /**
+     * User explicitly added/owns this item: force it MANUAL so
+     * auto-reconciliation can't overwrite it.
+     */
+    public function claimManual(): static
+    {
+        $this->source = ShoppingListSource::MANUAL;
+
+        return $this;
+    }
+
+    /**
+     * Revise the amount. A real change to an AUTO item is a user assertion of
+     * ownership that flips it to MANUAL (RECIPE/MANUAL keep their source).
+     */
+    public function reviseAmount(int $amount): static
+    {
+        if ($amount !== $this->amount && $this->source === ShoppingListSource::AUTO) {
+            $this->source = ShoppingListSource::MANUAL;
+        }
+
+        $this->amount = $amount;
+
+        return $this;
+    }
+
     public function isDone(): bool
     {
         return $this->done;

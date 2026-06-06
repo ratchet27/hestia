@@ -242,6 +242,35 @@ class ShoppingListControllerTest extends WebTestCase
         static::assertSame(10, $data['data']['amount']);
     }
 
+    public function testCreateMergesNonIncreasingAmountStillFlipsAutoToManual(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        // Create existing AUTO item with amount 10
+        $this->createItem([
+            'product' => $product,
+            'amount' => 10,
+            'source' => ShoppingListSource::AUTO
+        ]);
+
+        // Add same product with amount 3 (non-increasing, so max stays 10)
+        $response = $this->apiPost('/shopping-list', [
+            'product_id' => (string) $product->getId(),
+            'amount' => 3
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
+
+        // Amount stays max(10, 3) = 10, but the item must still flip AUTO -> MANUAL
+        static::assertSame(10, $data['data']['amount']);
+        static::assertSame('manual', $data['data']['source']);
+    }
+
     public function testCreateMergesUpdatesNote(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
