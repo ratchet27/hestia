@@ -14,9 +14,13 @@ final class ExpiringEntryResponseTest extends TestCase
 {
     public function testFromEntityMapsFieldsWithNonNullBestBefore(): void
     {
-        $entry = (new StockEntry())
-            ->setProduct((new Product())->setName('Yogurt')->setUnit('pcs'))
-            ->setLocation((new Location())->setName('Fridge'))
+        $entry = new StockEntry()
+            ->setProduct(
+                new Product()
+                    ->setName('Yogurt')
+                    ->setUnit('pcs')
+            )
+            ->setLocation(new Location()->setName('Fridge'))
             ->setBestBefore(new \DateTimeImmutable('2026-06-07'));
 
         $response = ExpiringEntryResponse::fromEntity($entry, 1);

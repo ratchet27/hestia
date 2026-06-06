@@ -27,10 +27,7 @@ final readonly class ExpiringEntryResponse
         return new self(
             id: $entry->getId(),
             product: ProductBriefResponse::fromEntity($entry->getProduct()),
-            location: new LocationResponse(
-                id: $entry->getLocation()->getId(),
-                name: $entry->getLocation()->getName()
-            ),
+            location: new LocationResponse(id: $entry->getLocation()->getId(), name: $entry->getLocation()->getName()),
             best_before: $bestBefore->format('Y-m-d'),
             days_until_expiry: $daysUntilExpiry
         );
