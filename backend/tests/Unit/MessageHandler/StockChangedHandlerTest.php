@@ -19,7 +19,7 @@ final class StockChangedHandlerTest extends TestCase
         $service->method('handleStockChange')->willThrowException(new \RuntimeException('boom'));
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(static::once())->method('warning');
+        $logger->expects(static::once())->method('error');
 
         $handler = new StockChangedHandler($service, $logger);
 
@@ -33,7 +33,10 @@ final class StockChangedHandlerTest extends TestCase
         $service = $this->createMock(ShoppingListService::class);
         $service->expects(static::once())->method('handleStockChange')->with($productId);
 
-        $handler = new StockChangedHandler($service, $this->createStub(LoggerInterface::class));
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects(static::never())->method('error');
+
+        $handler = new StockChangedHandler($service, $logger);
         $handler(new StockChangedMessage($productId));
     }
 }

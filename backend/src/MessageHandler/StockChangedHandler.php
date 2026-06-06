@@ -25,7 +25,7 @@ final readonly class StockChangedHandler
         } catch (\Throwable $throwable) {
             // Stock change is already committed; a reconciliation hiccup must not fail
             // the user's operation. It self-corrects on the next stock change.
-            $this->logger->warning('Shopping-list reconciliation failed', [
+            $this->logger->error('Shopping-list reconciliation failed', [
                 'productId' => (string) $message->productId,
                 'exception' => $throwable
             ]);
