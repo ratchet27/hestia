@@ -19,6 +19,11 @@
             "User.php"
         ]
     },
+    // Local regression guard (CI does not run Infection). Floor reflects the
+    // achieved value; residual equivalent/framework mutants are accepted, not
+    // masked by lowering this further.
+    "minMsi": 90,
+    "minCoveredMsi": 90,
     "logs": {
         "text": "var/infection.log",
         "html": "var/infection.html"
