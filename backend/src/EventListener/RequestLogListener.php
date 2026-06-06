@@ -30,6 +30,7 @@ final readonly class RequestLogListener
             return;
         }
 
+        // @mago-ignore analysis:mixed-assignment -- Symfony ServerBag::get() is mixed; narrowed by is_numeric() below
         $startedAt = $request->server->get('REQUEST_TIME_FLOAT');
         $durationMs = is_numeric($startedAt)
             ? max(0, (int) round(( microtime(true) - (float) $startedAt ) * 1000))

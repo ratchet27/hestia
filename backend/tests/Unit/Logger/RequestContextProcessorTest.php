@@ -20,9 +20,9 @@ final class RequestContextProcessorTest extends TestCase
 
         $record = ( new RequestContextProcessor($stack) )($this->record());
 
-        self::assertSame('/api/internal/v1/tasks', $record->extra['url']);
-        self::assertSame('POST', $record->extra['http_method']);
-        self::assertSame('127.0.0.1', $record->extra['ip']);
+        static::assertSame('/api/internal/v1/tasks', $record->extra['url']);
+        static::assertSame('POST', $record->extra['http_method']);
+        static::assertSame('127.0.0.1', $record->extra['ip']);
     }
 
     public function testPreservesExistingExtra(): void
@@ -32,17 +32,17 @@ final class RequestContextProcessorTest extends TestCase
 
         $record = ( new RequestContextProcessor($stack) )($this->record(['uid' => 'abc123']));
 
-        self::assertSame('abc123', $record->extra['uid']);
-        self::assertSame('/api/internal/v1/tasks', $record->extra['url']);
+        static::assertSame('abc123', $record->extra['uid']);
+        static::assertSame('/api/internal/v1/tasks', $record->extra['url']);
     }
 
     public function testNoOpWithoutRequest(): void
     {
         $record = ( new RequestContextProcessor(new RequestStack()) )($this->record());
 
-        self::assertArrayNotHasKey('url', $record->extra);
-        self::assertArrayNotHasKey('http_method', $record->extra);
-        self::assertArrayNotHasKey('ip', $record->extra);
+        static::assertArrayNotHasKey('url', $record->extra);
+        static::assertArrayNotHasKey('http_method', $record->extra);
+        static::assertArrayNotHasKey('ip', $record->extra);
     }
 
     /** @param array<string, mixed> $extra */

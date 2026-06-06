@@ -36,7 +36,7 @@ class ProductDeleteRecipeGuardTest extends WebTestCase
         $response = $this->apiDelete('/products/' . $product->getId(), ['hard' => 'true']);
 
         $body = self::assertErrorResponse($response, Response::HTTP_CONFLICT);
-        self::assertSame('PRODUCT_IN_USE', $body['type']);
+        static::assertSame('PRODUCT_IN_USE', $body['type']);
         $this->assertDatabaseHas(Product::class, ['id' => $product->getId()]);
     }
 }

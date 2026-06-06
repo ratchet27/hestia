@@ -46,14 +46,19 @@ final readonly class RedactSecretsProcessor implements ProcessorInterface
      */
     private function redactArray(array $data): array
     {
-        foreach ($data as $key => $value) {
-            if (is_string($value)) {
-                $data[$key] = $this->redact($value);
-            } elseif (is_array($value)) {
-                $data[$key] = $this->redactArray($value);
-            }
+        return array_map($this->redactValue(...), $data);
+    }
+
+    private function redactValue(mixed $value): mixed
+    {
+        if (is_string($value)) {
+            return $this->redact($value);
         }
 
-        return $data;
+        if (is_array($value)) {
+            return $this->redactArray($value);
+        }
+
+        return $value;
     }
 }

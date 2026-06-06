@@ -40,7 +40,9 @@ final class CreateUserCommand extends Command
 
         $username = (string) $input->getArgument('username');
         $name = (string) ( $input->getOption('name') ?? $username );
+        // @mago-ignore analysis:mixed-assignment -- Symfony Console getOption() is mixed; narrowed by is_string() below
         $email = $input->getOption('email');
+        // @mago-ignore analysis:mixed-assignment -- Symfony Console getOption() is mixed; narrowed by is_string() below
         $password = $input->getOption('password') ?? $io->askHidden('Password');
 
         if (!is_string($password) || $password === '') {

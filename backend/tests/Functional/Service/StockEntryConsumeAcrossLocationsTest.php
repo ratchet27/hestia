@@ -41,9 +41,9 @@ class StockEntryConsumeAcrossLocationsTest extends KernelTestCase
 
         $consumed = $service->consumeAcrossLocations($product->getId(), 1);
 
-        self::assertSame(1, $consumed);
-        self::assertNull($repo->find($earliest->getId()));
-        self::assertSame(1, $repo->countByProduct($product->getId()));
+        static::assertSame(1, $consumed);
+        static::assertNull($repo->find($earliest->getId()));
+        static::assertSame(1, $repo->countByProduct($product->getId()));
     }
 
     public function testThrowsWhenInsufficientTotalStock(): void

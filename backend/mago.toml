@@ -20,6 +20,8 @@ integrations = ["symfony", "phpunit"]
 [linter.rules]
 ambiguous-function-call = { enabled = false }
 literal-named-argument = { enabled = false }
+# `isset` is the null-safe idiom for optional query filters (ProductRepository); array_key_exists would change null-handling
+no-isset = { enabled = false }
 halstead = { effort-threshold = 7000 }
 too-many-methods = { threshold = 20 }
 

@@ -190,7 +190,7 @@ readonly class RecipeService
 
         foreach ($recipe->getIngredients() as $ingredient) {
             $product = $ingredient->getProduct();
-            // TODO: if recipe lists grow, replace per-ingredient COUNT with a single bulk stock-count query.
+            // TODO(@ratchet27): if recipe lists grow, replace per-ingredient COUNT with a single bulk stock-count query.
             $inStock = $this->stockEntryRepository->countByProduct($product->getId());
             $hasEnough = $inStock >= $ingredient->getRequiredCount();
             if (!$hasEnough) {

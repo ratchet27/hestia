@@ -25,12 +25,14 @@ final class TelegramSenderTest extends TestCase
 
         try {
             $sender->send('hello');
-            self::fail('Expected the notifier exception to propagate');
+            static::fail('Expected the notifier exception to propagate');
+
+            // @mago-ignore lint:no-empty-catch-clause -- intentional: assert the log side-effect after the expected throw (expectException cannot, it halts at the throw)
         } catch (NotifierException) {
             // expected — propagation preserves Messenger retry/failed semantics
         }
 
-        self::assertTrue($handler->hasErrorThatContains('Telegram delivery failed'));
+        static::assertTrue($handler->hasErrorThatContains('Telegram delivery failed'));
     }
 
     public function testDoesNotLogOnSuccess(): void
@@ -38,10 +40,10 @@ final class TelegramSenderTest extends TestCase
         $handler = new TestHandler();
 
         $chatter = $this->createMock(ChatterInterface::class);
-        $chatter->expects(self::once())->method('send')->with(self::isInstanceOf(ChatMessage::class));
+        $chatter->expects(self::once())->method('send')->with(static::isInstanceOf(ChatMessage::class));
 
         new TelegramSender($chatter, new Logger('app', [$handler]))->send('hello');
 
-        self::assertSame([], $handler->getRecords());
+        static::assertSame([], $handler->getRecords());
     }
 }
