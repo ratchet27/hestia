@@ -144,6 +144,11 @@ class StockEntryService
     /**
      * Consume N entries of a product across all locations (FIFO, earliest expiry first).
      *
+     * NOTE: Unlike the other consume/add methods, this method does NOT dispatch a
+     * StockChangedMessage itself. The caller is responsible for triggering reconciliation
+     * AFTER its transaction commits, because this method is used inside a caller-managed
+     * transaction (RecipeService::cook).
+     *
      * @return int Number of entries consumed
      */
     public function consumeAcrossLocations(Uuid $productId, int $quantity): int
@@ -159,8 +164,6 @@ class StockEntryService
         }
 
         $this->entityManager->flush();
-
-        $this->messageBus->dispatch(new StockChangedMessage($productId));
 
         return count($entries);
     }
