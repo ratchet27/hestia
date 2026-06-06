@@ -537,6 +537,39 @@ class StockControllerTest extends WebTestCase
         static::assertLessThan(0, $data['data'][0]['days_until_expiry']);
     }
 
+    public function testExpiringRejectsNegativeDays(): void
+    {
+        $response = $this->apiGet('/stocks/expiring', ['days' => '-5']);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        static::assertSame('VALIDATION_ERROR', $data['type']);
+        static::assertNotEmpty($data['errors']);
+        static::assertSame('days', $data['errors'][0]['property']);
+    }
+
+    public function testExpiringAllowsZeroDays(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        // Already expired (yesterday) — must be included by a days=0 cutoff of "today".
+        $this->createEntry([
+            'product' => $product,
+            'location' => $location,
+            'bestBefore' => new \DateTimeImmutable('yesterday')
+        ]);
+
+        $response = $this->apiGet('/stocks/expiring', ['days' => '0']);
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+
+        static::assertListResponse($data, 1);
+    }
+
     /**
      * Regression for C1 (#53): between 00:00–05:00 Almaty the API must report the household day,
      * not UTC. At 22:30Z (= 03:30 on 2026-06-06 Almaty) an item dated 2026-06-06 is "today" (0),
