@@ -355,10 +355,10 @@ class ProductControllerTest extends WebTestCase
             'category_id' => Uuid::v7(),
             'default_location_id' => $location->getId()
         ]);
-        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
 
-        static::assertSame('Category not found', $data['title']);
-        static::assertSame('CATEGORY_NOT_FOUND', $data['type']);
+        static::assertSame('Invalid category reference', $data['title']);
+        static::assertSame('INVALID_CATEGORY_REFERENCE', $data['type']);
     }
 
     public function testCreateProductInvalidLocation(): void

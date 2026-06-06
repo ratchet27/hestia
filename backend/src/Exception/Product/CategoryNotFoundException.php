@@ -14,9 +14,9 @@ final class CategoryNotFoundException extends ApiException
     public function __construct(Uuid $id)
     {
         parent::__construct(new ApiProblem(
-            title: 'Category not found',
-            type: 'CATEGORY_NOT_FOUND',
-            code: Response::HTTP_BAD_REQUEST,
+            title: 'Invalid category reference',
+            type: 'INVALID_CATEGORY_REFERENCE',
+            code: Response::HTTP_UNPROCESSABLE_ENTITY,
             extraData: ['id' => (string) $id]
         ));
     }
