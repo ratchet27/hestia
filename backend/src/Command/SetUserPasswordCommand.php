@@ -48,6 +48,7 @@ final class SetUserPasswordCommand extends Command
             return Command::FAILURE;
         }
 
+        // @mago-ignore analysis:mixed-assignment -- Symfony Console getOption() is mixed; narrowed by is_string() below
         $password = $input->getOption('password') ?? $io->askHidden('New password');
         if (!is_string($password) || $password === '') {
             $io->error('Password is required.');

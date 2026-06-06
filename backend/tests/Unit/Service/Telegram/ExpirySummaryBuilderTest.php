@@ -33,7 +33,7 @@ final class ExpirySummaryBuilderTest extends TestCase
 
     public function testReturnsNullWhenNoEntries(): void
     {
-        self::assertNull($this->builderAt('2026-06-04 04:00:00')->build([]));
+        static::assertNull($this->builderAt('2026-06-04 04:00:00')->build([]));
     }
 
     public function testBuildsBothSectionsWithRelativeDates(): void
@@ -48,16 +48,16 @@ final class ExpirySummaryBuilderTest extends TestCase
             $this->entry('Хлеб', 'Кладовая', '2026-06-06') // через 2 дн.
         ]);
 
-        self::assertNotNull($text);
-        self::assertStringContainsString('🏠 Гестия — сводка на 04.06', $text);
-        self::assertStringContainsString('⚠️ Просрочено', $text);
-        self::assertStringContainsString('Молоко (Холодильник) — 2 дн. назад', $text);
-        self::assertStringContainsString('Сметана (Холодильник) — вчера', $text);
-        self::assertStringContainsString('🔔 Скоро истекает', $text);
-        self::assertStringContainsString('Йогурт (Холодильник) — сегодня', $text);
-        self::assertStringContainsString('Хлеб (Кладовая) — через 2 дн.', $text);
+        static::assertNotNull($text);
+        static::assertStringContainsString('🏠 Гестия — сводка на 04.06', $text);
+        static::assertStringContainsString('⚠️ Просрочено', $text);
+        static::assertStringContainsString('Молоко (Холодильник) — 2 дн. назад', $text);
+        static::assertStringContainsString('Сметана (Холодильник) — вчера', $text);
+        static::assertStringContainsString('🔔 Скоро истекает', $text);
+        static::assertStringContainsString('Йогурт (Холодильник) — сегодня', $text);
+        static::assertStringContainsString('Хлеб (Кладовая) — через 2 дн.', $text);
         // App name is Гестия, never Хестия.
-        self::assertStringNotContainsString('Хестия', $text);
+        static::assertStringNotContainsString('Хестия', $text);
     }
 
     public function testOmitsExpiredSectionWhenNoneExpired(): void
@@ -66,10 +66,10 @@ final class ExpirySummaryBuilderTest extends TestCase
 
         $text = $builder->build([$this->entry('Йогурт', 'Холодильник', '2026-06-05')]); // завтра
 
-        self::assertNotNull($text);
-        self::assertStringNotContainsString('⚠️ Просрочено', $text);
-        self::assertStringContainsString('🔔 Скоро истекает', $text);
-        self::assertStringContainsString('Йогурт (Холодильник) — завтра', $text);
+        static::assertNotNull($text);
+        static::assertStringNotContainsString('⚠️ Просрочено', $text);
+        static::assertStringContainsString('🔔 Скоро истекает', $text);
+        static::assertStringContainsString('Йогурт (Холодильник) — завтра', $text);
     }
 
     public function testEscapesHtmlSpecialCharsInNames(): void
@@ -78,7 +78,7 @@ final class ExpirySummaryBuilderTest extends TestCase
 
         $text = $builder->build([$this->entry('Сок <Rich & Co>', 'Кухня', '2026-06-04')]);
 
-        self::assertNotNull($text);
-        self::assertStringContainsString('Сок &lt;Rich &amp; Co&gt; (Кухня) — сегодня', $text);
+        static::assertNotNull($text);
+        static::assertStringContainsString('Сок &lt;Rich &amp; Co&gt; (Кухня) — сегодня', $text);
     }
 }

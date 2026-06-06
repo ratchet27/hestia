@@ -27,14 +27,14 @@ final class RequestLogListenerTest extends TestCase
             new Response('', \Symfony\Component\HttpFoundation\Response::HTTP_OK)
         ));
 
-        self::assertTrue($handler->hasInfoThatContains('request handled'));
+        static::assertTrue($handler->hasInfoThatContains('request handled'));
 
         [$record] = $handler->getRecords();
-        self::assertSame('GET', $record->context['method']);
-        self::assertSame('/api/internal/v1/tasks', $record->context['path']);
-        self::assertSame(200, $record->context['status']);
-        self::assertIsInt($record->context['duration_ms']);
-        self::assertGreaterThanOrEqual(0, $record->context['duration_ms']);
+        static::assertSame('GET', $record->context['method']);
+        static::assertSame('/api/internal/v1/tasks', $record->context['path']);
+        static::assertSame(200, $record->context['status']);
+        static::assertIsInt($record->context['duration_ms']);
+        static::assertGreaterThanOrEqual(0, $record->context['duration_ms']);
     }
 
     public function testIgnoresNonApiRequest(): void
@@ -46,7 +46,7 @@ final class RequestLogListenerTest extends TestCase
             new Response()
         ));
 
-        self::assertSame([], $handler->getRecords());
+        static::assertSame([], $handler->getRecords());
     }
 
     public function testLogsNullDurationWhenStartTimeAbsent(): void
@@ -62,7 +62,7 @@ final class RequestLogListenerTest extends TestCase
         ));
 
         [$record] = $handler->getRecords();
-        self::assertNull($record->context['duration_ms']);
+        static::assertNull($record->context['duration_ms']);
     }
 
     private function event(Request $request, Response $response): TerminateEvent

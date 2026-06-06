@@ -37,8 +37,8 @@ final class RedactSecretsProcessorTest extends TestCase
 
         $result = ( new RedactSecretsProcessor() )($this->record('Request: "POST ' . $url . '"'));
 
-        self::assertStringNotContainsString(self::FAKE_TOKEN, $result->message);
-        self::assertStringContainsString('https://api.telegram.org/bot[REDACTED]/sendMessage', $result->message);
+        static::assertStringNotContainsString(self::FAKE_TOKEN, $result->message);
+        static::assertStringContainsString('https://api.telegram.org/bot[REDACTED]/sendMessage', $result->message);
     }
 
     public function testRedactsTokenInNestedContext(): void
@@ -48,8 +48,8 @@ final class RedactSecretsProcessorTest extends TestCase
             'url' => 'https://api.telegram.org/bot' . self::FAKE_TOKEN . '/sendMessage'
         ]));
 
-        self::assertStringNotContainsString(self::FAKE_TOKEN, (string) json_encode($result->context));
-        self::assertSame(200, $result->context['http_code']);
+        static::assertStringNotContainsString(self::FAKE_TOKEN, (string) json_encode($result->context));
+        static::assertSame(200, $result->context['http_code']);
     }
 
     public function testRedactsTokenInTelegramDsn(): void
@@ -58,8 +58,8 @@ final class RedactSecretsProcessorTest extends TestCase
             'DSN telegram://' . self::FAKE_TOKEN . '@default?channel=-100123'
         ));
 
-        self::assertStringNotContainsString(self::FAKE_TOKEN, $result->message);
-        self::assertStringContainsString('telegram://[REDACTED]@default', $result->message);
+        static::assertStringNotContainsString(self::FAKE_TOKEN, $result->message);
+        static::assertStringContainsString('telegram://[REDACTED]@default', $result->message);
     }
 
     public function testLeavesUnrelatedMessagesUntouched(): void
@@ -68,6 +68,6 @@ final class RedactSecretsProcessorTest extends TestCase
 
         $result = ( new RedactSecretsProcessor() )($this->record($message));
 
-        self::assertSame($message, $result->message);
+        static::assertSame($message, $result->message);
     }
 }

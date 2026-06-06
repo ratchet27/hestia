@@ -38,7 +38,7 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
         $repo
             ->expects(self::once())
             ->method('findExpiring')
-            ->with(self::callback(
+            ->with(static::callback(
                 static fn(\DateTimeImmutable $cutoff): bool => $cutoff->format('Y-m-d') === '2026-06-07'
             ))
             ->willReturn([$entry]);
@@ -47,13 +47,13 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
         $chatter
             ->expects(self::once())
             ->method('send')
-            ->with(self::callback(static fn(ChatMessage $m): bool => str_contains(
+            ->with(static::callback(static fn(ChatMessage $m): bool => str_contains(
                 $m->getSubject(),
                 'Молоко (Холодильник)'
             )));
 
         $this->handler($repo, $chatter)(new SendDailyExpirySummary());
-        self::assertTrue($this->logHandler->hasInfoThatContains('Daily expiry summary sent'));
+        static::assertTrue($this->logHandler->hasInfoThatContains('Daily expiry summary sent'));
     }
 
     public function testSendsNothingWhenSummaryIsNull(): void
@@ -63,7 +63,7 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
         $repo
             ->expects(self::once())
             ->method('findExpiring')
-            ->with(self::callback(
+            ->with(static::callback(
                 static fn(\DateTimeImmutable $cutoff): bool => $cutoff->format('Y-m-d') === '2026-06-07'
             ))
             ->willReturn([]);
@@ -72,7 +72,7 @@ final class SendDailyExpirySummaryHandlerTest extends TestCase
         $chatter->expects(self::never())->method('send');
 
         $this->handler($repo, $chatter)(new SendDailyExpirySummary());
-        self::assertTrue($this->logHandler->hasInfoThatContains('Daily expiry summary skipped'));
+        static::assertTrue($this->logHandler->hasInfoThatContains('Daily expiry summary skipped'));
     }
 
     private function handler(StockEntryRepository $repo, ChatterInterface $chatter): SendDailyExpirySummaryHandler

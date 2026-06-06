@@ -15,7 +15,6 @@ use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
-// @mago-ignore lint:too-many-methods
 class TaskControllerTest extends WebTestCase
 {
     use ApiTestTrait;
