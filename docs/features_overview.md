@@ -40,7 +40,6 @@ This document exists to prevent scope creep and to protect daily usability.
 ## Postponed (v2+)
 
 - undo system
-- recipe fulfillment UI
 - meal planning calendar
 - better mobile UX
 - bulk operations
