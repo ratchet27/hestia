@@ -75,7 +75,11 @@ export function AddStockModal({
           {t("addStock.title")}
         </h3>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="space-y-4"
+        >
           <div>
             <label
               htmlFor="add-product"
@@ -144,9 +148,11 @@ export function AddStockModal({
                 id="add-quantity"
                 type="number"
                 min="1"
+                max="50"
                 {...register("quantity", {
                   required: t("addStock.quantityRequired"),
                   min: { value: 1, message: t("addStock.quantityMin") },
+                  max: { value: 50, message: t("addStock.quantityMax") },
                   valueAsNumber: true,
                 })}
                 className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
