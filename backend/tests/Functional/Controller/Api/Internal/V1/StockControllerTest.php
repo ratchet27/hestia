@@ -266,6 +266,48 @@ class StockControllerTest extends WebTestCase
         static::assertSame('2026-02-15', $data['data']['entries'][0]['best_before']);
     }
 
+    public function testAddStockRejectsQuantityAboveLimit(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        $response = $this->apiPost('/stocks/add', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => (string) $location->getId(),
+            'quantity' => 51
+        ]);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        static::assertSame('VALIDATION_ERROR', $data['type']);
+        static::assertNotEmpty($data['errors']);
+        static::assertSame('quantity', $data['errors'][0]['property']);
+    }
+
+    public function testAddStockAcceptsQuantityAtLimit(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        $response = $this->apiPost('/stocks/add', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => (string) $location->getId(),
+            'quantity' => 50
+        ]);
+        $data = static::assertJsonResponse($response, Response::HTTP_CREATED);
+
+        static::assertSame(50, $data['data']['created']);
+    }
+
     public function testAddStockFailsWithInvalidProduct(): void
     {
         $location = $this->createLocation(['name' => 'Kitchen']);

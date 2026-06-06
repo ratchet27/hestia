@@ -18,6 +18,8 @@ final readonly class AddStockRequest
         public string $location_id,
 
         #[Assert\Positive]
+        // Cap per-request units (W5, #59): stock is one row per unit, so guard against fat-finger mass inserts. Consume is uncapped by design.
+        #[Assert\LessThanOrEqual(value: 50, message: 'Quantity must not exceed {{ compared_value }}.')]
         public int $quantity = 1,
 
         #[Assert\Date]

@@ -52,16 +52,29 @@ final readonly class ApiExceptionListener
 
     private function createProblem(\Throwable $exception): ApiProblem
     {
-        return match (true) {
-            $exception instanceof ApiException => $exception->problem,
-            $exception instanceof ValidationFailedException => $this->createValidationProblem($exception),
-            $exception instanceof HttpExceptionInterface => $this->createHttpProblem($exception),
-            default => new ApiProblem(
-                title: 'Internal Server Error',
-                type: 'INTERNAL_SERVER_ERROR',
-                code: Response::HTTP_INTERNAL_SERVER_ERROR
-            )
-        };
+        if ($exception instanceof ApiException) {
+            return $exception->problem;
+        }
+
+        if ($exception instanceof ValidationFailedException) {
+            return $this->createValidationProblem($exception);
+        }
+
+        if ($exception instanceof HttpExceptionInterface) {
+            $previous = $exception->getPrevious();
+
+            if ($previous instanceof ValidationFailedException) {
+                return $this->createValidationProblem($previous);
+            }
+
+            return $this->createHttpProblem($exception);
+        }
+
+        return new ApiProblem(
+            title: 'Internal Server Error',
+            type: 'INTERNAL_SERVER_ERROR',
+            code: Response::HTTP_INTERNAL_SERVER_ERROR
+        );
     }
 
     private function createValidationProblem(ValidationFailedException $exception): ApiProblem
