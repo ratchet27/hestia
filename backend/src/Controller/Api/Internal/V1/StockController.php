@@ -7,6 +7,7 @@ namespace App\Controller\Api\Internal\V1;
 use App\Request\AddStockRequest;
 use App\Request\ConsumeStockRequest;
 use App\Request\UpdateStockEntryRequest;
+use App\Response\Stock\AddedStockEntryResponse;
 use App\Response\Stock\ConsumeResultResponse;
 use App\Response\Stock\ExpiringEntryResponse;
 use App\Response\Stock\ProductSummaryResponse;
@@ -160,7 +161,7 @@ final class StockController extends AbstractController
                 new OA\Property(
                     property: 'entries',
                     type: 'array',
-                    items: new OA\Items(ref: new Model(type: StockEntryResponse::class))
+                    items: new OA\Items(ref: new Model(type: AddedStockEntryResponse::class))
                 )
             ],
             type: 'object'
@@ -175,10 +176,7 @@ final class StockController extends AbstractController
         return $this->json([
             'data' => [
                 'created' => count($entries),
-                'entries' => array_map(static fn($e) => [
-                    'id' => $e->getId(),
-                    'best_before' => $e->getBestBefore()?->format('Y-m-d')
-                ], $entries)
+                'entries' => array_map(AddedStockEntryResponse::fromEntity(...), $entries)
             ]
         ], Response::HTTP_CREATED);
     }

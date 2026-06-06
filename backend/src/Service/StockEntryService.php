@@ -16,7 +16,6 @@ use App\Repository\StockEntryRepository;
 use App\Request\AddStockRequest;
 use App\Request\ConsumeStockRequest;
 use App\Request\UpdateStockEntryRequest;
-use App\Response\Location\LocationResponse;
 use App\Response\Stock\ConsumeResultResponse;
 use App\Response\Stock\ExpiringEntryResponse;
 use App\Response\Stock\LocationQuantityResponse;
@@ -247,11 +246,7 @@ class StockEntryService
             );
 
             $result[] = new ProductSummaryResponse(
-                product: new ProductBriefResponse(
-                    id: $product->getId(),
-                    name: $product->getName(),
-                    unit: $product->getUnit()
-                ),
+                product: ProductBriefResponse::fromEntity($product),
                 total_quantity: (int) $row['total_quantity'],
                 earliest_expiry: $row['earliest_expiry'] instanceof \DateTimeInterface
                     ? $row['earliest_expiry']->format('Y-m-d')
@@ -276,7 +271,10 @@ class StockEntryService
             default => $this->stockEntryRepository->findAll()
         };
 
-        return array_map($this->mapEntryToResponse(...), $entries);
+        return array_map(fn(StockEntry $entry): StockEntryResponse => StockEntryResponse::fromEntity(
+            $entry,
+            $this->daysUntilExpiry($entry)
+        ), $entries);
     }
 
     /**
@@ -289,7 +287,7 @@ class StockEntryService
             throw new StockEntryNotFoundException($entryId);
         }
 
-        return $this->mapEntryToResponse($entry);
+        return StockEntryResponse::fromEntity($entry, $this->daysUntilExpiry($entry));
     }
 
     /**
@@ -306,20 +304,7 @@ class StockEntryService
                 /** @var \DateTimeImmutable $bestBefore - guaranteed non-null by findExpiring query */
                 $bestBefore = $entry->getBestBefore();
 
-                return new ExpiringEntryResponse(
-                    id: $entry->getId(),
-                    product: new ProductBriefResponse(
-                        id: $entry->getProduct()->getId(),
-                        name: $entry->getProduct()->getName(),
-                        unit: $entry->getProduct()->getUnit()
-                    ),
-                    location: new LocationResponse(
-                        id: $entry->getLocation()->getId(),
-                        name: $entry->getLocation()->getName()
-                    ),
-                    best_before: $bestBefore->format('Y-m-d'),
-                    days_until_expiry: $this->householdCalendar->daysUntil($bestBefore)
-                );
+                return ExpiringEntryResponse::fromEntity($entry, $this->householdCalendar->daysUntil($bestBefore));
             },
             $entries
         );
@@ -362,21 +347,10 @@ class StockEntryService
         );
     }
 
-    private function mapEntryToResponse(StockEntry $entry): StockEntryResponse
+    private function daysUntilExpiry(StockEntry $entry): ?int
     {
         $bestBefore = $entry->getBestBefore();
 
-        return new StockEntryResponse(
-            id: $entry->getId(),
-            product: new ProductBriefResponse(
-                id: $entry->getProduct()->getId(),
-                name: $entry->getProduct()->getName(),
-                unit: $entry->getProduct()->getUnit()
-            ),
-            location: new LocationResponse(id: $entry->getLocation()->getId(), name: $entry->getLocation()->getName()),
-            best_before: $bestBefore?->format('Y-m-d'),
-            created_at: $entry->getCreatedAt(),
-            days_until_expiry: $bestBefore !== null ? $this->householdCalendar->daysUntil($bestBefore) : null
-        );
+        return $bestBefore !== null ? $this->householdCalendar->daysUntil($bestBefore) : null;
     }
 }

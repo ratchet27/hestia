@@ -109,6 +109,34 @@ public function show(Uuid $uuid): JsonResponse
 - UUID primary keys preferred
 - For unique fields: use BOTH `#[UniqueEntity]` (validation) AND `#[ORM\Column(unique: true)]` (database constraint)
 
+### Response mapping
+
+Turn entities into response DTOs using exactly one of these, by case:
+
+1. **Flat entity → DTO, no computed fields:** Symfony ObjectMapper `#[Map]` on the
+   DTO (e.g. `CategoryResponse`, `LocationResponse`, `TaskResponse`, `ProductResponse`).
+2. **Entity → DTO with computed/derived fields:** a pure static factory
+   `DTO::fromEntity(Entity $e, …scalars): self` on the DTO (e.g.
+   `StockEntryResponse`, `ExpiringEntryResponse`, `ShoppingItemResponse`). Keep the
+   factory free of services — if a value needs a collaborator (e.g.
+   `days_until_expiry` needs `HouseholdCalendar`), the **service** computes the
+   scalar and passes it in. This keeps factories unit-testable with no container.
+3. **DTO assembled from queries / aggregates / multiple sources** (no single source
+   entity): build it in the **service** (e.g. `StockSummaryResponse`,
+   `ProductSummaryResponse`). No `#[Map]`, no `fromEntity`.
+
+**Never** build a response array inline in a controller — controllers return DTOs.
+Constructing a nested DTO via its constructor inside a factory/service is composition,
+not a fourth mechanism.
+
+Date formatting: `DateTimeImmutable` fields serialize as ISO-8601/ATOM via
+`DateTimeImmutableNormalizer`; date-only fields (e.g. `best_before`) are formatted
+`Y-m-d` in the factory/service. Keep that distinction.
+
+Opportunistic migration (not yet converted): `RecipeService::toResponse`,
+`CategoryListItemResponse` / `LocationListItemResponse` controller `toResponse()`
+methods.
+
 ## Commands
 
 **IMPORTANT: NEVER run PHP or Composer commands directly on the host machine.** Always use `docker compose exec php` to run commands inside the container.

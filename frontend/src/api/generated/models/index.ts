@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './addedStockEntryResponse.ts';
 export * from './addShoppingItemRequest.ts';
 export * from './addStockRequest.ts';
 export * from './apiProblem.ts';

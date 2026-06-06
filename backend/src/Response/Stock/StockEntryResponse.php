@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Response\Stock;
 
+use App\Entity\StockEntry;
 use App\Response\Location\LocationResponse;
 use Symfony\Component\Uid\Uuid;
 
@@ -18,5 +19,17 @@ final readonly class StockEntryResponse
         public \DateTimeImmutable $created_at,
         public ?int $days_until_expiry
     ) {
+    }
+
+    public static function fromEntity(StockEntry $entry, ?int $daysUntilExpiry): self
+    {
+        return new self(
+            id: $entry->getId(),
+            product: ProductBriefResponse::fromEntity($entry->getProduct()),
+            location: new LocationResponse(id: $entry->getLocation()->getId(), name: $entry->getLocation()->getName()),
+            best_before: $entry->getBestBefore()?->format('Y-m-d'),
+            created_at: $entry->getCreatedAt(),
+            days_until_expiry: $daysUntilExpiry
+        );
     }
 }
