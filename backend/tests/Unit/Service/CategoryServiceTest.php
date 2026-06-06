@@ -20,9 +20,25 @@ use Symfony\Component\Uid\Uuid;
 
 class CategoryServiceTest extends TestCase
 {
-    public function testCreateTranslatesUniqueViolationToNameTaken(): void
+    public function testCreatePersistsAndReturnsCategory(): void
     {
         $em = $this->createMock(EntityManagerInterface::class);
+        $em->expects($this->once())->method('persist');
+        $em->expects($this->once())->method('flush');
+
+        $service = new CategoryService(
+            $em,
+            $this->createStub(CategoryRepository::class),
+            $this->createStub(ProductRepository::class)
+        );
+
+        $result = $service->create(new CreateCategoryRequest('Снеки'));
+        static::assertSame('Снеки', $result->getName());
+    }
+
+    public function testCreateTranslatesUniqueViolationToNameTaken(): void
+    {
+        $em = $this->createStub(EntityManagerInterface::class);
         $em->method('flush')->willThrowException($this->createStub(UniqueConstraintViolationException::class));
 
         $service = new CategoryService(
@@ -43,13 +59,30 @@ class CategoryServiceTest extends TestCase
         $repo = $this->createStub(CategoryRepository::class);
         $repo->method('find')->willReturn($existing);
 
-        $em = $this->createMock(EntityManagerInterface::class);
+        $em = $this->createStub(EntityManagerInterface::class);
         $em->method('flush')->willThrowException($this->createStub(UniqueConstraintViolationException::class));
 
         $service = new CategoryService($em, $repo, $this->createStub(ProductRepository::class));
 
         $this->expectException(CategoryNameTakenException::class);
         $service->update(Uuid::v7(), new UpdateCategoryRequest('Снеки'));
+    }
+
+    public function testUpdateChangesNameAndFlushes(): void
+    {
+        $existing = new Category();
+        $existing->setName('Напитки');
+
+        $repo = $this->createStub(CategoryRepository::class);
+        $repo->method('find')->willReturn($existing);
+
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->expects($this->once())->method('flush');
+
+        $service = new CategoryService($em, $repo, $this->createStub(ProductRepository::class));
+
+        $result = $service->update(Uuid::v7(), new UpdateCategoryRequest('Снеки'));
+        static::assertSame('Снеки', $result->getName());
     }
 
     public function testUpdateWithSameNameDoesNotFlush(): void
@@ -97,6 +130,7 @@ class CategoryServiceTest extends TestCase
 
         $em = $this->createMock(EntityManagerInterface::class);
         $em->expects($this->never())->method('remove');
+        $em->expects($this->never())->method('flush');
 
         $service = new CategoryService($em, $repo, $products);
 
@@ -120,6 +154,21 @@ class CategoryServiceTest extends TestCase
         $em->expects($this->once())->method('flush');
 
         $service = new CategoryService($em, $repo, $products);
+        $service->delete(Uuid::v7());
+    }
+
+    public function testDeleteMissingThrowsNotFound(): void
+    {
+        $repo = $this->createStub(CategoryRepository::class);
+        $repo->method('find')->willReturn(null);
+
+        $service = new CategoryService(
+            $this->createStub(EntityManagerInterface::class),
+            $repo,
+            $this->createStub(ProductRepository::class)
+        );
+
+        $this->expectException(CategoryNotFoundException::class);
         $service->delete(Uuid::v7());
     }
 
