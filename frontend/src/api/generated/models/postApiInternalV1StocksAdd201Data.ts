@@ -5,9 +5,9 @@
  * Internal API for Hestia household inventory management
  * OpenAPI spec version: 1.0.0
  */
-import type { StockEntryResponse } from './stockEntryResponse.ts';
+import type { AddedStockEntryResponse } from './addedStockEntryResponse.ts';
 
 export type PostApiInternalV1StocksAdd201Data = {
   created?: number;
-  entries?: StockEntryResponse[];
+  entries?: AddedStockEntryResponse[];
 };

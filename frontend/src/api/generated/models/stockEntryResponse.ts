@@ -9,12 +9,12 @@ import type { LocationResponse } from './locationResponse.ts';
 import type { ProductBriefResponse } from './productBriefResponse.ts';
 
 export interface StockEntryResponse {
-  /** @nullable */
-  days_until_expiry?: number | null;
   id: string;
   product: ProductBriefResponse;
   location: LocationResponse;
   /** @nullable */
   best_before?: string | null;
   created_at: string;
+  /** @nullable */
+  days_until_expiry?: number | null;
 }
