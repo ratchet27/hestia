@@ -165,23 +165,30 @@ to:
 
 ```make
 mutate:
-	docker compose exec php vendor/bin/infection --show-mutations \
+	docker compose exec -e XDEBUG_MODE=coverage php vendor/bin/infection --show-mutations \
 		--initial-tests-php-options="-d pcov.enabled=1"
 ```
 
-`--initial-tests-php-options` injects the flag into the single initial PHPUnit
-coverage subprocess Infection spawns. Per-mutant runs collect no coverage, so they
-need nothing.
+**Why both flags** (discovered during execution — see the spec's superseded-assumption note):
+- `--initial-tests-php-options="-d pcov.enabled=1"` enables pcov for the single initial
+  coverage subprocess; php-code-coverage then selects pcov over Xdebug.
+- `-e XDEBUG_MODE=coverage` suppresses the cosmetic `running with Xdebug enabled` notice.
+  That notice keys on the Xdebug *extension being loaded* in Infection's own process, NOT
+  on the coverage driver or `XDEBUG_MODE`. An active mode makes `composer/xdebug-handler`
+  strip Xdebug from the process; it skips that strip when the mode is `off` (the container
+  default) — which is why `off` alone leaves the notice in place.
 
 - [ ] **Step 2: Run mutation testing and confirm pcov is the driver**
 
 Run: `make mutate`
 Expected:
-- NO `[notice] You are running Infection with Xdebug enabled.` line in the output.
-- Infection completes; the run is noticeably faster than the ~27 min Xdebug baseline noted in #75.
+- Notice reads `[notice] You are running Infection with PCOV enabled.` (NOT Xdebug).
+- Infection completes; faster than the Xdebug-driven baseline (~5m13s measured) — expect
+  ~4m40s. The win is modest (~11%): pcov only speeds initial coverage collection, not the
+  dominant per-mutant test runs.
 
-If the Xdebug notice still appears, confirm `XDEBUG_MODE` is `off` (it defaults to
-`off` in `compose.override.yaml`) and that `-d pcov.enabled=1` reached the subprocess.
+If the notice still says Xdebug, confirm `-e XDEBUG_MODE=coverage` reached `docker compose
+exec` and that `INFECTION_ALLOW_XDEBUG` is not set (it tells the handler to keep Xdebug).
 
 - [ ] **Step 3: Confirm MSI is unchanged and the suite is green**
 

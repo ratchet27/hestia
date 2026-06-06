@@ -75,19 +75,35 @@ pcov.directory = /app/src
 
 ```make
 mutate:
-	docker compose exec php vendor/bin/infection --show-mutations \
+	docker compose exec -e XDEBUG_MODE=coverage php vendor/bin/infection --show-mutations \
 		--initial-tests-php-options="-d pcov.enabled=1"
 ```
 
-Infection collects coverage by spawning a **single initial PHPUnit subprocess**. A
-`-d` flag on the parent `infection` process would **not** propagate to that subprocess;
-`--initial-tests-php-options` is the supported hook that injects PHP options into it.
-Per-mutant runs do not collect coverage, so they need nothing extra.
+Two mechanisms combine here:
 
-With pcov enabled in the coverage subprocess, php-code-coverage selects **pcov over
-Xdebug** as the driver → no Xdebug notice, faster collection. `XDEBUG_MODE` already
-defaults to `off` (`Dockerfile:58`, `compose.override.yaml:19`), so Xdebug contributes
-no coverage path.
+1. **`--initial-tests-php-options="-d pcov.enabled=1"`** — Infection collects coverage
+   by spawning a **single initial PHPUnit subprocess**. A `-d` flag on the parent
+   `infection` process would **not** propagate to that subprocess; this is the supported
+   hook that injects PHP options into it. Per-mutant runs do not collect coverage, so
+   they need nothing extra. With pcov enabled there, php-code-coverage's driver selector
+   picks **pcov over Xdebug** (verified: returns `PCOV 1.0.12`).
+
+2. **`-e XDEBUG_MODE=coverage`** — needed only to silence the cosmetic
+   `You are running Infection with Xdebug enabled.` notice. That notice is emitted by
+   Infection purely on `extension_loaded('xdebug')` in its **own process**
+   (`RunCommand.php:608`), independent of the actual coverage driver — so simply having
+   Xdebug installed (which #75 requires, for step-debugging) triggers it. Infection's
+   bundled `composer/xdebug-handler` restarts the process *without* Xdebug only when
+   Xdebug is in an **active** mode; it deliberately skips the restart when
+   `xdebug.mode=off`. Setting `XDEBUG_MODE=coverage` for the `make mutate` invocation
+   thus makes the handler strip Xdebug from Infection's process entirely — the notice
+   then correctly reads `running with PCOV enabled`, and Xdebug plays no part in the run.
+
+> **Note — superseded assumption.** An earlier draft assumed `XDEBUG_MODE=off` (the
+> container default, `Dockerfile:58` / `compose.override.yaml:19`) would suppress the
+> notice. It does not: the notice keys on the extension being *loaded*, not its mode,
+> and `off` is precisely the mode for which `composer/xdebug-handler` skips the strip.
+> Hence the explicit `XDEBUG_MODE=coverage` override above.
 
 ## Why this shape
 
@@ -103,10 +119,22 @@ no coverage path.
 
 1. Rebuild the dev image (`docker compose build php` or via `make up` rebuild).
 2. `make mutate`:
-   - no `You are running Infection with Xdebug enabled.` notice,
-   - capture wall-clock; compare against the ~27 min baseline from #57,
-   - MSI ≥ 90 (expect ~91), suite green.
+   - notice reads `running with PCOV enabled` (not Xdebug),
+   - MSI ≥ 90, suite green,
+   - faster than the Xdebug-driven baseline.
 3. `make test` unchanged — pcov dormant (`pcov.enabled = 0`), no behavioral change.
+
+### Measured results (2026-06-07, back-to-back warm runs, 562 mutants)
+
+| Run | Driver | Wall time | Notice | MSI |
+|-----|--------|-----------|--------|-----|
+| Xdebug baseline (`INFECTION_ALLOW_XDEBUG=1`, no pcov flag) | Xdebug | 5m13s | `with Xdebug enabled` | 92% |
+| This change (`XDEBUG_MODE=coverage` + pcov flag) | PCOV | 4m39s | `with PCOV enabled` | 92% |
+
+**~11% faster (34s), not a multiple.** pcov only accelerates Infection's *initial
+coverage collection*; the dominant cost is re-running covering tests once per surviving
+mutant (562 of them), which is identical across drivers. The win is real but modest;
+the more visible benefit is the truthful notice and Xdebug being absent from the run.
 
 ## Out of scope
 
