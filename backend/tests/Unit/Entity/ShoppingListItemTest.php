@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Tests\Unit\Entity;
 
+use App\Entity\Product;
 use App\Entity\ShoppingListItem;
 use App\Enum\ShoppingListSource;
 use PHPUnit\Framework\TestCase;
@@ -97,5 +98,23 @@ final class ShoppingListItemTest extends TestCase
         $item->claimManual();
 
         static::assertSame(ShoppingListSource::MANUAL, $item->getSource());
+    }
+
+    public function testGetDisplayNamePrefersProductThenCustomNameThenEmpty(): void
+    {
+        $product = new Product();
+        $product->setName('Milk');
+
+        // Product present → product name wins.
+        $withProduct = new ShoppingListItem()->setProduct($product)->setCustomName('ignored');
+        static::assertSame('Milk', $withProduct->getDisplayName());
+
+        // No product, custom name set → custom name.
+        $withCustom = new ShoppingListItem()->setCustomName('Eggs');
+        static::assertSame('Eggs', $withCustom->getDisplayName());
+
+        // Neither → empty string.
+        $empty = new ShoppingListItem();
+        static::assertSame('', $empty->getDisplayName());
     }
 }
