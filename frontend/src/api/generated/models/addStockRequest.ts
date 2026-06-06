@@ -9,7 +9,10 @@
 export interface AddStockRequest {
   product_id: string;
   location_id: string;
-  /** @exclusiveMinimum 0 */
+  /**
+     * @maximum 50
+     * @exclusiveMinimum 0
+     */
   quantity?: number;
   /** @nullable */
   best_before?: string | null;
