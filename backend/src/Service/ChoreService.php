@@ -63,9 +63,17 @@ class ChoreService
     {
         $chore = $this->getChore($id);
         $chore->setName($request->name);
-        $chore->setScheduleType(ScheduleType::from($request->schedule_type));
-        $chore->setScheduleValue($request->schedule_value);
         $chore->setAssignee($request->assignee);
+
+        $newType = ScheduleType::from($request->schedule_type);
+        $scheduleChanged =
+            $newType !== $chore->getScheduleType() || $request->schedule_value !== $chore->getScheduleValue();
+
+        // Recompute next-due only on a real schedule change; a name/assignee-only edit
+        // must leave nextDueAt untouched. Anchored to now (clock restart) via reschedule.
+        if ($scheduleChanged) {
+            $chore->reschedule($newType, $request->schedule_value, $this->now());
+        }
 
         $this->em->flush();
 
