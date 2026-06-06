@@ -14,9 +14,13 @@ final class AddedStockEntryResponseTest extends TestCase
 {
     public function testFromEntityMapsIdAndFormatsDate(): void
     {
-        $entry = (new StockEntry())
-            ->setProduct((new Product())->setName('Milk')->setUnit('pcs'))
-            ->setLocation((new Location())->setName('Fridge'))
+        $entry = new StockEntry()
+            ->setProduct(
+                new Product()
+                    ->setName('Milk')
+                    ->setUnit('pcs')
+            )
+            ->setLocation(new Location()->setName('Fridge'))
             ->setBestBefore(new \DateTimeImmutable('2026-06-10 14:30:00'));
 
         $response = AddedStockEntryResponse::fromEntity($entry);
@@ -27,9 +31,13 @@ final class AddedStockEntryResponseTest extends TestCase
 
     public function testFromEntityKeepsNullBestBefore(): void
     {
-        $entry = (new StockEntry())
-            ->setProduct((new Product())->setName('Milk')->setUnit('pcs'))
-            ->setLocation((new Location())->setName('Pantry'));
+        $entry = new StockEntry()
+            ->setProduct(
+                new Product()
+                    ->setName('Milk')
+                    ->setUnit('pcs')
+            )
+            ->setLocation(new Location()->setName('Pantry'));
 
         $response = AddedStockEntryResponse::fromEntity($entry);
 

@@ -12,7 +12,9 @@ final class ProductBriefResponseTest extends TestCase
 {
     public function testFromEntityCopiesIdNameAndUnit(): void
     {
-        $product = (new Product())->setName('Milk')->setUnit('pcs');
+        $product = new Product()
+            ->setName('Milk')
+            ->setUnit('pcs');
 
         $response = ProductBriefResponse::fromEntity($product);
 

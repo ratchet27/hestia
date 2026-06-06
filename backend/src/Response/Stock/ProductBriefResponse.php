@@ -18,10 +18,6 @@ final readonly class ProductBriefResponse
 
     public static function fromEntity(Product $product): self
     {
-        return new self(
-            id: $product->getId(),
-            name: $product->getName(),
-            unit: $product->getUnit()
-        );
+        return new self(id: $product->getId(), name: $product->getName(), unit: $product->getUnit());
     }
 }

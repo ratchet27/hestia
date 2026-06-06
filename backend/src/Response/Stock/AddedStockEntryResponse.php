@@ -17,9 +17,6 @@ final readonly class AddedStockEntryResponse
 
     public static function fromEntity(StockEntry $entry): self
     {
-        return new self(
-            id: $entry->getId(),
-            best_before: $entry->getBestBefore()?->format('Y-m-d')
-        );
+        return new self(id: $entry->getId(), best_before: $entry->getBestBefore()?->format('Y-m-d'));
     }
 }
