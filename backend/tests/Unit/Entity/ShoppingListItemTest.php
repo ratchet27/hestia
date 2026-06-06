@@ -85,5 +85,17 @@ final class ShoppingListItemTest extends TestCase
 
         $item->setSource(ShoppingListSource::MANUAL);
         static::assertFalse($item->isAuto());
+
+        $item->setSource(ShoppingListSource::RECIPE);
+        static::assertFalse($item->isAuto());
+    }
+
+    public function testClaimManualFromManualStaysManual(): void
+    {
+        $item = new ShoppingListItem()->setSource(ShoppingListSource::MANUAL);
+
+        $item->claimManual();
+
+        static::assertSame(ShoppingListSource::MANUAL, $item->getSource());
     }
 }
