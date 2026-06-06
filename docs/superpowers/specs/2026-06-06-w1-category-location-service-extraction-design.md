@@ -103,17 +103,25 @@ concern: the controller already holds the entity returned by the service.)
 
 ## Testing
 
-- **Existing functional tests pass unchanged** — `CategoryControllerTest` / `LocationControllerTest`
-  already assert 409 `*_NAME_TAKEN` for duplicate create and rename-to-existing, which catch-only still
-  produces; in-use delete → 409 and not-found → 404 likewise unchanged.
-- **New service unit tests** (`tests/Functional/Service/CategoryServiceTest`, `LocationServiceTest` —
-  match existing service test placement) exercising create/update/delete/usageCount directly, so the
-  moved logic is inside Infection's `src/Service` scope. Cover: create, rename, no-op rename (no 409
-  against self), delete-empty, delete-in-use → 409, rename-to-existing → 409.
-- **Race translation test:** true concurrency cannot be unit-simulated (needs two live transactions).
-  Instead assert that a `UniqueConstraintViolationException` raised at flush is translated to
-  `CategoryNameTakenException` (409) — proving the missing *translation* exists. The PR description will
-  note that real concurrency is not simulated.
+Two layers — both, since they cover different things and don't conflict:
+
+### Functional (end-to-end, real DB) — `tests/Functional/Controller/...`
+- **Existing `CategoryControllerTest` / `LocationControllerTest` pass unchanged** — they already assert
+  409 `*_NAME_TAKEN` for duplicate create and rename-to-existing, in-use delete → 409, not-found → 404.
+  These prove the contract is preserved through the full HTTP stack after the refactor.
+
+### Unit (isolated, mocked collaborators) — `tests/Unit/Service/`
+New `CategoryServiceTest` / `LocationServiceTest` with the `EntityManagerInterface` and repositories
+mocked, so the moved logic is exercised fast and in isolation (and lives in `src/Service`, inside
+Infection's scope — the W4 tie-in):
+- **Race translation (the key new case):** stub `em->flush()` to throw `UniqueConstraintViolationException`
+  → assert the service throws `CategoryNameTakenException` (409). This is exactly the translation that was
+  missing; the mocked EM lets us prove it deterministically without simulating two live transactions
+  (true concurrency still cannot be unit-simulated — the PR will note that).
+- `delete` with `usageCount > 0` (stub repo count) → `CategoryInUseException` (409); with `0` →
+  `remove` + `flush` called.
+- `update` no-op rename (same name) → no `flush`, no 409 against itself.
+- `usageCount` sums the right repository counts (Location: products + stock entries).
 
 ## Acceptance criteria
 
