@@ -96,6 +96,23 @@ class ChoreTest extends TestCase
         yield 'from end of April, target 31 advances to May' => ['2026-04-30', 31, '2026-05-31'];
     }
 
+    public function testMarkDoneNormalizesNextDueToMidnightForEverySchedule(): void
+    {
+        // The done-instant carries a wall-clock time; nextDueAt must always be 00:00:00.
+        $doneAt = new \DateTimeImmutable('2026-02-05 14:37:11');
+
+        foreach ([ScheduleType::INTERVAL, ScheduleType::FIXED_WEEKLY, ScheduleType::FIXED_MONTHLY] as $type) {
+            $chore = $this->createChore($type, 3);
+            $chore->markDone($doneAt);
+
+            static::assertSame(
+                '00:00:00',
+                $chore->getNextDueAt()->format('H:i:s'),
+                sprintf('nextDueAt must be midnight for %s', $type->value)
+            );
+        }
+    }
+
     public function testMarkDoneUpdatesLastDoneAt(): void
     {
         $chore = $this->createChore(ScheduleType::INTERVAL, 7);

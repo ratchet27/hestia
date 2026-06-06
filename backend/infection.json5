@@ -1,11 +1,29 @@
 {
     "$schema": "https://raw.githubusercontent.com/infection/infection/0.32/resources/schema.json",
     "source": {
-        // Start with services - most business logic lives here
+        // Services hold most business logic; entities hold the rich pure logic
+        // (Chore recurrence, ShoppingListItem transitions, Product barcode guard).
+        // Pure data-holder entities (only accessors + ORM lifecycle) are excluded
+        // so the MSI reflects real logic, not getter noise.
         "directories": [
-            "src/Service"
+            "src/Service",
+            "src/Entity"
+        ],
+        "excludes": [
+            "Barcode.php",
+            "StockEntry.php",
+            "RecipeIngredient.php",
+            "Recipe.php",
+            "Category.php",
+            "Location.php",
+            "User.php"
         ]
     },
+    // Local regression guard (CI does not run Infection). Floor reflects the
+    // achieved value; residual equivalent/framework mutants are accepted, not
+    // masked by lowering this further.
+    "minMsi": 90,
+    "minCoveredMsi": 90,
     "logs": {
         "text": "var/infection.log",
         "html": "var/infection.html"
