@@ -241,7 +241,7 @@ Recipes are ingredient sets (product + required count, each with a
 you can't.
 
 Features:
-- CRUD (name, ingredients)
+- CRUD (name, optional instructions and source URL, ingredients)
 - **fulfillment check** — required count vs. current stock, per ingredient
 - **cook** — allowed only when every ingredient is in stock; consumes stock
   (across locations) for ingredients flagged `consume on cook`, then reconciles
