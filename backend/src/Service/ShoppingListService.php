@@ -145,7 +145,8 @@ readonly class ShoppingListService
 
     /**
      * Update an existing shopping list item.
-     * Converting AUTO to MANUAL if amount is changed.
+     * Amount edits go through ShoppingListItem::reviseAmount, which flips an
+     * AUTO item to MANUAL on a real change.
      */
     public function updateItem(Uuid $id, UpdateShoppingItemRequest $request): ShoppingListItem
     {
