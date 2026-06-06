@@ -214,11 +214,9 @@ class Product
 
     public function removeBarcode(Barcode $barcode): static
     {
-        if ($this->barcodes->removeElement($barcode)) {
-            if ($barcode->getProduct() === $this) {
-                $barcode->setProduct($this);
-            }
-        }
+        // orphanRemoval handles detach/delete; Barcode::product is non-nullable,
+        // so there is no inverse side to clear here.
+        $this->barcodes->removeElement($barcode);
 
         return $this;
     }
