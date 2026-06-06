@@ -9,14 +9,14 @@ use App\Exception\ApiProblem;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 
-final class LocationNotFoundException extends ApiException
+final class InvalidCategoryReferenceException extends ApiException
 {
     public function __construct(Uuid $id)
     {
         parent::__construct(new ApiProblem(
-            title: 'Location not found',
-            type: 'LOCATION_NOT_FOUND',
-            code: Response::HTTP_BAD_REQUEST,
+            title: 'Invalid category reference',
+            type: 'INVALID_CATEGORY_REFERENCE',
+            code: Response::HTTP_UNPROCESSABLE_ENTITY,
             extraData: ['id' => (string) $id]
         ));
     }

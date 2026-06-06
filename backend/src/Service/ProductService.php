@@ -8,8 +8,8 @@ use App\Entity\Barcode;
 use App\Entity\Product;
 use App\Entity\RecipeIngredient;
 use App\Exception\Barcode\BarcodeAlreadyExistsException;
-use App\Exception\Product\CategoryNotFoundException;
-use App\Exception\Product\LocationNotFoundException;
+use App\Exception\Product\InvalidCategoryReferenceException;
+use App\Exception\Product\InvalidLocationReferenceException;
 use App\Exception\Product\ProductInUseException;
 use App\Exception\Product\ProductNotFoundException;
 use App\Message\StockChangedMessage;
@@ -66,13 +66,13 @@ class ProductService
         $categoryId = Uuid::fromString($request->categoryId);
         $category = $this->categoryRepository->find($categoryId);
         if ($category === null) {
-            throw new CategoryNotFoundException($categoryId);
+            throw new InvalidCategoryReferenceException($categoryId);
         }
 
         $locationId = Uuid::fromString($request->defaultLocationId);
         $location = $this->locationRepository->find($locationId);
         if ($location === null) {
-            throw new LocationNotFoundException($locationId);
+            throw new InvalidLocationReferenceException($locationId);
         }
 
         $product = new Product();
@@ -109,13 +109,13 @@ class ProductService
         $categoryId = Uuid::fromString($request->categoryId);
         $category = $this->categoryRepository->find($categoryId);
         if ($category === null) {
-            throw new CategoryNotFoundException($categoryId);
+            throw new InvalidCategoryReferenceException($categoryId);
         }
 
         $locationId = Uuid::fromString($request->defaultLocationId);
         $location = $this->locationRepository->find($locationId);
         if ($location === null) {
-            throw new LocationNotFoundException($locationId);
+            throw new InvalidLocationReferenceException($locationId);
         }
 
         $product->setName($request->name);

@@ -322,6 +322,26 @@ class StockControllerTest extends WebTestCase
         static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
     }
 
+    public function testAddStockFailsWithInvalidLocation(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $product = $this->createProduct([
+            'name' => 'Test Product',
+            'category' => $category,
+            'defaultLocation' => $location
+        ]);
+
+        $response = $this->apiPost('/stocks/add', [
+            'product_id' => (string) $product->getId(),
+            'location_id' => '01936f00-0000-7000-8000-000000000000',
+            'quantity' => 5
+        ]);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        static::assertSame('INVALID_LOCATION_REFERENCE', $data['type']);
+    }
+
     // ========== Consume Stock Tests ==========
 
     public function testConsumeStockDeletesEntriesFifo(): void
