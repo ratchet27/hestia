@@ -1,7 +1,7 @@
 # Home ERP – Family Household Management System
 
 > **Scope note:** This document describes the system **as currently built**.
-> Designed-but-not-yet-implemented ideas live in §18 Roadmap, not in the
+> Designed-but-not-yet-implemented ideas live in §19 Roadmap, not in the
 > body above it. Keep it that way — the body is the source of truth for what exists.
 
 ## 1. Purpose
@@ -83,7 +83,7 @@ must see as a **single origin** so the session cookie is sent on API calls.
 ### Production
 - Single deployment behind one origin (the SPA build is served alongside the API).
 - A multi-subdomain split (`ui.*` / `api.*`) with a parent-domain cookie is a
-  possible future topology — see §18.
+  possible future topology — see §19.
 
 ---
 
@@ -100,7 +100,7 @@ must see as a **single origin** so the session cookie is sent on API calls.
 
 ### Sessions vs machines
 Browsers authenticate with the session cookie. There is currently **no
-machine/bot credential** (API keys are a roadmap item — §18); Telegram delivery
+machine/bot credential** (API keys are a roadmap item — §19); Telegram delivery
 is outbound only and scheduled tasks run inside the app via Symfony Scheduler /
 console commands, so neither calls the HTTP API.
 
@@ -147,7 +147,7 @@ The API is:
 - product
 
 Barcodes resolve a scanned code to a product. Price memory / store association
-are roadmap items (§18).
+are roadmap items (§19).
 
 ---
 
@@ -192,7 +192,7 @@ Product categories (Doctrine entity, seeded). Default set:
 
 Used for grouping and color-coding in the UI.
 
-> Stores / shopping-location modeling and price memory are **not built** — see §18.
+> Stores / shopping-location modeling and price memory are **not built** — see §19.
 
 ---
 
@@ -229,12 +229,32 @@ Features:
 - clear completed
 - notes
 
-> A "recipe missing items" source exists in the data model (`source = recipe`)
-> but is **not wired** — recipes are a roadmap item (§18).
+> A `recipe` shopping-list source is **active** — a recipe's "add missing"
+> action adds shortfall items as `source = recipe`. See §13 Recipes.
 
 ---
 
-## 13. Tasks & Chores
+## 13. Recipes
+
+Recipes are ingredient sets (product + required count, each with a
+`consume on cook` flag) for checking what you can make and restocking for what
+you can't.
+
+Features:
+- CRUD (name, ingredients)
+- **fulfillment check** — required count vs. current stock, per ingredient
+- **cook** — allowed only when every ingredient is in stock; consumes stock
+  (across locations) for ingredients flagged `consume on cook`, then reconciles
+  the shopping list. Blocks with the missing-product list if any ingredient is
+  short.
+- **add missing to shopping list** — adds each ingredient's shortfall as a
+  shopping-list item with `source = recipe` (skips products already listed)
+
+Backend-integrated end to end, with a dedicated Recipes page in the SPA.
+
+---
+
+## 14. Tasks & Chores
 
 ### Tasks
 - one-off
@@ -252,11 +272,11 @@ Features:
 - "mark done" advances the next-due date (timezone-aware)
 - editing a chore's schedule (type or value) recomputes next-due from now (clock restart, timezone-aware); editing only name/assignee leaves next-due unchanged
 
-> Per-chore reminders and product consumption on completion are **not built** — §18.
+> Per-chore reminders and product consumption on completion are **not built** — §19.
 
 ---
 
-## 14. Telegram Integration
+## 15. Telegram Integration
 
 Outbound only.
 
@@ -264,12 +284,12 @@ Implemented:
 - **daily** summary of expired / expiring items (Symfony Scheduler →
   Messenger → Telegram, sent at a configurable time in the app timezone)
 
-> Weekly chores summary and shopping-list summary are **not built** — §18.
+> Weekly chores summary and shopping-list summary are **not built** — §19.
 > No inbound commands.
 
 ---
 
-## 15. UI Structure
+## 16. UI Structure
 
 Single responsive SPA (desktop-first, usable on mobile web).
 
@@ -279,16 +299,14 @@ Pages:
 - Products (CRUD, categories)
 - Shopping list
 - Tasks & Chores
-- Settings (language switch is live; other controls are placeholders — §18)
-
-> A Recipes page exists as a **placeholder** running on mock data; it is not
-> backend-integrated — §18.
+- Recipes (CRUD, fulfillment check, cook, add missing to shopping list)
+- Settings (language switch is live; other controls are placeholders — §19)
 
 Telegram acts as a lightweight awareness layer on top of this UI.
 
 ---
 
-## 16. Localization
+## 17. Localization
 
 - Russian primary
 - English secondary
@@ -297,7 +315,7 @@ Telegram acts as a lightweight awareness layer on top of this UI.
 
 ---
 
-## 17. Testing & Quality
+## 18. Testing & Quality
 
 - Backend: PHPUnit (unit + functional controller tests, Zenstruck Foundry
   factories, `ResetDatabase`). Gate: `make lint` (Rector → Mago format/lint/analyze
@@ -307,14 +325,12 @@ Telegram acts as a lightweight awareness layer on top of this UI.
 
 ---
 
-## 18. Roadmap
+## 19. Roadmap
 
 Everything in this section is **designed or desired but not yet built**.
 
 ### v2 – Trustworthy
 - richer correction UI / undo of stock actions
-- **Recipes**: fulfillment check, shopping-list generation, stock consumption
-  (wires up the existing `recipe` shopping-list source and the placeholder UI)
 - chore reminders and optional product consumption on chore completion
 - better mobile UX
 
