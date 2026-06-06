@@ -37,8 +37,20 @@ jobs:
       - name: Setup Mago
         uses: nhedger/setup-mago@v2
 
+      # Mirrors `make lint` order: rector -> mago -> phpstan.
+      # CI runs each tool in check mode; locally `make lint` auto-fixes.
+      - name: Run Rector
+        run: vendor/bin/rector process --dry-run --no-progress-bar
+
       - name: Run Mago
         run: |
           mago format --check
           mago lint --reporting-format=github --minimum-report-level=warning
           mago analyze --reporting-format=github --minimum-report-level=warning
+
+      - name: Run PHPStan
+        run: |
+          vendor/bin/phpstan analyse \
+            --error-format=github \
+            --no-progress \
+            --memory-limit=512M
