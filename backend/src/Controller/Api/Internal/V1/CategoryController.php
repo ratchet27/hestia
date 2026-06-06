@@ -5,15 +5,10 @@ declare(strict_types = 1);
 namespace App\Controller\Api\Internal\V1;
 
 use App\Entity\Category;
-use App\Entity\Product;
-use App\Exception\Category\CategoryInUseException;
-use App\Exception\Category\CategoryNameTakenException;
-use App\Exception\Category\CategoryNotFoundException;
-use App\Repository\CategoryRepository;
 use App\Request\CreateCategoryRequest;
 use App\Request\UpdateCategoryRequest;
 use App\Response\Category\CategoryListItemResponse;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\CategoryService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,8 +23,7 @@ use Symfony\Component\Uid\Uuid;
 final class CategoryController extends AbstractController
 {
     public function __construct(
-        private readonly CategoryRepository $categoryRepository,
-        private readonly EntityManagerInterface $em
+        private readonly CategoryService $categoryService
     ) {
     }
 
@@ -49,8 +43,7 @@ final class CategoryController extends AbstractController
     ]))]
     public function list(): JsonResponse
     {
-        $categories = $this->categoryRepository->findAllOrderedByName();
-        $data = array_map($this->toResponse(...), $categories);
+        $data = array_map($this->toResponse(...), $this->categoryService->list());
 
         return $this->json([
             'data' => $data,
@@ -68,13 +61,7 @@ final class CategoryController extends AbstractController
     #[OA\Response(response: 422, description: 'Validation error')]
     public function create(#[MapRequestPayload] CreateCategoryRequest $request): JsonResponse
     {
-        $this->assertNameAvailable($request->name);
-
-        $category = new Category();
-        $category->setName($request->name);
-
-        $this->em->persist($category);
-        $this->em->flush();
+        $category = $this->categoryService->create($request);
 
         return $this->json(['data' => $this->toResponse($category)], Response::HTTP_CREATED);
     }
@@ -94,13 +81,7 @@ final class CategoryController extends AbstractController
     #[OA\Response(response: 409, description: 'Name already exists')]
     public function update(Uuid $uuid, #[MapRequestPayload] UpdateCategoryRequest $request): JsonResponse
     {
-        $category = $this->categoryRepository->find($uuid) ?? throw new CategoryNotFoundException($uuid);
-
-        if ($request->name !== $category->getName()) {
-            $this->assertNameAvailable($request->name);
-            $category->setName($request->name);
-            $this->em->flush();
-        }
+        $category = $this->categoryService->update($uuid, $request);
 
         return $this->json(['data' => $this->toResponse($category)]);
     }
@@ -117,33 +98,17 @@ final class CategoryController extends AbstractController
     #[OA\Response(response: 409, description: 'Category is in use')]
     public function delete(Uuid $uuid): JsonResponse
     {
-        $category = $this->categoryRepository->find($uuid) ?? throw new CategoryNotFoundException($uuid);
-
-        $usage = $this->usageCount($category);
-        if ($usage > 0) {
-            throw new CategoryInUseException($usage);
-        }
-
-        $this->em->remove($category);
-        $this->em->flush();
+        $this->categoryService->delete($uuid);
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 
     private function toResponse(Category $category): CategoryListItemResponse
     {
-        return new CategoryListItemResponse($category->getId(), $category->getName(), $this->usageCount($category));
-    }
-
-    private function usageCount(Category $category): int
-    {
-        return $this->em->getRepository(Product::class)->count(['category' => $category]);
-    }
-
-    private function assertNameAvailable(string $name): void
-    {
-        if ($this->categoryRepository->findOneBy(['name' => $name]) !== null) {
-            throw new CategoryNameTakenException($name);
-        }
+        return new CategoryListItemResponse(
+            $category->getId(),
+            $category->getName(),
+            $this->categoryService->usageCount($category)
+        );
     }
 }
