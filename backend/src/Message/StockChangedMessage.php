@@ -7,14 +7,13 @@ namespace App\Message;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Message dispatched when stock levels change for a product.
+ * Dispatched after a product's stock level changes, to reconcile the shopping list.
+ * Carries only the product id; the handler re-queries the live stock count.
  */
 final readonly class StockChangedMessage
 {
     public function __construct(
-        public Uuid $productId,
-        public int $previousQuantity,
-        public int $newQuantity
+        public Uuid $productId
     ) {
     }
 }

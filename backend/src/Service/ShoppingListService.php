@@ -10,6 +10,7 @@ use App\Enum\ShoppingListSource;
 use App\Exception\ShoppingList\ShoppingListItemNotFoundException;
 use App\Repository\ProductRepository;
 use App\Repository\ShoppingListItemRepository;
+use App\Repository\StockEntryRepository;
 use App\Request\AddShoppingItemRequest;
 use App\Request\UpdateShoppingItemRequest;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,37 +22,34 @@ readonly class ShoppingListService
     public function __construct(
         private EntityManagerInterface $entityManager,
         private ShoppingListItemRepository $shoppingListItemRepository,
-        private ProductRepository $productRepository
+        private ProductRepository $productRepository,
+        private StockEntryRepository $stockEntryRepository
     ) {
     }
 
     /**
-     * Handle stock change event - auto-add or auto-remove shopping list items.
+     * Reconcile the shopping list against a product's current stock level.
      *
-     * @param Uuid $productId      The product that changed
-     * @param int  $_previousQty   Previous total stock quantity (unused; kept for the event contract)
-     * @param int  $newQty         New total stock quantity
+     * Re-queries the live stock count (does not trust any caller-supplied quantity),
+     * so it is idempotent and order-independent.
      */
-    public function handleStockChange(Uuid $productId, int $_previousQty, int $newQty): void
+    public function handleStockChange(Uuid $productId): void
     {
         $product = $this->productRepository->find($productId);
         if ($product === null || !$product->isActive()) {
             return;
         }
 
-        $minStock = $product->getMinStock();
-        // When minStock=0, deficit will be 0, triggering cleanup of any stale auto items
-        // @infection-ignore-all: Equivalent mutant - max(-1, x) behaves same as max(0, x) when next check is `> 0`
-        $deficit = max(0, $minStock - $newQty);
+        $currentStock = $this->stockEntryRepository->countByProduct($productId);
+        // When minStock=0, deficit is 0, which removes any stale auto item below.
+        $deficit = max(0, $product->getMinStock() - $currentStock);
 
         if ($deficit > 0) {
-            // Stock is below minimum - add or update auto item
             $this->upsertAutoItem($product, $deficit);
 
             return;
         }
 
-        // Stock is at or above minimum - remove auto item if exists
         $this->removeAutoItem($product);
     }
 

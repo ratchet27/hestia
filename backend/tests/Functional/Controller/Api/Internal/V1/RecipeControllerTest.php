@@ -100,6 +100,31 @@ class RecipeControllerTest extends WebTestCase
         static::assertSame(0, $repo->countByProduct($sauce->getId()));
     }
 
+    public function testCookBelowMinStockAddsAutoItemToShoppingList(): void
+    {
+        $location = LocationFactory::createOne();
+        // minStock=3; cook consumes 2 of 3 → 1 remains → deficit 2
+        $milk = ProductFactory::createOne(['name' => 'Milk', 'minStock' => 3]);
+        StockEntryFactory::createMany(3, ['product' => $milk, 'location' => $location]);
+
+        $recipe = RecipeFactory::createOne();
+        RecipeIngredientFactory::createOne([
+            'recipe' => $recipe,
+            'product' => $milk,
+            'requiredCount' => 2,
+            'consumeOnCook' => true
+        ]);
+
+        $response = $this->apiPost('/recipes/' . $recipe->getId() . '/cook', []);
+        static::assertJsonResponse($response, Response::HTTP_OK);
+
+        // Reconciliation fires after the cook transaction commits: auto item must exist.
+        $data = static::assertJsonResponse($this->apiGet('/shopping-list'), Response::HTTP_OK);
+        static::assertListResponse($data, 1);
+        static::assertSame('auto', $data['data'][0]['source']);
+        static::assertSame(2, $data['data'][0]['amount']); // deficit: minStock 3 - remaining 1
+    }
+
     public function testCookBlockedWhenNotCookable(): void
     {
         $product = ProductFactory::createOne();

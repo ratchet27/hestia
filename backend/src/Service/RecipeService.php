@@ -11,6 +11,7 @@ use App\Enum\ShoppingListSource;
 use App\Exception\Product\ProductNotFoundException;
 use App\Exception\Recipe\RecipeNotCookableException;
 use App\Exception\Recipe\RecipeNotFoundException;
+use App\Message\StockChangedMessage;
 use App\Repository\ProductRepository;
 use App\Repository\RecipeRepository;
 use App\Repository\ShoppingListItemRepository;
@@ -19,13 +20,14 @@ use App\Request\SaveRecipeRequest;
 use App\Response\Recipe\RecipeIngredientResponse;
 use App\Response\Recipe\RecipeResponse;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 
 // @mago-ignore lint:kan-defect
 readonly class RecipeService
 {
     // Reads stock counts via StockEntryRepository (fulfillment) and consumes via StockEntryService (cook);
-    // both are genuinely needed.
+    // both are genuinely needed. MessageBusInterface dispatches reconciliation post-commit in cook.
     // @mago-ignore lint:excessive-parameter-list
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -33,7 +35,8 @@ readonly class RecipeService
         private ProductRepository $productRepository,
         private StockEntryRepository $stockEntryRepository,
         private ShoppingListItemRepository $shoppingListItemRepository,
-        private StockEntryService $stockEntryService
+        private StockEntryService $stockEntryService,
+        private MessageBusInterface $messageBus
     ) {
     }
 
@@ -95,18 +98,25 @@ readonly class RecipeService
             throw new RecipeNotCookableException($id, $missing);
         }
 
-        $this->entityManager->wrapInTransaction(function () use ($recipe): void {
+        /** @var array<string, Uuid> $consumedProductIds */
+        $consumedProductIds = [];
+        $this->entityManager->wrapInTransaction(function () use ($recipe, &$consumedProductIds): void {
             foreach ($recipe->getIngredients() as $ingredient) {
                 if (!$ingredient->isConsumeOnCook()) {
                     continue;
                 }
 
-                $this->stockEntryService->consumeAcrossLocations(
-                    $ingredient->getProduct()->getId(),
-                    $ingredient->getRequiredCount()
-                );
+                $productId = $ingredient->getProduct()->getId();
+                $this->stockEntryService->consumeAcrossLocations($productId, $ingredient->getRequiredCount());
+                $consumedProductIds[(string) $productId] = $productId; // dedupe by string key
             }
         });
+
+        // Reconcile shopping list AFTER the cook transaction has committed,
+        // so the handler sees durable stock counts (not an in-flight transaction).
+        foreach ($consumedProductIds as $productId) {
+            $this->messageBus->dispatch(new StockChangedMessage($productId));
+        }
 
         return $this->toResponse($recipe);
     }
