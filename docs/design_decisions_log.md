@@ -110,10 +110,17 @@ This makes future external APIs possible without refactors.
 
 ## 4. Hosting decisions
 
-- Two subdomains: ui + api
-- Shared cookie domain
-- CORS kept minimal
-- Reverse proxy in front
+- Single-origin deployment: the SPA build is served alongside the Symfony API
+  behind one origin (FrankenPHP/Caddy), so the `SameSite=Lax` session cookie is
+  sent on API calls — see spec §4
+- CORS kept minimal (restricted to localhost in dev) — see spec §4
+- Single reverse proxy (FrankenPHP/Caddy) in front: serves static SPA assets and
+  routes dynamic requests to Symfony
+- Multi-subdomain split (`ui.*` / `api.*`) with a parent-domain cookie is deferred
+  to the roadmap — see spec §19
+
+_History: originally planned as two subdomains (`ui` + `api`) with a shared cookie
+domain; superseded by the single-origin model above._
 
 ---
 
