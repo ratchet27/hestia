@@ -14,9 +14,9 @@ final class LocationNotFoundException extends ApiException
     public function __construct(Uuid $id)
     {
         parent::__construct(new ApiProblem(
-            title: 'Location not found',
-            type: 'LOCATION_NOT_FOUND',
-            code: Response::HTTP_BAD_REQUEST,
+            title: 'Invalid location reference',
+            type: 'INVALID_LOCATION_REFERENCE',
+            code: Response::HTTP_UNPROCESSABLE_ENTITY,
             extraData: ['id' => (string) $id]
         ));
     }
