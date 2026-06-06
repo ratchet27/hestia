@@ -117,7 +117,7 @@ readonly class ShoppingListService
         if ($product !== null) {
             $existing = $this->shoppingListItemRepository->findByProduct($product);
             if ($existing !== null) {
-                $existing->reviseAmount(max($existing->getAmount(), $request->amount))->claimManual();
+                $existing->setAmount(max($existing->getAmount(), $request->amount))->claimManual();
                 if ($request->note !== null) {
                     $existing->setNote($request->note);
                 }
