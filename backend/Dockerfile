@@ -63,6 +63,7 @@ RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 RUN set -eux; \
 	install-php-extensions \
 		xdebug \
+		pcov \
 	;
 
 COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
