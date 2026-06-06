@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace App\Service;
 
 use App\Entity\StockEntry;
-use App\Exception\Product\LocationNotFoundException;
+use App\Exception\Product\InvalidLocationReferenceException;
 use App\Exception\Product\ProductNotActiveException;
 use App\Exception\Product\ProductNotFoundException;
 use App\Exception\Stock\InsufficientStockException;
@@ -65,7 +65,7 @@ class StockEntryService
 
         $location = $this->locationRepository->find($locationId);
         if ($location === null) {
-            throw new LocationNotFoundException($locationId);
+            throw new InvalidLocationReferenceException($locationId);
         }
 
         // Calculate best_before
@@ -110,7 +110,7 @@ class StockEntryService
 
         $location = $this->locationRepository->find($locationId);
         if ($location === null) {
-            throw new LocationNotFoundException($locationId);
+            throw new InvalidLocationReferenceException($locationId);
         }
 
         $available = $this->stockEntryRepository->countByProductAndLocation($productId, $locationId);
@@ -181,7 +181,7 @@ class StockEntryService
             $locationId = Uuid::fromString($request->location_id);
             $location = $this->locationRepository->find($locationId);
             if ($location === null) {
-                throw new LocationNotFoundException($locationId);
+                throw new InvalidLocationReferenceException($locationId);
             }
 
             $entry->setLocation($location);
