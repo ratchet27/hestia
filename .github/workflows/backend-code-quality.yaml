@@ -34,8 +34,18 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-progress
 
+      # Pinned: mago is not a composer dependency, so the action cannot detect a
+      # version from composer.lock and installs the latest release instead. That
+      # made CI drift ahead of the locally installed mago and turned an analyzer
+      # regression into a red build on an unchanged tree — 1.46.0 reads
+      # Symfony\Component\ObjectMapper\TransformCallableInterface as having one
+      # template parameter, though it declares two, so the correct @implements
+      # tags in src/ObjectMapper/Transform/ were reported as errors. Bump this
+      # deliberately, together with the host install.
       - name: Setup Mago
         uses: nhedger/setup-mago@v2
+        with:
+          version: "1.30.0"
 
       # Mirrors `make lint` order: rector -> mago -> phpstan.
       # CI runs each tool in check mode; locally `make lint` auto-fixes.
