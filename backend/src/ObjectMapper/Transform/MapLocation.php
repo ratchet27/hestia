@@ -14,6 +14,7 @@ use Symfony\Component\ObjectMapper\TransformCallableInterface;
  *
  * @implements TransformCallableInterface<object, LocationResponse>
  */
+// @mago-expect analysis:excess-template-parameter
 class MapLocation implements TransformCallableInterface
 {
     public function __construct(
@@ -21,6 +22,7 @@ class MapLocation implements TransformCallableInterface
     ) {
     }
 
+    // @mago-expect analysis:docblock-type-mismatch
     public function __invoke(mixed $value, object $source, ?object $target): mixed
     {
         if (!is_object($value)) {
