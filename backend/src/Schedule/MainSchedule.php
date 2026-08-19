@@ -16,7 +16,7 @@ use Symfony\Component\Scheduler\ScheduleProviderInterface;
 final readonly class MainSchedule implements ScheduleProviderInterface
 {
     public function __construct(
-        #[Autowire('%env(TELEGRAM_DAILY_SUMMARY_TIME)%')]
+        #[Autowire(env: 'TELEGRAM_DAILY_SUMMARY_TIME')]
         private string $dailySummaryTime,
         private AppTimezone $appTimezone
     ) {

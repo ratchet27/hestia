@@ -71,7 +71,7 @@ final class CsrfDoubleSubmitSubscriber implements EventSubscriberInterface
                 Cookie::create(self::COOKIE_NAME, $token)
                     ->withSecure(true)
                     ->withHttpOnly(false)
-                    ->withSameSite(Cookie::SAMESITE_LAX)
+                    ->withSameSite(\Symfony\Component\HttpFoundation\Cookie::SAMESITE_LAX)
                     ->withPath('/')
             );
     }

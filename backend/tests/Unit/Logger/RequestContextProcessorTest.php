@@ -15,8 +15,7 @@ final class RequestContextProcessorTest extends TestCase
 {
     public function testAddsCurrentRequestContextToExtra(): void
     {
-        $stack = new RequestStack();
-        $stack->push(Request::create('/api/internal/v1/tasks', Request::METHOD_POST));
+        $stack = new RequestStack([Request::create('/api/internal/v1/tasks', Request::METHOD_POST)]);
 
         $record = ( new RequestContextProcessor($stack) )($this->record());
 
@@ -27,8 +26,7 @@ final class RequestContextProcessorTest extends TestCase
 
     public function testPreservesExistingExtra(): void
     {
-        $stack = new RequestStack();
-        $stack->push(Request::create('/api/internal/v1/tasks', Request::METHOD_GET));
+        $stack = new RequestStack([Request::create('/api/internal/v1/tasks', Request::METHOD_GET)]);
 
         $record = ( new RequestContextProcessor($stack) )($this->record(['uid' => 'abc123']));
 
