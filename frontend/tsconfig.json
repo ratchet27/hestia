@@ -26,10 +26,9 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
 
-    // Path aliases
-    "baseUrl": ".",
+    // Path aliases (relative to this tsconfig; baseUrl is deprecated in TS 6+)
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   }
 }
