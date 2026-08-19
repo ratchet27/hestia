@@ -18,9 +18,9 @@ use Symfony\Component\Routing\Attribute\Route;
 final class TelegramController extends AbstractController
 {
     public function __construct(
-        #[Autowire('%env(TELEGRAM_DSN)%')]
+        #[Autowire(env: 'TELEGRAM_DSN')]
         private readonly string $telegramDsn,
-        #[Autowire('%env(TELEGRAM_DAILY_SUMMARY_TIME)%')]
+        #[Autowire(env: 'TELEGRAM_DAILY_SUMMARY_TIME')]
         private readonly string $dailySummaryTime,
         // Lazy: the Telegram chatter transport is built from TELEGRAM_DSN only when a
         // message is actually sent. Without this, merely constructing the controller
