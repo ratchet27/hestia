@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
-use App\Entity\Location;
 use App\Request\CreateLocationRequest;
 use App\Request\UpdateLocationRequest;
 use App\Response\Location\LocationListItemResponse;
@@ -43,7 +42,7 @@ final class LocationController extends AbstractController
     ]))]
     public function list(): JsonResponse
     {
-        $data = array_map($this->toResponse(...), $this->locationService->list());
+        $data = $this->locationService->listItems();
 
         return $this->json([
             'data' => $data,
@@ -63,7 +62,7 @@ final class LocationController extends AbstractController
     {
         $location = $this->locationService->create($request);
 
-        return $this->json(['data' => $this->toResponse($location)], Response::HTTP_CREATED);
+        return $this->json(['data' => $this->locationService->toListItem($location)], Response::HTTP_CREATED);
     }
 
     #[Route(
@@ -83,7 +82,7 @@ final class LocationController extends AbstractController
     {
         $location = $this->locationService->update($uuid, $request);
 
-        return $this->json(['data' => $this->toResponse($location)]);
+        return $this->json(['data' => $this->locationService->toListItem($location)]);
     }
 
     #[Route(
@@ -101,14 +100,5 @@ final class LocationController extends AbstractController
         $this->locationService->delete($uuid);
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
-    }
-
-    private function toResponse(Location $location): LocationListItemResponse
-    {
-        return new LocationListItemResponse(
-            $location->getId(),
-            $location->getName(),
-            $this->locationService->usageCount($location)
-        );
     }
 }

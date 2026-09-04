@@ -43,12 +43,15 @@ readonly class RecipeService
     /** @return RecipeResponse[] */
     public function list(): array
     {
-        return array_map($this->toResponse(...), $this->recipeRepository->findAllOrdered());
+        $recipes = $this->recipeRepository->findAllOrdered();
+        $stockByProduct = $this->stockForRecipes($recipes);
+
+        return array_map(fn(Recipe $recipe): RecipeResponse => $this->toResponse($recipe, $stockByProduct), $recipes);
     }
 
     public function getResponse(Uuid $id): RecipeResponse
     {
-        return $this->toResponse($this->getRecipe($id));
+        return $this->respond($this->getRecipe($id));
     }
 
     public function create(SaveRecipeRequest $request): RecipeResponse
@@ -58,7 +61,7 @@ readonly class RecipeService
         $this->entityManager->persist($recipe);
         $this->entityManager->flush();
 
-        return $this->toResponse($recipe);
+        return $this->respond($recipe);
     }
 
     public function update(Uuid $id, SaveRecipeRequest $request): RecipeResponse
@@ -72,7 +75,7 @@ readonly class RecipeService
             $this->entityManager->flush();
         });
 
-        return $this->toResponse($recipe);
+        return $this->respond($recipe);
     }
 
     public function delete(Uuid $id): void
@@ -118,7 +121,7 @@ readonly class RecipeService
             $this->messageBus->dispatch(new StockChangedMessage($productId));
         }
 
-        return $this->toResponse($recipe);
+        return $this->respond($recipe);
     }
 
     /** @return array{added: int} */
@@ -183,15 +186,37 @@ readonly class RecipeService
         }
     }
 
-    private function toResponse(Recipe $recipe): RecipeResponse
+    private function respond(Recipe $recipe): RecipeResponse
+    {
+        return $this->toResponse($recipe, $this->stockForRecipes([$recipe]));
+    }
+
+    /**
+     * One grouped stock count for every product used by the given recipes.
+     *
+     * @param Recipe[] $recipes
+     *
+     * @return array<string, int> keyed by RFC 4122 product id
+     */
+    private function stockForRecipes(array $recipes): array
+    {
+        $productIds = array_merge(...array_map(static fn(Recipe $recipe): array => array_map(
+            static fn(RecipeIngredient $ingredient): Uuid => $ingredient->getProduct()->getId(),
+            $recipe->getIngredients()->toArray()
+        ), $recipes));
+
+        return $this->stockEntryRepository->countByProducts($productIds);
+    }
+
+    /** @param array<string, int> $stockByProduct entry counts keyed by RFC 4122 product id, every ingredient present */
+    private function toResponse(Recipe $recipe, array $stockByProduct): RecipeResponse
     {
         $ingredients = [];
         $cookable = true;
 
         foreach ($recipe->getIngredients() as $ingredient) {
             $product = $ingredient->getProduct();
-            // TODO(@ratchet27): if recipe lists grow, replace per-ingredient COUNT with a single bulk stock-count query.
-            $inStock = $this->stockEntryRepository->countByProduct($product->getId());
+            $inStock = $stockByProduct[$product->getId()->toRfc4122()];
             $hasEnough = $inStock >= $ingredient->getRequiredCount();
             if (!$hasEnough) {
                 $cookable = false;

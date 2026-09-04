@@ -133,9 +133,8 @@ Date formatting: `DateTimeImmutable` fields serialize as ISO-8601/ATOM via
 `DateTimeImmutableNormalizer`; date-only fields (e.g. `best_before`) are formatted
 `Y-m-d` in the factory/service. Keep that distinction.
 
-Opportunistic migration (not yet converted): `RecipeService::toResponse`,
-`CategoryListItemResponse` / `LocationListItemResponse` controller `toResponse()`
-methods.
+Opportunistic migration (not yet converted): `RecipeService::toResponse` (it is a
+private method building the DTO plus computed stock fields; case 3 in spirit).
 
 ## Commands
 

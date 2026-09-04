@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\StockEntry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
@@ -101,7 +102,7 @@ class StockEntryRepository extends ServiceEntityRepository
     {
         // @mago-ignore analysis:mixed-return-statement
         return $this
-            ->createQueryBuilder('e')
+            ->createQueryBuilderWithRelations()
             ->where('e.location = :locationId')
             ->setParameter('locationId', $locationId)
             ->orderBy('e.bestBefore', 'ASC')
@@ -119,7 +120,7 @@ class StockEntryRepository extends ServiceEntityRepository
     {
         // @mago-ignore analysis:mixed-return-statement
         return $this
-            ->createQueryBuilder('e')
+            ->createQueryBuilderWithRelations()
             ->where('e.product = :productId')
             ->setParameter('productId', $productId)
             ->orderBy('e.bestBefore', 'ASC')
@@ -137,13 +138,124 @@ class StockEntryRepository extends ServiceEntityRepository
     {
         // @mago-ignore analysis:mixed-return-statement
         return $this
-            ->createQueryBuilder('e')
+            ->createQueryBuilderWithRelations()
             ->where('e.bestBefore IS NOT NULL')
             ->andWhere('e.bestBefore <= :cutoffDate')
             ->setParameter('cutoffDate', $cutoff, Types::DATE_IMMUTABLE)
             ->orderBy('e.bestBefore', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * All entries with product and location loaded, in the same order as the
+     * filtered variants.
+     *
+     * @return StockEntry[]
+     */
+    public function findAllWithRelations(): array
+    {
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
+            ->createQueryBuilderWithRelations()
+            ->orderBy('e.bestBefore', 'ASC')
+            ->addOrderBy('e.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Entry count per product for a set of products, in one query.
+     *
+     * @param Uuid[] $productIds
+     *
+     * @return array<string, int> keyed by RFC 4122 product id; every requested id present (0 when no stock)
+     */
+    public function countByProducts(array $productIds): array
+    {
+        if ($productIds === []) {
+            return [];
+        }
+
+        $keys = array_map(static fn(Uuid $id): string => $id->toRfc4122(), $productIds);
+        $counts = array_fill_keys($keys, 0);
+
+        /** @var list<array{product_id: string, quantity: string|int}> $rows */
+        $rows = $this
+            ->createQueryBuilder('e')
+            ->select('IDENTITY(e.product) as product_id', 'COUNT(e.id) as quantity')
+            ->where('e.product IN (:ids)')
+            ->setParameter('ids', $keys, ArrayParameterType::STRING)
+            ->groupBy('e.product')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($rows as $row) {
+            $counts[$row['product_id']] = (int) $row['quantity'];
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Entry count per location across all products, in one query.
+     *
+     * @return array<string, int> keyed by RFC 4122 location id
+     */
+    public function countByLocationGrouped(): array
+    {
+        /** @var list<array{location_id: string, quantity: string|int}> $rows */
+        $rows = $this
+            ->createQueryBuilder('e')
+            ->select('IDENTITY(e.location) as location_id', 'COUNT(e.id) as quantity')
+            ->groupBy('e.location')
+            ->getQuery()
+            ->getResult();
+
+        return array_column(
+            array_map(static fn(array $row): array => [
+                'id' => $row['location_id'],
+                'n' => (int) $row['quantity']
+            ], $rows),
+            'n',
+            'id'
+        );
+    }
+
+    /**
+     * Location breakdown for every product in one query (the per-product
+     * variant is getLocationBreakdown).
+     *
+     * @return array<array{product_id: string, location_id: string, location_name: string, quantity: int}>
+     */
+    public function getLocationBreakdownForAll(): array
+    {
+        // @mago-ignore analysis:mixed-return-statement
+        return $this
+            ->createQueryBuilder('e')
+            ->select(
+                'IDENTITY(e.product) as product_id',
+                'IDENTITY(e.location) as location_id',
+                'l.name as location_name',
+                'COUNT(e.id) as quantity'
+            )
+            ->join('e.location', 'l')
+            ->groupBy('e.product, e.location, l.name')
+            ->orderBy('l.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    private function createQueryBuilderWithRelations(): \Doctrine\ORM\QueryBuilder
+    {
+        // Response DTOs read product name/unit and location name for every row;
+        // fetch-join them so a list is one query instead of 1 + 2N lazy loads.
+        return $this
+            ->createQueryBuilder('e')
+            ->join('e.product', 'p')
+            ->addSelect('p')
+            ->join('e.location', 'l')
+            ->addSelect('l');
     }
 
     /**

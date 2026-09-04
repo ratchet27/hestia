@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
-use App\Entity\Category;
 use App\Request\CreateCategoryRequest;
 use App\Request\UpdateCategoryRequest;
 use App\Response\Category\CategoryListItemResponse;
@@ -43,7 +42,7 @@ final class CategoryController extends AbstractController
     ]))]
     public function list(): JsonResponse
     {
-        $data = array_map($this->toResponse(...), $this->categoryService->list());
+        $data = $this->categoryService->listItems();
 
         return $this->json([
             'data' => $data,
@@ -63,7 +62,7 @@ final class CategoryController extends AbstractController
     {
         $category = $this->categoryService->create($request);
 
-        return $this->json(['data' => $this->toResponse($category)], Response::HTTP_CREATED);
+        return $this->json(['data' => $this->categoryService->toListItem($category)], Response::HTTP_CREATED);
     }
 
     #[Route(
@@ -83,7 +82,7 @@ final class CategoryController extends AbstractController
     {
         $category = $this->categoryService->update($uuid, $request);
 
-        return $this->json(['data' => $this->toResponse($category)]);
+        return $this->json(['data' => $this->categoryService->toListItem($category)]);
     }
 
     #[Route(
@@ -101,14 +100,5 @@ final class CategoryController extends AbstractController
         $this->categoryService->delete($uuid);
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
-    }
-
-    private function toResponse(Category $category): CategoryListItemResponse
-    {
-        return new CategoryListItemResponse(
-            $category->getId(),
-            $category->getName(),
-            $this->categoryService->usageCount($category)
-        );
     }
 }

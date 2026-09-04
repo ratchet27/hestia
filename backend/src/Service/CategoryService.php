@@ -12,6 +12,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Request\CreateCategoryRequest;
 use App\Request\UpdateCategoryRequest;
+use App\Response\Category\CategoryListItemResponse;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -29,6 +30,30 @@ readonly class CategoryService
     public function list(): array
     {
         return $this->categoryRepository->findAllOrderedByName();
+    }
+
+    /**
+     * List items with usage counts: two queries total, not one COUNT per row.
+     *
+     * @return CategoryListItemResponse[]
+     */
+    public function listItems(): array
+    {
+        $usage = $this->productRepository->countByCategoryGrouped();
+
+        return array_map(
+            static fn(Category $category): CategoryListItemResponse => new CategoryListItemResponse(
+                $category->getId(),
+                $category->getName(),
+                $usage[$category->getId()->toRfc4122()] ?? 0
+            ),
+            $this->list()
+        );
+    }
+
+    public function toListItem(Category $category): CategoryListItemResponse
+    {
+        return new CategoryListItemResponse($category->getId(), $category->getName(), $this->usageCount($category));
     }
 
     public function create(CreateCategoryRequest $request): Category

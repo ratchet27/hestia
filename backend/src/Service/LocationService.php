@@ -13,6 +13,7 @@ use App\Repository\ProductRepository;
 use App\Repository\StockEntryRepository;
 use App\Request\CreateLocationRequest;
 use App\Request\UpdateLocationRequest;
+use App\Response\Location\LocationListItemResponse;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -31,6 +32,32 @@ readonly class LocationService
     public function list(): array
     {
         return $this->locationRepository->findAllOrderedByName();
+    }
+
+    /**
+     * List items with usage counts: three queries total, not two COUNTs per row.
+     *
+     * @return LocationListItemResponse[]
+     */
+    public function listItems(): array
+    {
+        $products = $this->productRepository->countByDefaultLocationGrouped();
+        $stock = $this->stockEntryRepository->countByLocationGrouped();
+
+        return array_map(static function (Location $location) use ($products, $stock): LocationListItemResponse {
+            $key = $location->getId()->toRfc4122();
+
+            return new LocationListItemResponse(
+                $location->getId(),
+                $location->getName(),
+                ( $products[$key] ?? 0 ) + ( $stock[$key] ?? 0 )
+            );
+        }, $this->list());
+    }
+
+    public function toListItem(Location $location): LocationListItemResponse
+    {
+        return new LocationListItemResponse($location->getId(), $location->getName(), $this->usageCount($location));
     }
 
     public function create(CreateLocationRequest $request): Location
