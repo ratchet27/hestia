@@ -63,10 +63,9 @@ final readonly class ApiExceptionListener
         if ($exception instanceof HttpExceptionInterface) {
             $previous = $exception->getPrevious();
 
-            // #[MapRequestPayload] wraps DTO validation failures in a 422 HttpException;
-            // unwrap so they surface as VALIDATION_ERROR. Note: createValidationProblem
-            // hardcodes 422, which matches MapRequestPayload but would override the 400
-            // that #[MapQueryString] uses by default — revisit if a query-string DTO is added.
+            // #[MapRequestPayload] (422) and #[MapQueryString] (404 by default) both wrap
+            // DTO validation failures in an HttpException. Unwrap and normalise every
+            // DTO validation failure to 422 VALIDATION_ERROR regardless of the mapper.
             if ($previous instanceof ValidationFailedException) {
                 return $this->createValidationProblem($previous);
             }

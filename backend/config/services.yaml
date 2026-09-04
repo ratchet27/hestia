@@ -27,14 +27,6 @@ services:
         arguments:
             $objectMapper: '@Symfony\Component\ObjectMapper\ObjectMapperInterface'
 
-    App\ObjectMapper\Transform\MapProduct:
-        arguments:
-            $objectMapper: '@Symfony\Component\ObjectMapper\ObjectMapperInterface'
-
-    App\ObjectMapper\Transform\MapLocation:
-        arguments:
-            $objectMapper: '@Symfony\Component\ObjectMapper\ObjectMapperInterface'
-
     App\Service\Time\AppTimezone:
         arguments:
             $fixedOffset: '%app.timezone%'

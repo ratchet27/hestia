@@ -66,7 +66,8 @@ final class AuthController extends AbstractController
     #[OA\Response(response: 204, description: 'CSRF cookie set')]
     public function csrf(): Response
     {
-        // The CsrfDoubleSubmitSubscriber (added in a later task) sets the cookie on the response; this just provides a cheap endpoint to hit.
+        // CsrfDoubleSubmitSubscriber sets the XSRF-TOKEN cookie on every API response
+        // that lacks one; this endpoint only exists as a cheap first request to trigger it.
         return new Response(null, Response::HTTP_NO_CONTENT);
     }
 }
