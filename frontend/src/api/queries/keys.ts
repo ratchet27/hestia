@@ -46,21 +46,18 @@ export const queryKeys = {
   tasks: {
     all: ["tasks"] as const,
     list: (status: string) => ["tasks", status] as const,
-    detail: (id: string) => ["tasks", id] as const,
   },
 
   // Chores
   chores: {
     all: ["chores"] as const,
     list: () => ["chores", "list"] as const,
-    detail: (id: string) => ["chores", id] as const,
   },
 
   // Recipes
   recipes: {
     all: ["recipes"] as const,
     list: () => [...queryKeys.recipes.all, "list"] as const,
-    detail: (id: string) => [...queryKeys.recipes.all, "detail", id] as const,
   },
 
   // Telegram

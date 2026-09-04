@@ -3,8 +3,6 @@ import { NavLink } from "react-router-dom";
 import { Icons } from "./Icons";
 import { UserProfile } from "./UserProfile";
 
-// TODO: Move date/time display (and possibly weather) to top-right corner of main content area
-
 const navItems = [
   { path: "/", labelKey: "nav.home", icon: Icons.Dashboard },
   { path: "/stock", labelKey: "nav.stock", icon: Icons.Stock },
