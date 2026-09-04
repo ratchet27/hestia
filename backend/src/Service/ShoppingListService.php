@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Entity\Product;
 use App\Entity\ShoppingListItem;
 use App\Enum\ShoppingListSource;
+use App\Exception\Product\ProductNotFoundException;
 use App\Exception\ShoppingList\ShoppingListItemNotFoundException;
 use App\Repository\ProductRepository;
 use App\Repository\ShoppingListItemRepository;
@@ -36,7 +37,15 @@ readonly class ShoppingListService
     public function handleStockChange(Uuid $productId): void
     {
         $product = $this->productRepository->find($productId);
-        if ($product === null || !$product->isActive()) {
+        if ($product === null) {
+            return;
+        }
+
+        // An archived product has no deficit: nothing should nag the household to
+        // buy it, so any AUTO item it left behind is removed. MANUAL items are kept.
+        if (!$product->isActive()) {
+            $this->removeAutoItem($product);
+
             return;
         }
 
@@ -105,12 +114,12 @@ readonly class ShoppingListService
      * Add a manual item to the shopping list.
      * If product already exists, converts to manual and uses max(existing, new) for amount.
      */
-    // @mago-ignore lint:halstead
     public function addItem(AddShoppingItemRequest $request): ShoppingListItem
     {
         $product = null;
         if ($request->product_id !== null) {
-            $product = $this->productRepository->find(Uuid::fromString($request->product_id));
+            $productId = Uuid::fromString($request->product_id);
+            $product = $this->productRepository->find($productId) ?? throw new ProductNotFoundException($productId);
         }
 
         // Check for existing item with same product

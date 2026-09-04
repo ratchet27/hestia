@@ -17,6 +17,7 @@ use App\Repository\BarcodeRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\LocationRepository;
 use App\Repository\ProductRepository;
+use App\Repository\StockEntryRepository;
 use App\Request\CreateProductRequest;
 use App\Request\UpdateProductRequest;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,6 +37,7 @@ class ProductService
         private readonly CategoryRepository $categoryRepository,
         private readonly LocationRepository $locationRepository,
         private readonly BarcodeRepository $barcodeRepository,
+        private readonly StockEntryRepository $stockEntryRepository,
         private readonly MessageBusInterface $messageBus,
         private readonly ValidatorInterface $validator
     ) {
@@ -105,6 +107,7 @@ class ProductService
     {
         $product = $this->getProduct($id);
         $oldMinStock = $product->getMinStock();
+        $wasActive = $product->isActive();
 
         $categoryId = Uuid::fromString($request->categoryId);
         $category = $this->categoryRepository->find($categoryId);
@@ -141,8 +144,9 @@ class ProductService
 
         $this->em->flush();
 
-        // Reconcile shopping list if minStock changed (same mechanism as stock changes)
-        if ($request->minStock !== $oldMinStock) {
+        // Reconcile the shopping list when the deficit inputs change: minStock, or
+        // active (an archived product must not keep an AUTO item on the list).
+        if ($request->minStock !== $oldMinStock || $request->active !== $wasActive) {
             $this->messageBus->dispatch(new StockChangedMessage($id));
         }
 
@@ -155,6 +159,9 @@ class ProductService
         $product->deactivate();
 
         $this->em->flush();
+
+        // Archived products reconcile to "no deficit", which drops their AUTO item.
+        $this->messageBus->dispatch(new StockChangedMessage($id));
     }
 
     public function hardDelete(Uuid $id): void
@@ -166,6 +173,12 @@ class ProductService
             throw new ProductInUseException($id, 'a recipe');
         }
 
+        // stock_entries.product_id has no ON DELETE clause; without this guard the
+        // FK violation surfaces as an opaque 500 instead of a 409.
+        if ($this->stockEntryRepository->countByProduct($id) > 0) {
+            throw new ProductInUseException($id, 'stock entries');
+        }
+
         $this->em->remove($product);
         $this->em->flush();
     }
@@ -173,6 +186,10 @@ class ProductService
     /** @param string[] $newBarcodes */
     private function syncBarcodes(Product $product, array $newBarcodes): void
     {
+        // The DTO rejects duplicates with Assert\Unique; this keeps the method safe
+        // for any future caller that bypasses request validation.
+        $newBarcodes = array_values(array_unique($newBarcodes));
+
         // Get existing barcode strings
         $existingBarcodes = $product->getBarcodes()->toArray();
         $existingCodes = array_map(static fn(Barcode $b): string => $b->getBarcode(), $existingBarcodes);

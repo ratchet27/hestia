@@ -14,6 +14,10 @@ use App\Factory\LocationFactory;
 use App\Factory\ProductFactory;
 use App\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
+use App\Entity\ShoppingListItem;
+use App\Enum\ShoppingListSource;
+use App\Factory\ShoppingListItemFactory;
+use App\Factory\StockEntryFactory;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
@@ -811,5 +815,78 @@ class ProductControllerTest extends WebTestCase
         // Verify database: kept barcode exists, removed barcode is deleted
         $this->assertDatabaseHas(Barcode::class, ['barcode' => '1111111111111']);
         $this->assertDatabaseMissing(Barcode::class, ['barcode' => '2222222222222']);
+    }
+
+    // ========== Audit follow-ups (B-A1, B-A2, B-A4, SEC-4) ==========
+
+    public function testHardDeleteWithStockEntriesReturnsConflict(): void
+    {
+        $product = $this->createProduct();
+        StockEntryFactory::createOne(['product' => $product, 'location' => $this->createLocation()]);
+
+        $response = $this->apiDelete('/products/' . $product->getId(), ['hard' => '1']);
+        $data = static::assertErrorResponse($response, Response::HTTP_CONFLICT);
+
+        static::assertSame('PRODUCT_IN_USE', $data['type']);
+        static::assertSame('stock entries', $data['used_by']);
+        $this->assertDatabaseHas(Product::class, ['id' => $product->getId()]);
+    }
+
+    public function testListRejectsMalformedCategoryId(): void
+    {
+        $response = $this->apiGet('/products', ['category_id' => 'not-a-uuid']);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        static::assertSame('VALIDATION_ERROR', $data['type']);
+        static::assertSame('categoryId', $data['errors'][0]['property']);
+    }
+
+    public function testCreateProductRejectsDuplicateBarcodes(): void
+    {
+        $category = $this->createCategory();
+        $location = $this->createLocation();
+
+        $response = $this->apiPost('/products', [
+            'name' => 'Milk',
+            'category_id' => (string) $category->getId(),
+            'default_location_id' => (string) $location->getId(),
+            'barcodes' => ['4600000000001', '4600000000001']
+        ]);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        static::assertSame('VALIDATION_ERROR', $data['type']);
+        static::assertSame('barcodes', $data['errors'][0]['property']);
+    }
+
+    public function testSoftDeleteRemovesAutoShoppingItem(): void
+    {
+        $product = $this->createProduct(['minStock' => 3, 'active' => true]);
+        ShoppingListItemFactory::createOne([
+            'product' => $product,
+            'amount' => 3,
+            'source' => ShoppingListSource::AUTO
+        ]);
+
+        $response = $this->apiDelete('/products/' . $product->getId());
+        static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode(), (string) $response->getContent());
+
+        $this->assertDatabaseMissing(ShoppingListItem::class, ['product' => $product->getId()]);
+    }
+
+    public function testDeactivatingViaUpdateRemovesAutoShoppingItem(): void
+    {
+        $product = $this->createProduct(['minStock' => 3, 'active' => true]);
+        ShoppingListItemFactory::createOne([
+            'product' => $product,
+            'amount' => 3,
+            'source' => ShoppingListSource::AUTO
+        ]);
+
+        $response = $this->apiPut('/products/' . $product->getId(), $this->buildUpdatePayload($product, [
+            'active' => false
+        ]));
+        static::assertJsonResponse($response, Response::HTTP_OK);
+
+        $this->assertDatabaseMissing(ShoppingListItem::class, ['product' => $product->getId()]);
     }
 }

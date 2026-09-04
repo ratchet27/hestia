@@ -17,6 +17,7 @@ use App\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Uid\Uuid;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -689,5 +690,30 @@ class ShoppingListControllerTest extends WebTestCase
             'note' => 'Test note',
             'source' => 'manual'
         ]);
+    }
+
+    public function testCreateWithoutProductOrNameIsRejected(): void
+    {
+        $response = $this->apiPost('/shopping-list', ['amount' => 1]);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        static::assertSame('VALIDATION_ERROR', $data['type']);
+        static::assertSame('custom_name', $data['errors'][0]['property']);
+        $this->assertDatabaseMissing(ShoppingListItem::class, ['amount' => 1]);
+    }
+
+    public function testCreateWithBlankCustomNameIsRejected(): void
+    {
+        $response = $this->apiPost('/shopping-list', ['custom_name' => '   ']);
+        static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function testCreateWithUnknownProductReturns404(): void
+    {
+        $response = $this->apiPost('/shopping-list', ['product_id' => (string) Uuid::v7(), 'amount' => 2]);
+        $data = static::assertErrorResponse($response, Response::HTTP_NOT_FOUND);
+
+        static::assertSame('PRODUCT_NOT_FOUND', $data['type']);
+        $this->assertDatabaseMissing(ShoppingListItem::class, ['amount' => 2]);
     }
 }

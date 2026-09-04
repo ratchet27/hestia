@@ -319,7 +319,39 @@ class ShoppingListAutoAddTest extends WebTestCase
         static::assertListResponse($data, 0);
     }
 
-    public function testNoActionForInactiveProduct(): void
+    public function testInactiveProductRemovesAutoItemButKeepsManualItem(): void
+    {
+        $category = $this->createCategory(['name' => 'Test Category']);
+        $location = $this->createLocation(['name' => 'Kitchen']);
+        $archived = $this->createProduct([
+            'name' => 'Archived Product',
+            'category' => $category,
+            'defaultLocation' => $location,
+            'minStock' => 5,
+            'active' => false
+        ]);
+        $wanted = $this->createProduct([
+            'name' => 'Still Wanted',
+            'category' => $category,
+            'defaultLocation' => $location,
+            'minStock' => 5,
+            'active' => false
+        ]);
+        $this->createItem(['product' => $archived, 'amount' => 5, 'source' => ShoppingListSource::AUTO]);
+        $this->createItem(['product' => $wanted, 'amount' => 2, 'source' => ShoppingListSource::MANUAL]);
+
+        $this->shoppingListService->handleStockChange($archived->getId());
+        $this->shoppingListService->handleStockChange($wanted->getId());
+
+        // The AUTO item for the archived product is gone; the household's MANUAL item survives.
+        $response = $this->apiGet('/shopping-list');
+        $data = static::assertJsonResponse($response, Response::HTTP_OK);
+        static::assertListResponse($data, 1);
+        static::assertSame('Still Wanted', $data['data'][0]['name']);
+        static::assertSame('manual', $data['data'][0]['source']);
+    }
+
+    public function testInactiveProductNeverGetsAutoItem(): void
     {
         $category = $this->createCategory(['name' => 'Test Category']);
         $location = $this->createLocation(['name' => 'Kitchen']);
@@ -331,11 +363,9 @@ class ShoppingListAutoAddTest extends WebTestCase
             'active' => false
         ]);
 
-        // Stock change on inactive product (guard returns before count; setStockLevel with 0 is a no-op)
         $this->setStockLevel($product, $location, 0);
         $this->shoppingListService->handleStockChange($product->getId());
 
-        // No shopping item should be created
         $response = $this->apiGet('/shopping-list');
         $data = static::assertJsonResponse($response, Response::HTTP_OK);
         static::assertListResponse($data, 0);

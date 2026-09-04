@@ -235,4 +235,21 @@ class RecipeControllerTest extends WebTestCase
         $response = $this->apiDelete('/recipes/' . $recipe->getId());
         static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
     }
+
+    public function testCreateRejectsDuplicateIngredientProduct(): void
+    {
+        $pasta = ProductFactory::createOne(['name' => 'Pasta']);
+
+        $response = $this->apiPost('/recipes', [
+            'name' => 'Double pasta',
+            'ingredients' => [
+                ['product_id' => (string) $pasta->getId(), 'required_count' => 1],
+                ['product_id' => (string) $pasta->getId(), 'required_count' => 2]
+            ]
+        ]);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        static::assertSame('VALIDATION_ERROR', $data['type']);
+        static::assertSame('ingredients', $data['errors'][0]['property']);
+    }
 }
