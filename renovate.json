@@ -7,62 +7,75 @@
   ],
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
-  "labels": ["dependencies"],
-  "schedule": ["before 6am on monday"],
+  "labels": [
+    "dependencies"
+  ],
+  "schedule": [
+    "before 6am on monday"
+  ],
   "prConcurrentLimit": 5,
   "prHourlyLimit": 0,
   "rangeStrategy": "bump",
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 6am on monday"]
+    "schedule": [
+      "before 6am on monday"
+    ]
   },
   "packageRules": [
     {
       "description": "Group all non-major updates into a single PR per ecosystem",
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupName": "non-major dependencies"
     },
     {
       "description": "Auto-merge patch-level updates once CI is green",
-      "matchUpdateTypes": ["patch"],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "automerge": true
     },
     {
       "description": "Keep all Symfony packages in lock-step",
-      "matchPackageNames": ["symfony/**"],
+      "matchPackageNames": [
+        "symfony/**"
+      ],
       "groupName": "symfony"
     },
     {
       "description": "Major updates require explicit approval via the dependency dashboard",
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "dependencyDashboardApproval": true
     },
     {
-      "description": "Hold Symfony at 8.0 until the object-mapper 8.1 migration is done (patches still flow)",
-      "matchPackageNames": ["symfony/**"],
-      "matchUpdateTypes": ["minor", "major"],
-      "enabled": false
-    },
-    {
       "description": "Do not propose raising the PHP platform requirement",
-      "matchDepNames": ["php"],
+      "matchDepNames": [
+        "php"
+      ],
       "enabled": false
     },
     {
       "description": "Keep vite and its React plugin upgraded together (plugin-react majors require a matching vite major)",
-      "matchPackageNames": ["vite", "@vitejs/plugin-react"],
+      "matchPackageNames": [
+        "vite",
+        "@vitejs/plugin-react"
+      ],
       "groupName": "vite"
     },
     {
       "description": "Hold vite + plugin-react majors until vitest ships rolldown-vite-compatible types (vite 8 is rolldown-based and breaks vitest's duplicated-vite type check; plugin-react 6 imports vite/internal and needs vite 8)",
-      "matchPackageNames": ["vite", "@vitejs/plugin-react"],
-      "matchUpdateTypes": ["major"],
-      "enabled": false
-    },
-    {
-      "description": "No full composer.lock refresh while symfony is held at 8.0 — Renovate runs composer with --no-plugins, so the Symfony Flex pin (extra.symfony.require) is bypassed and transitive components float to 8.1. Re-enable after the 8.1/object-mapper migration.",
-      "matchManagers": ["composer"],
-      "matchUpdateTypes": ["lockFileMaintenance"],
+      "matchPackageNames": [
+        "vite",
+        "@vitejs/plugin-react"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "enabled": false
     }
   ]

@@ -94,7 +94,7 @@
         }
     },
     "require-dev": {
-        "infection/infection": ">=0.33.2",
+        "infection/infection": "^0.33.2",
         "phpunit/phpunit": "^13.1.13",
         "rector/rector": "^2.4.5",
         "symfony/browser-kit": "8.1.*",
