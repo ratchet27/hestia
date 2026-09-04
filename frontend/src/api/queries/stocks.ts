@@ -44,6 +44,8 @@ export function useAddStock() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all });
+      // The backend reconciles AUTO shopping items on every stock change.
+      queryClient.invalidateQueries({ queryKey: queryKeys.shoppingList.all });
     },
   });
 }
@@ -61,6 +63,8 @@ export function useConsumeStock() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all });
+      // The backend reconciles AUTO shopping items on every stock change.
+      queryClient.invalidateQueries({ queryKey: queryKeys.shoppingList.all });
     },
   });
 }

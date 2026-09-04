@@ -73,6 +73,8 @@ export function useUpdateProduct() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.products.detail(id),
       });
+      // min_stock or active changes reconcile the AUTO shopping items server-side.
+      queryClient.invalidateQueries({ queryKey: queryKeys.shoppingList.all });
     },
   });
 }
