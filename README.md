@@ -12,17 +12,6 @@ recipes and recurring chores, and pushes a daily expiry summary to Telegram.
 [![Backend Code Quality](https://github.com/ratchet27/hestia/actions/workflows/backend-code-quality.yaml/badge.svg)](https://github.com/ratchet27/hestia/actions/workflows/backend-code-quality.yaml)
 [![Frontend Code Quality](https://github.com/ratchet27/hestia/actions/workflows/frontend-code-quality.yaml/badge.svg)](https://github.com/ratchet27/hestia/actions/workflows/frontend-code-quality.yaml)
 
-<!--
-SCREENSHOTS — add 2–3 images to docs/screenshots/ before making this repo
-public, then delete this comment and uncomment the block below. Suggested
-shots: the dashboard, the stock list with expiry badges, the shopping list.
-
-## Screenshots
-
-| Dashboard | Stock | Shopping list |
-| --------- | ----- | ------------- |
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Stock](docs/screenshots/stock.png) | ![Shopping list](docs/screenshots/shopping.png) |
--->
 
 ---
 
@@ -191,12 +180,13 @@ If you only have a few minutes:
 ```
 backend/     Symfony API — src/, tests/, migrations/, Docker + FrankenPHP config
 frontend/    React SPA — features/, generated API client, Vitest suite
-docs/        Specification, design decisions, and per-feature design + implementation plans
+docs/        Specification, design decisions, per-feature design docs, and the architecture review
 ```
 
-Each feature in `docs/plans/` and `docs/superpowers/` was specified before it was
-built: a design document, then an implementation plan, then the code. Those
-documents were written with AI assistance, as was some of the implementation.
+Each feature in `docs/plans/` and `docs/superpowers/specs/` was designed before it
+was built. The step-by-step implementation plans that followed each design were
+removed once the code landed; git history keeps them. The design documents were
+written with AI assistance, as was some of the implementation.
 
 ## Status
 

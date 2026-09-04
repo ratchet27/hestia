@@ -1,7 +1,7 @@
 # Authentication v1 — Design
 
 **Date:** 2026-06-02
-**Status:** Approved (design) — pending implementation plan
+**Status:** Implemented (2026-06)
 **Scope:** First-class authentication for the Hestia household app (2 users, self-hosted).
 
 ## Goal

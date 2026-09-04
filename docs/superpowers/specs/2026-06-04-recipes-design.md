@@ -1,7 +1,7 @@
 # Recipes (v2) — Design
 
 **Date:** 2026-06-04
-**Status:** Approved design, pre-implementation
+**Status:** Implemented (2026-06)
 **Scope:** Roadmap §18 "Recipes: fulfillment check, shopping-list generation, stock
 consumption." Wires up the existing placeholder `RecipesPage` and the dormant
 `ShoppingListSource::RECIPE` enum value.
