@@ -2,6 +2,12 @@ framework:
     messenger:
         failure_transport: failed
 
+        # JSON on the wire instead of the default PhpSerializer: a message
+        # pulled from the broker can then only carry data, never a PHP object
+        # graph for unserialize() to instantiate.
+        serializer:
+            default_serializer: messenger.transport.symfony_serializer
+
         transports:
             async:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'

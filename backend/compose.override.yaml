@@ -33,7 +33,15 @@ services:
 ###< symfony/mercure-bundle ###
 
 ###> doctrine/doctrine-bundle ###
+  # Dev-only: expose infrastructure on loopback for local tooling (psql, RabbitMQ UI).
+  # Never published in prod (compose.prod.yaml), where the services stay on the
+  # compose network only.
   database:
     ports:
-      - "5432"
+      - "127.0.0.1:5432:5432"
 ###< doctrine/doctrine-bundle ###
+
+  rabbitmq:
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"

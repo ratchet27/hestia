@@ -1,11 +1,33 @@
 ---
 # Production environment override
+#
+# Passwords have no defaults here: `${VAR:?}` makes compose refuse to start
+# unless POSTGRES_PASSWORD and RABBITMQ_PASSWORD are set, so the dev
+# placeholders from compose.yaml can never reach a real deployment.
 services:
   php:
     build:
       context: .
       target: frankenphp_prod
     environment:
-      APP_SECRET: ${APP_SECRET}
-      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+      APP_SECRET: ${APP_SECRET:?}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:?}@database:5432/${POSTGRES_DB:-app}?serverVersion=18&charset=${POSTGRES_CHARSET:-utf8}
+      MESSENGER_TRANSPORT_DSN: amqp://${RABBITMQ_USER:-hestia}:${RABBITMQ_PASSWORD:?}@rabbitmq:5672/%2f/messages
+
+  messenger:
+    build:
+      context: .
+      target: frankenphp_prod
+    environment:
+      APP_ENV: prod
+      APP_SECRET: ${APP_SECRET:?}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:?}@database:5432/${POSTGRES_DB:-app}?serverVersion=18&charset=${POSTGRES_CHARSET:-utf8}
+      MESSENGER_TRANSPORT_DSN: amqp://${RABBITMQ_USER:-hestia}:${RABBITMQ_PASSWORD:?}@rabbitmq:5672/%2f/messages
+
+  database:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+
+  rabbitmq:
+    environment:
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?}
