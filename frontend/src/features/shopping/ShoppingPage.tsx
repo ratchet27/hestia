@@ -1,5 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { ShoppingItemResponse } from "@/api/generated/models";
 import {
   useAddShoppingItem,
@@ -7,7 +6,6 @@ import {
   useShoppingList,
   useUpdateShoppingItem,
 } from "@/api/queries";
-import { queryKeys } from "@/api/queries/keys";
 import {
   EditItemModal,
   ProductSearchInput,
@@ -15,7 +13,6 @@ import {
 } from "./components";
 
 export function ShoppingPage(): React.ReactElement {
-  const queryClient = useQueryClient();
   const [editingItem, setEditingItem] = useState<ShoppingItemResponse | null>(
     null,
   );
@@ -24,13 +21,6 @@ export function ShoppingPage(): React.ReactElement {
   const addMutation = useAddShoppingItem();
   const updateMutation = useUpdateShoppingItem();
   const deleteMutation = useDeleteShoppingItem();
-
-  // Refetch on every page visit
-  useEffect(() => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.shoppingList.list(),
-    });
-  }, [queryClient]);
 
   const pendingItems = items.filter((item) => !item.done);
 
