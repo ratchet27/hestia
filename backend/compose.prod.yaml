@@ -4,8 +4,14 @@
 # Passwords have no defaults here: `${VAR:?}` makes compose refuse to start
 # unless POSTGRES_PASSWORD and RABBITMQ_PASSWORD are set, so the dev
 # placeholders from compose.yaml can never reach a real deployment.
+#
+# The prod image runs as www-data (rootless, synced from symfony-docker). If a
+# deployment predates that and its caddy_data/caddy_config volumes were
+# created by a root container, chown them once before switching images:
+#   docker compose run --rm --user root --entrypoint chown php -R www-data:www-data /data /config
 services:
   php:
+    image: ${IMAGES_PREFIX:-}app-php-prod
     build:
       context: .
       target: frankenphp_prod
@@ -16,6 +22,7 @@ services:
       TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
 
   messenger:
+    image: ${IMAGES_PREFIX:-}app-php-prod
     build:
       context: .
       target: frankenphp_prod

@@ -1,7 +1,6 @@
 ---
 services:
   php:
-    image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     depends_on:
       rabbitmq:
@@ -11,9 +10,6 @@ services:
       DEFAULT_URI: https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}
       DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!ChangeMe!}@database:5432/${POSTGRES_DB:-app}?serverVersion=18&charset=${POSTGRES_CHARSET:-utf8}
       MESSENGER_TRANSPORT_DSN: amqp://${RABBITMQ_USER:-hestia}:${RABBITMQ_PASSWORD:-hestia}@rabbitmq:5672/%2f/messages
-      # The two next lines can be removed after initial installation
-      SYMFONY_VERSION: ${SYMFONY_VERSION:-}
-      STABILITY: ${STABILITY:-stable}
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -32,7 +28,6 @@ services:
         protocol: udp
 
   messenger:
-    image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     command: bin/console messenger:consume async scheduler_main --time-limit=3600 -vv
     # The image HEALTHCHECK probes Caddy's metrics endpoint, which this

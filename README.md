@@ -137,6 +137,13 @@ The Vite dev server proxies `/api` to the backend so the browser sees a single
 origin and the session cookie stays first-party. API docs are at
 `https://localhost/api/doc` (dev only; the route is not registered in prod).
 
+The Docker setup under `backend/` is a copy of
+[symfony-docker](https://github.com/dunglas/symfony-docker); the synced upstream
+commit is noted at the top of `backend/Dockerfile`. Upstream's `template-sync`
+assumes the template sits at the repository root, so updates are ported by hand:
+diff upstream against `backend/{Dockerfile,compose*.yaml,frankenphp/}` and keep the
+lines marked `hestia:`.
+
 Telegram notifications are optional — without a `TELEGRAM_DSN` in
 `backend/.env.local`, everything else works unchanged.
 
