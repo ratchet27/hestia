@@ -34,6 +34,17 @@
 	# Disable Topics tracking if not enabled explicitly: https://github.com/jkarlin/topics
 	header ?Permissions-Policy "browsing-topics=()"
 
+	# Defence in depth: the app has no inline scripts or third-party assets, so a
+	# strict policy costs nothing. Dev relaxes CSP_POLICY for Swagger UI
+	# (compose.override.yaml); prod keeps the default below.
+	header {
+		Content-Security-Policy "{$CSP_POLICY:default-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'}"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
 	@phpRoute {
 		not file {path}
 	}

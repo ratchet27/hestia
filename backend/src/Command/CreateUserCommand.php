@@ -31,7 +31,12 @@ final class CreateUserCommand extends Command
             ->addArgument('username', InputArgument::REQUIRED, 'Login username')
             ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Display name')
             ->addOption('email', null, InputOption::VALUE_REQUIRED, 'Email (optional)')
-            ->addOption('password', null, InputOption::VALUE_REQUIRED, 'Password (prompted if omitted)');
+            ->addOption(
+                'password-stdin',
+                null,
+                InputOption::VALUE_NONE,
+                'Read the password from standard input instead of the hidden prompt'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -42,10 +47,9 @@ final class CreateUserCommand extends Command
         $name = (string) ( $input->getOption('name') ?? $username );
         // @mago-ignore analysis:mixed-assignment -- Symfony Console getOption() is mixed; narrowed by is_string() below
         $email = $input->getOption('email');
-        // @mago-ignore analysis:mixed-assignment -- Symfony Console getOption() is mixed; narrowed by is_string() below
-        $password = $input->getOption('password') ?? $io->askHidden('Password');
+        $password = PasswordInput::read($input, $io, 'Password');
 
-        if (!is_string($password) || $password === '') {
+        if ($password === '') {
             $io->error('Password is required.');
 
             return Command::FAILURE;

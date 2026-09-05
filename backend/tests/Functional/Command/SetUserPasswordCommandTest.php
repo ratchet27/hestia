@@ -25,9 +25,10 @@ class SetUserPasswordCommandTest extends KernelTestCase
         $application = new Application(self::bootKernel());
         $tester = new CommandTester($application->find('app:user:set-password'));
 
+        $tester->setInputs(['newpassword456']);
         $tester->execute([
             'username' => 'testuser',
-            '--password' => 'newpassword456'
+            '--password-stdin' => true
         ]);
 
         $tester->assertCommandIsSuccessful();
@@ -46,9 +47,10 @@ class SetUserPasswordCommandTest extends KernelTestCase
         $application = new Application(self::bootKernel());
         $tester = new CommandTester($application->find('app:user:set-password'));
 
+        $tester->setInputs(['irrelevant']);
         $tester->execute([
             'username' => 'nobody',
-            '--password' => 'irrelevant'
+            '--password-stdin' => true
         ]);
 
         static::assertSame(1, $tester->getStatusCode());

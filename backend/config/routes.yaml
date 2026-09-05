@@ -16,15 +16,18 @@ api_internal_v1:
     type: attribute
     prefix: /api/internal/v1
 
-# API Documentation
-api_doc:
-    path: /api/doc
-    methods: GET
-    defaults:
-        _controller: nelmio_api_doc.controller.swagger_ui
+# API documentation: dev only. Prod has no reason to hand out the full
+# route/DTO map to anonymous clients; the frontend regenerates its client
+# from a dev backend (frontend/AGENTS.md).
+when@dev:
+    api_doc:
+        path: /api/doc
+        methods: GET
+        defaults:
+            _controller: nelmio_api_doc.controller.swagger_ui
 
-api_doc_json:
-    path: /api/doc.json
-    methods: GET
-    defaults:
-        _controller: nelmio_api_doc.controller.swagger_json
+    api_doc_json:
+        path: /api/doc.json
+        methods: GET
+        defaults:
+            _controller: nelmio_api_doc.controller.swagger_json

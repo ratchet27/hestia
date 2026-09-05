@@ -13,6 +13,7 @@ services:
       APP_SECRET: ${APP_SECRET:?}
       DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:?}@database:5432/${POSTGRES_DB:-app}?serverVersion=18&charset=${POSTGRES_CHARSET:-utf8}
       MESSENGER_TRANSPORT_DSN: amqp://${RABBITMQ_USER:-hestia}:${RABBITMQ_PASSWORD:?}@rabbitmq:5672/%2f/messages
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
 
   messenger:
     build:
