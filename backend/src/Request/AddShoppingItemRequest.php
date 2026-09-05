@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace App\Request;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 final readonly class AddShoppingItemRequest
 {
@@ -21,5 +22,22 @@ final readonly class AddShoppingItemRequest
         #[Assert\Length(max: 500)]
         public ?string $note = null
     ) {
+    }
+
+    /**
+     * An item needs something to display: either a product or a custom name.
+     * Without this, `POST /shopping-list {}` used to create a nameless row.
+     */
+    #[Assert\Callback]
+    public function validateHasName(ExecutionContextInterface $context): void
+    {
+        if ($this->product_id !== null || trim((string) $this->custom_name) !== '') {
+            return;
+        }
+
+        $context
+            ->buildViolation('Either product_id or custom_name is required.')
+            ->atPath('custom_name')
+            ->addViolation();
     }
 }

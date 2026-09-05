@@ -38,6 +38,7 @@ final readonly class UpdateProductRequest
             new Assert\Type('string'),
             new Assert\Length(max: 50)
         ])]
+        #[Assert\Unique(message: 'Each barcode may be listed only once.')]
         public ?array $barcodes = null
     ) {
     }

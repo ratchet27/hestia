@@ -6,6 +6,7 @@ namespace App\Controller\Api\Internal\V1;
 
 use App\Exception\ApiProblem;
 use App\Request\CreateProductRequest;
+use App\Request\ProductListQuery;
 use App\Request\UpdateProductRequest;
 use App\Response\Product\ProductResponse;
 use App\Service\ProductService;
@@ -15,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -53,25 +55,11 @@ final class ProductController extends AbstractController
             type: 'object'
         )
     ]))]
-    public function list(Request $request): JsonResponse
-    {
-        $filters = [];
-
-        if ($request->query->has('name')) {
-            $filters['name'] = $request->query->getString('name');
-        }
-
-        if ($request->query->has('category_id')) {
-            $filters['category_id'] = $request->query->getString('category_id');
-        }
-
-        // Default to active-only unless include_archived=true is specified
-        $includeArchived = $request->query->getBoolean('include_archived', false);
-        if (!$includeArchived) {
-            $filters['active'] = true;
-        }
-
-        $products = $this->productService->listProducts($filters);
+    public function list(
+        #[MapQueryString]
+        ProductListQuery $query = new ProductListQuery()
+    ): JsonResponse {
+        $products = $this->productService->listProducts($query->toFilters());
 
         $data = array_map(fn($product) => $this->mapper->map($product, ProductResponse::class), $products);
 

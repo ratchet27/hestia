@@ -7,6 +7,7 @@ namespace App\Controller\Api\Internal\V1;
 use App\Request\AddStockRequest;
 use App\Request\ConsumeStockRequest;
 use App\Request\ExpiringStockQuery;
+use App\Request\StockEntriesQuery;
 use App\Request\UpdateStockEntryRequest;
 use App\Response\Stock\AddedStockEntryResponse;
 use App\Response\Stock\ConsumeResultResponse;
@@ -89,14 +90,13 @@ final class StockController extends AbstractController
             type: 'object'
         )
     ]))]
-    public function listEntries(Request $request): JsonResponse
-    {
-        $locationId = $request->query->get('location');
-        $productId = $request->query->get('product');
-
+    public function listEntries(
+        #[MapQueryString]
+        StockEntriesQuery $query = new StockEntriesQuery()
+    ): JsonResponse {
         $data = $this->stockEntryService->getEntries(
-            locationId: $locationId !== null ? Uuid::fromString($locationId) : null,
-            productId: $productId !== null ? Uuid::fromString($productId) : null
+            locationId: $query->location !== null ? Uuid::fromString($query->location) : null,
+            productId: $query->product !== null ? Uuid::fromString($query->product) : null
         );
 
         return $this->json([

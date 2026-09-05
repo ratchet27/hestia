@@ -962,4 +962,22 @@ class StockControllerTest extends WebTestCase
             }
         }
     }
+
+    public function testListEntriesRejectsMalformedLocation(): void
+    {
+        $response = $this->apiGet('/stocks/entries', ['location' => 'not-a-uuid']);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        static::assertSame('VALIDATION_ERROR', $data['type']);
+        static::assertSame('location', $data['errors'][0]['property']);
+    }
+
+    public function testListEntriesRejectsMalformedProduct(): void
+    {
+        $response = $this->apiGet('/stocks/entries', ['product' => '123']);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        static::assertSame('VALIDATION_ERROR', $data['type']);
+        static::assertSame('product', $data['errors'][0]['property']);
+    }
 }
