@@ -122,6 +122,11 @@ available") and flat snake_case `extraData`. Rules:
   not cookable), 422 = a reference in the payload does not resolve.
 - Put per-occurrence text in `detail`, not in `extraData['message']`; the frontend
   already prefers `detail` for toasts.
+- Validation failures (`VALIDATION_ERROR`, 422) list `errors: [{property, violation}]` with
+  `property` in the **wire** (snake_case) name, not the DTO property; the frontend maps
+  it straight onto form fields.
+- Never echo `\Throwable::getMessage()` to the client (see `TelegramController::test`):
+  map to a fixed code and let the logger keep the detail.
 - Exception classes are `final`.
 
 ### Response mapping

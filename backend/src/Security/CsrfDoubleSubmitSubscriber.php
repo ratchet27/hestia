@@ -60,7 +60,10 @@ final class CsrfDoubleSubmitSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if ($request->cookies->has(self::COOKIE_NAME)) {
+        // A cookie planted before login, or left over after logout, must not stay
+        // valid for the next session: rotate at every auth boundary, otherwise
+        // only issue a token when the client has none.
+        if (!$this->isAuthBoundary($request) && $request->cookies->has(self::COOKIE_NAME)) {
             return;
         }
 
@@ -74,6 +77,19 @@ final class CsrfDoubleSubmitSubscriber implements EventSubscriberInterface
                     ->withSameSite(\Symfony\Component\HttpFoundation\Cookie::SAMESITE_LAX)
                     ->withPath('/')
             );
+    }
+
+    private function isAuthBoundary(Request $request): bool
+    {
+        $path = $request->getPathInfo();
+
+        return (
+            $request->isMethod('POST')
+            && (
+                str_starts_with($path, '/api/internal/v1/auth/login')
+                || str_starts_with($path, '/api/internal/v1/auth/logout')
+            )
+        );
     }
 
     private function isProtected(Request $request): bool

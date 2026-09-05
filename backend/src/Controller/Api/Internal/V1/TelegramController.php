@@ -12,6 +12,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Notifier\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[OA\Tag(name: 'Telegram')]
@@ -64,8 +65,12 @@ final class TelegramController extends AbstractController
             $this->telegramSender->send('🔔 Hestia — тестовое сообщение / test message');
 
             return $this->json(['data' => new TelegramTestResultResponse(ok: true)]);
-        } catch (\Throwable $throwable) {
-            return $this->json(['data' => new TelegramTestResultResponse(ok: false, error: $throwable->getMessage())]);
+        } catch (TransportExceptionInterface) {
+            // Fixed codes only: TelegramSender already logged the exception, and a
+            // transport message could carry the bot token or Telegram's raw reply.
+            return $this->json(['data' => new TelegramTestResultResponse(ok: false, error: 'transport_error')]);
+        } catch (\Throwable) {
+            return $this->json(['data' => new TelegramTestResultResponse(ok: false, error: 'send_failed')]);
         }
     }
 

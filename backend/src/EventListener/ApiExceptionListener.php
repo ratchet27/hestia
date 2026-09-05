@@ -85,7 +85,9 @@ final readonly class ApiExceptionListener
         $errors = [];
         foreach ($exception->getViolations() as $violation) {
             $errors[] = [
-                'property' => $violation->getPropertyPath(),
+                // The violation path names the DTO property (camelCase); the client
+                // sent and displays snake_case fields, so report the wire name.
+                'property' => self::toWireName($violation->getPropertyPath()),
                 'violation' => $violation->getMessage()
             ];
         }
@@ -96,6 +98,11 @@ final readonly class ApiExceptionListener
             code: Response::HTTP_UNPROCESSABLE_ENTITY,
             extraData: ['errors' => $errors]
         );
+    }
+
+    private static function toWireName(string $propertyPath): string
+    {
+        return strtolower((string) preg_replace('/(?<=[a-z0-9])([A-Z])/', '_$1', $propertyPath));
     }
 
     private function createHttpProblem(HttpExceptionInterface $exception): ApiProblem

@@ -34,7 +34,11 @@ class ProductRepository extends ServiceEntityRepository
             ->orderBy('p.name', 'ASC');
 
         if (isset($filters['name'])) {
-            $qb->andWhere('LOWER(p.name) LIKE LOWER(:name)')->setParameter('name', '%' . $filters['name'] . '%');
+            // The value is bound, so this is about semantics, not injection: a
+            // literal "%" or "_" in the search must not act as a wildcard.
+            // PostgreSQL's default LIKE escape character is the backslash.
+            $needle = addcslashes($filters['name'], '%_\\');
+            $qb->andWhere('LOWER(p.name) LIKE LOWER(:name)')->setParameter('name', '%' . $needle . '%');
         }
 
         if (isset($filters['category_id'])) {
