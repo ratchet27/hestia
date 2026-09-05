@@ -32,6 +32,8 @@ security:
     access_control:
         - { path: ^/api/internal/v1/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/internal/v1/auth/csrf, roles: PUBLIC_ACCESS }
+        # /api/doc routes exist only in dev (config/routes.yaml); anonymous there
+        # so the client generator can fetch the spec without a session.
         - { path: ^/api/doc, roles: PUBLIC_ACCESS }
         - { path: ^/api/internal/v1, roles: ROLE_USER }
 

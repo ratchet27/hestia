@@ -124,7 +124,8 @@ cd backend
 make up
 docker compose exec php bin/console doctrine:migrations:migrate
 docker compose exec php bin/console app:seed          # default categories and locations
-docker compose exec php bin/console app:user:create <username> --name "<display name>"
+docker compose exec php bin/console app:user:create <username> --name "<display name>"   # prompts for the password
+# scripted: echo "$PASSWORD" | docker compose exec -T php bin/console app:user:create <username> --password-stdin
 
 # Frontend — dev server on http://localhost:5173
 cd ../frontend
@@ -134,7 +135,7 @@ bun run dev
 
 The Vite dev server proxies `/api` to the backend so the browser sees a single
 origin and the session cookie stays first-party. API docs are at
-`https://localhost/api/doc`.
+`https://localhost/api/doc` (dev only; the route is not registered in prod).
 
 Telegram notifications are optional — without a `TELEGRAM_DSN` in
 `backend/.env.local`, everything else works unchanged.

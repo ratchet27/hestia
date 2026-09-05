@@ -28,10 +28,10 @@ final class SetUserPasswordCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('username', InputArgument::REQUIRED, 'Login username')->addOption(
-            'password',
+            'password-stdin',
             null,
-            InputOption::VALUE_REQUIRED,
-            'New password (prompted if omitted)'
+            InputOption::VALUE_NONE,
+            'Read the password from standard input instead of the hidden prompt'
         );
     }
 
@@ -48,9 +48,8 @@ final class SetUserPasswordCommand extends Command
             return Command::FAILURE;
         }
 
-        // @mago-ignore analysis:mixed-assignment -- Symfony Console getOption() is mixed; narrowed by is_string() below
-        $password = $input->getOption('password') ?? $io->askHidden('New password');
-        if (!is_string($password) || $password === '') {
+        $password = PasswordInput::read($input, $io, 'New password');
+        if ($password === '') {
             $io->error('Password is required.');
 
             return Command::FAILURE;

@@ -8,6 +8,14 @@ framework:
     serializer:
         name_converter: 'serializer.name_converter.camel_case_to_snake_case'
 
+    # login_throttling and the request logs key on the client IP. Behind a
+    # reverse proxy that IP is the proxy's unless it is trusted here, so five
+    # bad logins from anyone would lock the whole household out together.
+    # Empty (the default) trusts nobody: correct when this Caddy terminates TLS
+    # and faces the network directly. See .env for the values to use otherwise.
+    trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-port']
+
     #esi: true
     #fragments: true
 
