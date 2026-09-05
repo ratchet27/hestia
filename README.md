@@ -121,9 +121,10 @@ Requires Docker and [Bun](https://bun.sh/).
 ```bash
 # Backend — API on https://localhost (self-signed cert)
 cd backend
-make up
-docker compose exec php bin/console doctrine:migrations:migrate
-docker compose exec php bin/console app:seed          # default categories and locations
+make install   # clean slate: drops volumes, builds, migrates, seeds, creates dev login pavel / hestia
+# or step by step, keeping existing data:
+make up        # migrations run in the entrypoint
+docker compose exec php bin/console app:seed --with-dev-user   # defaults + dev login (dev env only)
 docker compose exec php bin/console app:user:create <username> --name "<display name>"   # prompts for the password
 # scripted: echo "$PASSWORD" | docker compose exec -T php bin/console app:user:create <username> --password-stdin
 

@@ -1,4 +1,16 @@
-.PHONY: up down lint test mutate
+.PHONY: install up down lint test mutate
+
+# Clean local (re)install: drops every container AND volume (database, broker,
+# Caddy certs), rebuilds the dev image, migrates (entrypoint), seeds defaults
+# and the dev login (SeedCommand::DEV_USERNAME / DEV_PASSWORD).
+install:
+	docker compose down --volumes --remove-orphans
+	docker compose build --pull
+	# --wait fails on services without a healthcheck (messenger), so wait on php
+	# (which pulls database + rabbitmq) and start the rest afterwards.
+	docker compose up -d --wait php
+	docker compose up -d
+	docker compose exec php bin/console app:seed --with-dev-user
 
 up:
 	docker compose up -d
