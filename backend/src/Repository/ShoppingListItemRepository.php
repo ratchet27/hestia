@@ -57,9 +57,12 @@ class ShoppingListItemRepository extends ServiceEntityRepository
      */
     public function findAllOrdered(): array
     {
+        // The response reads the product name per row; fetch-join it.
         // @mago-ignore analysis:mixed-return-statement
         return $this
             ->createQueryBuilder('i')
+            ->leftJoin('i.product', 'p')
+            ->addSelect('p')
             ->orderBy('i.done', 'ASC')
             ->addOrderBy('i.createdAt', 'DESC')
             ->getQuery()

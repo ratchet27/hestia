@@ -49,6 +49,66 @@ class ProductRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @param Uuid[] $ids
+     *
+     * @return array<string, Product> keyed by RFC 4122 id
+     */
+    public function findByIdsIndexed(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        /** @var Product[] $products */
+        $products = $this->findBy(['id' => $ids]);
+
+        $indexed = [];
+        foreach ($products as $product) {
+            $indexed[$product->getId()->toRfc4122()] = $product;
+        }
+
+        return $indexed;
+    }
+
+    /**
+     * Product count per category, in one query.
+     *
+     * @return array<string, int> keyed by RFC 4122 category id
+     */
+    public function countByCategoryGrouped(): array
+    {
+        return $this->countGroupedBy('p.category');
+    }
+
+    /**
+     * Product count per default location, in one query.
+     *
+     * @return array<string, int> keyed by RFC 4122 location id
+     */
+    public function countByDefaultLocationGrouped(): array
+    {
+        return $this->countGroupedBy('p.defaultLocation');
+    }
+
+    /** @return array<string, int> */
+    private function countGroupedBy(string $association): array
+    {
+        /** @var list<array{group_id: string, quantity: string|int}> $rows */
+        $rows = $this
+            ->createQueryBuilder('p')
+            ->select(sprintf('IDENTITY(%s) as group_id', $association), 'COUNT(p.id) as quantity')
+            ->groupBy($association)
+            ->getQuery()
+            ->getResult();
+
+        return array_column(
+            array_map(static fn(array $row): array => ['id' => $row['group_id'], 'n' => (int) $row['quantity']], $rows),
+            'n',
+            'id'
+        );
+    }
+
     public function exists(Uuid $id): bool
     {
         return null !== $this

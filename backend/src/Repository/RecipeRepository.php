@@ -23,7 +23,17 @@ class RecipeRepository extends ServiceEntityRepository
      */
     public function findAllOrdered(): array
     {
+        // Fetch-join ingredients and their products: the list response reads
+        // both for every recipe, which was R x I lazy loads.
         // @mago-ignore analysis:mixed-return-statement
-        return $this->createQueryBuilder('r')->orderBy('r.name', 'ASC')->getQuery()->getResult();
+        return $this
+            ->createQueryBuilder('r')
+            ->leftJoin('r.ingredients', 'i')
+            ->addSelect('i')
+            ->leftJoin('i.product', 'p')
+            ->addSelect('p')
+            ->orderBy('r.name', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }

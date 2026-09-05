@@ -226,23 +226,28 @@ class StockEntryService
             ? $this->stockEntryRepository->getStockSummaryLowStock()
             : $this->stockEntryRepository->getStockSummary();
 
+        // Three queries regardless of product count: the summary rows, the
+        // products they name, and one grouped location breakdown for all of them.
+        $products = $this->productRepository->findByIdsIndexed(array_map(
+            static fn(array $row): Uuid => Uuid::fromString($row['product_id']),
+            $summaryData
+        ));
+
+        $locationsByProduct = [];
+        foreach ($this->stockEntryRepository->getLocationBreakdownForAll() as $loc) {
+            $locationsByProduct[$loc['product_id']][] = new LocationQuantityResponse(
+                id: Uuid::fromString($loc['location_id']),
+                name: $loc['location_name'],
+                quantity: (int) $loc['quantity']
+            );
+        }
+
         $result = [];
         foreach ($summaryData as $row) {
-            $productId = Uuid::fromString($row['product_id']);
-            $product = $this->productRepository->find($productId);
+            $product = $products[$row['product_id']] ?? null;
             if ($product === null) {
                 continue;
             }
-
-            $locationBreakdown = $this->stockEntryRepository->getLocationBreakdown($productId);
-            $locations = array_map(
-                static fn(array $loc) => new LocationQuantityResponse(
-                    id: Uuid::fromString($loc['location_id']),
-                    name: $loc['location_name'],
-                    quantity: (int) $loc['quantity']
-                ),
-                $locationBreakdown
-            );
 
             $result[] = new ProductSummaryResponse(
                 product: ProductBriefResponse::fromEntity($product),
@@ -250,7 +255,7 @@ class StockEntryService
                 earliest_expiry: $row['earliest_expiry'] instanceof \DateTimeInterface
                     ? $row['earliest_expiry']->format('Y-m-d')
                     : null,
-                locations: $locations
+                locations: $locationsByProduct[$row['product_id']] ?? []
             );
         }
 
@@ -267,7 +272,7 @@ class StockEntryService
         $entries = match (true) {
             $locationId !== null => $this->stockEntryRepository->findByLocation($locationId),
             $productId !== null => $this->stockEntryRepository->findByProduct($productId),
-            default => $this->stockEntryRepository->findAll()
+            default => $this->stockEntryRepository->findAllWithRelations()
         };
 
         return array_map(fn(StockEntry $entry): StockEntryResponse => StockEntryResponse::fromEntity(
