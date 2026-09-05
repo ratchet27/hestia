@@ -68,7 +68,9 @@
         "л": "l (litres)",
         "мл": "ml (millilitres)",
         "уп": "pk (packs)"
-      }
+      },
+      "expiryMax": "At most {{max}}",
+      "minStockMax": "At most {{max}}"
     }
   },
   "nav": {
@@ -255,7 +257,9 @@
         "updated": "Task updated",
         "deleted": "Task deleted",
         "toggled": "Task status updated"
-      }
+      },
+      "markDone": "Mark done",
+      "markUndone": "Mark not done"
     },
     "form": {
       "save": "Save",

@@ -1,11 +1,11 @@
 import { type ReactElement, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type {
+  CategoryListItemResponse,
+  LocationListItemResponse,
+} from "../../api/generated/models";
 
-export interface ManagedItem {
-  id: string;
-  name: string;
-  usage_count: number;
-}
+export type ManagedItem = CategoryListItemResponse | LocationListItemResponse;
 
 interface ManagedListProps {
   title: string;

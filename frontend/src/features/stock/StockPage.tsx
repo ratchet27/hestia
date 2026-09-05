@@ -111,24 +111,10 @@ export function StockPage(): ReactElement {
     );
   };
 
-  const handleConsume = (entry: StockEntryResponse) => {
-    consumeStock.mutate({
-      product_id: entry.product.id,
-      location_id: entry.location.id,
-      quantity: 1,
-    });
-  };
-
-  const handleDone = (entry: ExpiringEntryResponse) => {
-    consumeStock.mutate({
-      product_id: entry.product.id,
-      location_id: entry.location.id,
-      quantity: 1,
-    });
-  };
-
-  const handleThrow = (entry: ExpiringEntryResponse) => {
-    // For now, throw also consumes (removes) the item
+  // "Consumed", "done" and "thrown away" all mean the same thing to the API
+  // today: one entry of this product leaves this location. The UI keeps the
+  // separate buttons for intent; the model has no waste tracking yet.
+  const removeEntry = (entry: StockEntryResponse | ExpiringEntryResponse) => {
     consumeStock.mutate({
       product_id: entry.product.id,
       location_id: entry.location.id,
@@ -147,8 +133,8 @@ export function StockPage(): ReactElement {
 
       <AttentionSection
         items={expiringItems}
-        onDone={handleDone}
-        onThrow={handleThrow}
+        onDone={removeEntry}
+        onThrow={removeEntry}
       />
 
       <section>
@@ -177,7 +163,7 @@ export function StockPage(): ReactElement {
 
         <StockTable
           entries={sortedEntries}
-          onConsume={handleConsume}
+          onConsume={removeEntry}
           isLoading={entriesLoading}
         />
       </section>

@@ -125,13 +125,10 @@ describe("DashboardPage", () => {
     // Wait for data to load
     await screen.findByText("Йогурт");
 
-    // Click "View all stock" link
-    const viewAllLink = screen.getByText(/Все запасы/i);
-    await user.click(viewAllLink);
+    await user.click(screen.getByText(/Все запасы/i));
 
-    // Router should navigate (we can't fully test this without router mock,
-    // but at least verify the button exists and is clickable)
-    expect(viewAllLink).toBeInTheDocument();
+    // The test renderer uses BrowserRouter, so navigation lands in jsdom's URL.
+    expect(window.location.pathname).toBe("/stock");
   });
 
   it("clicking Выполнено button fires POST to mark chore done", async () => {

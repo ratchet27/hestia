@@ -5,6 +5,7 @@ import {
   createProductResponse,
 } from "@/test/mocks/data";
 import { render, screen, waitFor } from "@/test/utils";
+import { ApiError } from "../../api/client";
 import { ProductForm } from "./ProductForm";
 
 describe("ProductForm", () => {
@@ -118,6 +119,49 @@ describe("ProductForm", () => {
         }),
       );
     });
+  });
+
+  it("maps a 422 onto the offending field using the wire name", async () => {
+    const onSubmit = vi
+      .fn()
+      .mockRejectedValue(
+        new ApiError(422, "Validation failed", [
+          { propertyPath: "min_stock", message: "Too many" },
+        ]),
+      );
+    const { user } = render(
+      <ProductForm {...defaultProps} onSubmit={onSubmit} />,
+    );
+    await user.type(screen.getByLabelText(/Название/i), "Молоко");
+    await user.click(screen.getByRole("button", { name: /Создать/i }));
+
+    expect(await screen.findByText("Too many")).toBeInTheDocument();
+  });
+
+  it("toasts the owning product on a barcode conflict", async () => {
+    const onSubmit = vi
+      .fn()
+      .mockRejectedValue(new ApiError(409, "conflict", undefined, "Кефир"));
+    const { user } = render(
+      <ProductForm {...defaultProps} onSubmit={onSubmit} />,
+    );
+    await user.type(screen.getByLabelText(/Название/i), "Молоко");
+    await user.click(screen.getByRole("button", { name: /Создать/i }));
+
+    expect(await screen.findByText(/Кефир/)).toBeInTheDocument();
+  });
+
+  it("rejects an expiry beyond the backend limit before submitting", async () => {
+    const onSubmit = vi.fn();
+    const { user } = render(
+      <ProductForm {...defaultProps} onSubmit={onSubmit} />,
+    );
+    await user.type(screen.getByLabelText(/Название/i), "Молоко");
+    await user.type(screen.getByLabelText(/Срок годности/i), "4000");
+    await user.click(screen.getByRole("button", { name: /Создать/i }));
+
+    expect(await screen.findByText("Не больше 3650")).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it("shows 'Сохранить' button when editing", () => {
