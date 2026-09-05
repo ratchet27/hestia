@@ -70,6 +70,8 @@ export function useCookRecipe() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all });
+      // Cooking consumes stock, which can push products below min_stock.
+      queryClient.invalidateQueries({ queryKey: queryKeys.shoppingList.all });
     },
   });
 }

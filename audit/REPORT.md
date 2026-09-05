@@ -420,7 +420,7 @@ Cyrillic literal counts (verified): `ProductForm.tsx` 24, `ProductsPage.tsx` 21,
 **F-S13 · Nit · frontend · slop · `handleDone` and `handleThrow` identical with "For now" comment**
 `StockPage.tsx:111-134`. Fix: one handler or implement the distinction.
 
-**F-S14 · Nit · frontend · slop · `ManagedItem` re-declares generated shape**
+**F-S14 · Nit · frontend · slop · `ManagedItem` redeclares generated shape**
 `ManagedList.tsx:4-8`. Fix: `Pick<LocationResponse,…>`.
 
 **F-S15 · Low · tests · slop · Vacuous and positional assertions**
