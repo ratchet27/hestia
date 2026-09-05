@@ -19,37 +19,6 @@ class TaskRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Task[]
-     */
-    public function findActive(): array
-    {
-        // @mago-ignore analysis:mixed-return-statement
-        return $this
-            ->createQueryBuilder('t')
-            ->where('t.done = false')
-            ->orderBy('t.dueDate', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * @return Task[]
-     */
-    public function findCompletedRecently(int $days = 3): array
-    {
-        $since = new \DateTimeImmutable(sprintf('-%d days', $days));
-        // @mago-ignore analysis:mixed-return-statement
-        return $this
-            ->createQueryBuilder('t')
-            ->where('t.done = true')
-            ->andWhere('t.doneAt >= :since')
-            ->setParameter('since', $since)
-            ->orderBy('t.doneAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
      * @param string $status 'active'|'completed'|'all'
      * @return Task[]
      */

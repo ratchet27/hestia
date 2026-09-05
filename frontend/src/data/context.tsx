@@ -11,16 +11,6 @@ export interface AuthContextValue {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
-interface DataProviderProps {
-  children: ReactNode;
-}
-
-export function DataProvider({
-  children,
-}: DataProviderProps): React.ReactElement {
-  return <>{children}</>;
-}
-
 interface AuthProviderProps {
   children: ReactNode;
 }

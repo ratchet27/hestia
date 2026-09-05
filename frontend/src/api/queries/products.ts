@@ -6,8 +6,6 @@ import type {
   UpdateProductRequest,
 } from "../generated/models";
 import {
-  deleteApiProductsDelete,
-  getApiProductsShow,
   postApiProductsCreate,
   putApiProductsUpdate,
 } from "../generated/products/products";
@@ -33,20 +31,6 @@ export function useProducts(options: UseProductsOptions = {}) {
       }>(url);
       return response.data.data ?? [];
     },
-  });
-}
-
-export function useProduct(id: string) {
-  return useQuery({
-    queryKey: queryKeys.products.detail(id),
-    queryFn: async () => {
-      const response = await getApiProductsShow(id);
-      if (response.status === 200) {
-        return response.data.data!;
-      }
-      throw new Error("Failed to fetch product");
-    },
-    enabled: !!id,
   });
 }
 
@@ -89,17 +73,6 @@ export function useUpdateProduct() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.products.detail(id),
       });
-    },
-  });
-}
-
-export function useDeleteProduct() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => deleteApiProductsDelete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
     },
   });
 }

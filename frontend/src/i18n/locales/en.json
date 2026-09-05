@@ -5,10 +5,8 @@
     "add": "Add",
     "adding": "Adding...",
     "done": "Done",
-    "delete": "Delete",
     "save": "Save",
     "edit": "Edit",
-    "search": "Search",
     "all": "All",
     "noItems": "No items",
     "logout": "Logout",
@@ -17,9 +15,7 @@
   "scan": {
     "title": "Scan barcode",
     "placeholder": "Enter barcode",
-    "lookup": "Lookup",
-    "notFound": "Barcode not found",
-    "createProduct": "Create product?"
+    "lookup": "Lookup"
   },
   "barcodes": {
     "title": "Barcodes",
@@ -122,7 +118,6 @@
     "saveFailed": "Could not save the recipe. Check the fields."
   },
   "expiry": {
-    "expired": "expired",
     "today": "today",
     "tomorrow": "tomorrow",
     "yesterday": "yesterday",
@@ -218,7 +213,6 @@
       "cancel": "Cancel",
       "create": "Create",
       "delete": "Delete",
-      "deleteConfirm": "Are you sure you want to delete?",
       "saving": "Saving...",
       "creating": "Creating...",
       "deleting": "Deleting..."

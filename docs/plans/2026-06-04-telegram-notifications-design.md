@@ -1,7 +1,7 @@
 # Telegram Notifications (Daily Expiry Summary) — Design
 
 **Date:** 2026-06-04
-**Status:** Approved (design) — pending implementation plan
+**Status:** Implemented (2026-06)
 **Scope:** First slice of spec §15 Telegram integration — an outbound-only daily expiry summary.
 
 ## Goal

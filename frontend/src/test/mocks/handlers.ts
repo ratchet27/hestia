@@ -28,28 +28,3 @@ export const handlers = [
     HttpResponse.json(wrapResponse([])),
   ),
 ];
-
-// Error handlers for testing failure states
-export const errorHandlers = {
-  tasksFailed: http.get("*/api/internal/v1/tasks", () =>
-    HttpResponse.json({ message: "Server error" }, { status: 500 }),
-  ),
-  choresFailed: http.get("*/api/internal/v1/chores", () =>
-    HttpResponse.json({ message: "Server error" }, { status: 500 }),
-  ),
-  stockEntriesFailed: http.get("*/api/internal/v1/stocks/entries", () =>
-    HttpResponse.json({ message: "Server error" }, { status: 500 }),
-  ),
-  stockEntriesUnauthorized: http.get("*/api/internal/v1/stocks/entries", () =>
-    HttpResponse.json({ message: "Unauthorized" }, { status: 401 }),
-  ),
-  addStockValidationError: http.post("*/api/internal/v1/stocks/add", () =>
-    HttpResponse.json(
-      {
-        message: "Validation failed",
-        violations: [{ propertyPath: "quantity", message: "Must be positive" }],
-      },
-      { status: 422 },
-    ),
-  ),
-};

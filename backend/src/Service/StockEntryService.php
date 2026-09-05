@@ -22,7 +22,6 @@ use App\Response\Stock\LocationQuantityResponse;
 use App\Response\Stock\ProductBriefResponse;
 use App\Response\Stock\ProductSummaryResponse;
 use App\Response\Stock\StockEntryResponse;
-use App\Response\Stock\StockSummaryResponse;
 use App\Message\StockChangedMessage;
 use App\Service\Time\HouseholdCalendar;
 use Doctrine\ORM\EntityManagerInterface;
@@ -307,43 +306,6 @@ class StockEntryService
                 return ExpiringEntryResponse::fromEntity($entry, $this->householdCalendar->daysUntil($bestBefore));
             },
             $entries
-        );
-    }
-
-    /**
-     * Get stock summary for a single product (used by ProductController).
-     */
-    public function getStockSummaryForProduct(Uuid $productId): ?StockSummaryResponse
-    {
-        $totalQuantity = $this->stockEntryRepository->countByProduct($productId);
-        if ($totalQuantity === 0) {
-            return null;
-        }
-
-        $locationBreakdown = $this->stockEntryRepository->getLocationBreakdown($productId);
-        $locations = array_map(
-            static fn(array $loc) => new LocationQuantityResponse(
-                id: Uuid::fromString($loc['location_id']),
-                name: $loc['location_name'],
-                quantity: (int) $loc['quantity']
-            ),
-            $locationBreakdown
-        );
-
-        // Get earliest expiry
-        $entries = $this->stockEntryRepository->findByProduct($productId);
-        $earliestExpiry = null;
-        foreach ($entries as $entry) {
-            $bestBefore = $entry->getBestBefore();
-            if ($bestBefore !== null && ( $earliestExpiry === null || $bestBefore < $earliestExpiry )) {
-                $earliestExpiry = $bestBefore;
-            }
-        }
-
-        return new StockSummaryResponse(
-            total_quantity: $totalQuantity,
-            earliest_expiry: $earliestExpiry?->format('Y-m-d'),
-            locations: $locations
         );
     }
 

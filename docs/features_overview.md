@@ -23,22 +23,21 @@ This document exists to prevent scope creep and to protect daily usability.
 ### Tasks / Chores
 - recurring chores
 - one-off tasks
-- reminders
 
 ### Telegram
 - daily expiry summary
-- weekly chores summary
-- optional shopping list summary
 
 ### UX
 - desktop-first management UI
-- mobile-friendly web UI
-- Russian language
+- Russian and English UI
 
 ---
 
 ## Postponed (v2+)
 
+- per-chore reminders
+- weekly chores summary and shopping-list summary in Telegram
+- mobile-friendly web UI
 - undo system
 - meal planning calendar
 - better mobile UX

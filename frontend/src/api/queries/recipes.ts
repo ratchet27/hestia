@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SaveRecipeRequest } from "../generated/models";
 import {
-  deleteApiInternalV1RecipesDelete,
   getApiInternalV1RecipesIndex,
   postApiInternalV1RecipesAddMissing,
   postApiInternalV1RecipesCook,
@@ -51,18 +50,6 @@ export function useUpdateRecipe() {
         return response.data.data!;
       }
       throw new Error("Failed to update recipe");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.recipes.all });
-    },
-  });
-}
-
-export function useDeleteRecipe() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      await deleteApiInternalV1RecipesDelete(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.all });

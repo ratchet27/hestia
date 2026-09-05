@@ -1,14 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type {
-  AddStockRequest,
-  ConsumeStockRequest,
-  UpdateStockEntryRequest,
-} from "../generated/models";
+import type { AddStockRequest, ConsumeStockRequest } from "../generated/models";
 import {
-  deleteApiInternalV1StocksEntriesDelete,
   getApiInternalV1StocksEntriesList,
   getApiInternalV1StocksExpiring,
-  patchApiInternalV1StocksEntriesUpdate,
   postApiInternalV1StocksAdd,
   postApiInternalV1StocksConsume,
 } from "../generated/stock/stock";
@@ -65,40 +59,6 @@ export function useConsumeStock() {
       }
       throw new Error("Failed to consume stock");
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all });
-    },
-  });
-}
-
-export function useUpdateStockEntry() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: UpdateStockEntryRequest;
-    }) => {
-      const response = await patchApiInternalV1StocksEntriesUpdate(id, data);
-      if (response.status === 200) {
-        return response.data.data!;
-      }
-      throw new Error("Failed to update stock entry");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all });
-    },
-  });
-}
-
-export function useDeleteStockEntry() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => deleteApiInternalV1StocksEntriesDelete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all });
     },

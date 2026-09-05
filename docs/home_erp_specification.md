@@ -300,7 +300,7 @@ Pages:
 - Shopping list
 - Tasks & Chores
 - Recipes (CRUD, fulfillment check, cook, add missing to shopping list)
-- Settings (language switch is live; other controls are placeholders — §19)
+- Settings (language switch, locations and categories CRUD, Telegram status + test message)
 
 Telegram acts as a lightweight awareness layer on top of this UI.
 

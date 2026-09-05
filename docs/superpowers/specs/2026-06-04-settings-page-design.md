@@ -1,7 +1,7 @@
 # Settings Page — Design
 
 **Date:** 2026-06-04
-**Status:** Approved design, pending implementation plan
+**Status:** Implemented (2026-06)
 
 ## 1. Problem
 

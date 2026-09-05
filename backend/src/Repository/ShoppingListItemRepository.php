@@ -9,7 +9,6 @@ use App\Entity\ShoppingListItem;
 use App\Enum\ShoppingListSource;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<ShoppingListItem>
@@ -81,13 +80,5 @@ class ShoppingListItemRepository extends ServiceEntityRepository
             ->setParameter('done', true)
             ->getQuery()
             ->execute();
-    }
-
-    /**
-     * Find item by UUID.
-     */
-    public function findByUuid(Uuid $id): ?ShoppingListItem
-    {
-        return $this->find($id);
     }
 }
