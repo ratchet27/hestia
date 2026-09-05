@@ -32,27 +32,27 @@ jobs:
         uses: docker/setup-buildx-action@v4
       - name: Build Docker images
         working-directory: backend
+        env:
+          # Passed via env, not interpolated into the script: a ref name is
+          # attacker-influenced text and must not be expanded as shell code.
+          CACHE_SCOPE: ${{ github.ref }}
         run: |
           docker buildx bake \
             --file compose.yaml \
             --file compose.override.yaml \
-            --set '*.cache-from=type=gha,scope=${{ github.ref }}' \
+            --set "*.cache-from=type=gha,scope=${CACHE_SCOPE}" \
             --set '*.cache-from=type=gha,scope=refs/heads/master' \
-            --set '*.cache-to=type=gha,scope=${{ github.ref }},mode=max' \
+            --set "*.cache-to=type=gha,scope=${CACHE_SCOPE},mode=max" \
             --pull \
             --load
       - name: Start services
         run: docker compose -f compose.yaml -f compose.override.yaml -f compose.ci.yaml up --wait --no-build
       - name: Check HTTP reachability
         run: curl -v --fail-with-body http://localhost
-      - name: Create test database
-        if: false # Remove this line if Doctrine ORM is installed
-        run: docker compose exec -T php bin/console -e test doctrine:database:create
-      - name: Run migrations
-        if: false # Remove this line if Doctrine Migrations is installed
-        run: docker compose exec -T php bin/console -e test doctrine:migrations:migrate --no-interaction
       - name: Run PHPUnit
         run: docker compose exec -T php bin/phpunit
-      - name: Doctrine Schema Validator
-        if: false # Remove this line if Doctrine ORM is installed
-        run: docker compose exec -T php bin/console -e test doctrine:schema:validate
+      - name: Doctrine mapping validator
+        # --skip-sync: the DB legitimately differs from the mapping by one
+        # partial unique index (shopping_list_product_unique) that Doctrine
+        # cannot express; only the mapping itself is checked here.
+        run: docker compose exec -T php bin/console -e test doctrine:schema:validate --skip-sync

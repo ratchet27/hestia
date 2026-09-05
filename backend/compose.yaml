@@ -35,6 +35,11 @@ services:
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     command: bin/console messenger:consume async scheduler_main --time-limit=3600 -vv
+    # The image HEALTHCHECK probes Caddy's metrics endpoint, which this
+    # console-only service never starts; without this override it is
+    # permanently "unhealthy" and `up --wait` never settles.
+    healthcheck:
+      disable: true
     depends_on:
       php:
         condition: service_healthy
@@ -59,8 +64,6 @@ services:
       start_period: 60s
     volumes:
       - database_data:/var/lib/postgresql
-    ports:
-      - "5432:5432"
 
   rabbitmq:
     image: rabbitmq:4.3-management-alpine
@@ -75,9 +78,6 @@ services:
       start_period: 30s
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
 
 volumes:
   caddy_data:

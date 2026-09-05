@@ -34,7 +34,7 @@ jobs:
         env:
           LINTER_RULES_PATH: .github/linters
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Only enable: BASH, DOCKERFILE_HADOLINT, YAML, SHELL_SHFMT, GITLEAKS
+          # Only enable: BASH, DOCKERFILE_HADOLINT, YAML, SHELL_SHFMT, GITLEAKS, ZIZMOR
           # Disable everything else:
           VALIDATE_ANSIBLE: false
           VALIDATE_BIOME: false
@@ -53,7 +53,6 @@ jobs:
           VALIDATE_ENV: false
           VALIDATE_GIT_COMMITLINT: false
           VALIDATE_GITHUB_ACTIONS: false
-          VALIDATE_GITHUB_ACTIONS_ZIZMOR: false
           VALIDATE_GO: false
           VALIDATE_GO_MODULES: false
           VALIDATE_GO_RELEASER: false
