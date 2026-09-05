@@ -57,4 +57,43 @@ class CsrfTest extends WebTestCase
 
         static::assertSame(Response::HTTP_CREATED, $this->client->getResponse()->getStatusCode());
     }
+
+    public function testLoginRotatesTheCsrfToken(): void
+    {
+        // @mago-ignore lint:no-literal-password
+        UserFactory::createOne(['username' => 'rotate', 'plainPassword' => 'secret123']);
+        $this->client->request(\Symfony\Component\HttpFoundation\Request::METHOD_GET, '/api/internal/v1/auth/csrf');
+        $before = $this->client->getCookieJar()->get('XSRF-TOKEN')?->getValue();
+        static::assertNotNull($before);
+
+        // @mago-ignore lint:no-literal-password
+        $response = $this->apiPost('/auth/login', ['username' => 'rotate', 'password' => 'secret123']);
+        static::assertSame(Response::HTTP_OK, $response->getStatusCode());
+
+        $after = $this->client->getCookieJar()->get('XSRF-TOKEN')?->getValue();
+        static::assertNotNull($after);
+        static::assertNotSame($before, $after, 'a token planted before login must not survive it');
+    }
+
+    public function testLogoutRotatesTheCsrfToken(): void
+    {
+        $this->client->request(\Symfony\Component\HttpFoundation\Request::METHOD_GET, '/api/internal/v1/auth/csrf');
+        $before = $this->client->getCookieJar()->get('XSRF-TOKEN')?->getValue();
+
+        $this->apiPost('/auth/logout', []);
+
+        $after = $this->client->getCookieJar()->get('XSRF-TOKEN')?->getValue();
+        static::assertNotNull($after);
+        static::assertNotSame($before, $after, 'a token from the old session must not survive logout');
+    }
+
+    public function testUnrelatedResponseKeepsTheExistingToken(): void
+    {
+        $this->client->request(\Symfony\Component\HttpFoundation\Request::METHOD_GET, '/api/internal/v1/auth/csrf');
+        $before = $this->client->getCookieJar()->get('XSRF-TOKEN')?->getValue();
+
+        $this->apiGet('/products');
+
+        static::assertSame($before, $this->client->getCookieJar()->get('XSRF-TOKEN')?->getValue());
+    }
 }

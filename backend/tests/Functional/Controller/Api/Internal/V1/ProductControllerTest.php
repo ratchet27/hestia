@@ -251,6 +251,38 @@ class ProductControllerTest extends WebTestCase
         $this->assertDatabaseHas(Product::class, ['name' => 'New Product']);
     }
 
+    public function testNameFilterTreatsLikeMetacharactersLiterally(): void
+    {
+        $this->createProduct(['name' => '50% cream']);
+        $this->createProduct(['name' => 'Milk']);
+        $this->createProduct(['name' => 'Snack_bar']);
+
+        $percent = static::assertJsonResponse($this->apiGet('/products', ['name' => '%']), Response::HTTP_OK);
+        static::assertSame(['50% cream'], array_column($percent['data'], 'name'));
+
+        $underscore = static::assertJsonResponse($this->apiGet('/products', ['name' => 'k_b']), Response::HTTP_OK);
+        static::assertSame(['Snack_bar'], array_column($underscore['data'], 'name'));
+    }
+
+    public function testCreateProductRejectsIntegersBeyondTheColumnRange(): void
+    {
+        $category = $this->createCategory();
+        $location = $this->createLocation();
+
+        $response = $this->apiPost('/products', [
+            'name' => 'Huge',
+            'category_id' => $category->getId(),
+            'default_location_id' => $location->getId(),
+            'min_stock' => 2 ** 31,
+            'default_expiry_days' => 2 ** 31
+        ]);
+        $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        $properties = array_column($data['errors'], 'property');
+        static::assertContains('min_stock', $properties);
+        static::assertContains('default_expiry_days', $properties);
+    }
+
     public function testCreateProductWithAllFields(): void
     {
         $category = $this->createCategory();
@@ -838,7 +870,7 @@ class ProductControllerTest extends WebTestCase
         $data = static::assertErrorResponse($response, Response::HTTP_UNPROCESSABLE_ENTITY);
 
         static::assertSame('VALIDATION_ERROR', $data['type']);
-        static::assertSame('categoryId', $data['errors'][0]['property']);
+        static::assertSame('category_id', $data['errors'][0]['property']);
     }
 
     public function testCreateProductRejectsDuplicateBarcodes(): void

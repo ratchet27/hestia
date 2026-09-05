@@ -22,10 +22,10 @@ final readonly class UpdateProductRequest
         #[Assert\Uuid]
         public string $defaultLocationId,
 
-        #[Assert\Positive]
+        #[Assert\Range(min: 1, max: 3650)]
         public ?int $defaultExpiryDays = null,
 
-        #[Assert\PositiveOrZero]
+        #[Assert\Range(min: 0, max: 100_000)]
         public int $minStock = 0,
 
         #[Assert\Length(max: 50)]
