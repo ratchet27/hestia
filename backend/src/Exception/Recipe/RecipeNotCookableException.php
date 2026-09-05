@@ -9,7 +9,7 @@ use App\Exception\ApiProblem;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 
-class RecipeNotCookableException extends ApiException
+final class RecipeNotCookableException extends ApiException
 {
     /**
      * @param string[] $missing
@@ -20,11 +20,8 @@ class RecipeNotCookableException extends ApiException
             title: 'Recipe is not cookable',
             type: 'RECIPE_NOT_COOKABLE',
             code: Response::HTTP_CONFLICT,
-            extraData: [
-                'recipe_id' => (string) $id,
-                'missing' => $missing,
-                'message' => 'Not all ingredients are in stock'
-            ]
+            extraData: ['id' => (string) $id, 'missing' => $missing],
+            detail: 'Not all ingredients are in stock'
         ));
     }
 }

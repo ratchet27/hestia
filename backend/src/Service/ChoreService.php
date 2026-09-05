@@ -8,8 +8,7 @@ use App\Entity\Chore;
 use App\Enum\ScheduleType;
 use App\Exception\Chore\ChoreNotFoundException;
 use App\Repository\ChoreRepository;
-use App\Request\CreateChoreRequest;
-use App\Request\UpdateChoreRequest;
+use App\Request\SaveChoreRequest;
 use App\Service\Time\HouseholdCalendar;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
@@ -42,7 +41,7 @@ class ChoreService
         return $chore;
     }
 
-    public function createChore(CreateChoreRequest $request): Chore
+    public function createChore(SaveChoreRequest $request): Chore
     {
         $chore = new Chore();
         $chore->setName($request->name);
@@ -57,7 +56,7 @@ class ChoreService
         return $chore;
     }
 
-    public function updateChore(Uuid $id, UpdateChoreRequest $request): Chore
+    public function updateChore(Uuid $id, SaveChoreRequest $request): Chore
     {
         $chore = $this->getChore($id);
         $chore->setName($request->name);

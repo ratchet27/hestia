@@ -4,20 +4,13 @@ declare(strict_types = 1);
 
 namespace App\Exception\Chore;
 
-use App\Exception\ApiException;
-use App\Exception\ApiProblem;
-use Symfony\Component\HttpFoundation\Response;
+use App\Exception\EntityNotFoundException;
 use Symfony\Component\Uid\Uuid;
 
-final class ChoreNotFoundException extends ApiException
+final class ChoreNotFoundException extends EntityNotFoundException
 {
     public function __construct(Uuid $id)
     {
-        parent::__construct(new ApiProblem(
-            title: 'Chore not found',
-            type: 'CHORE_NOT_FOUND',
-            code: Response::HTTP_NOT_FOUND,
-            extraData: ['id' => (string) $id]
-        ));
+        parent::__construct('Chore not found', 'CHORE_NOT_FOUND', $id);
     }
 }

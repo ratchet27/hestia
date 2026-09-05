@@ -4,20 +4,13 @@ declare(strict_types = 1);
 
 namespace App\Exception\Product;
 
-use App\Exception\ApiException;
-use App\Exception\ApiProblem;
-use Symfony\Component\HttpFoundation\Response;
+use App\Exception\EntityNotFoundException;
 use Symfony\Component\Uid\Uuid;
 
-final class ProductNotFoundException extends ApiException
+final class ProductNotFoundException extends EntityNotFoundException
 {
     public function __construct(Uuid $id)
     {
-        parent::__construct(new ApiProblem(
-            title: 'Product not found',
-            type: 'PRODUCT_NOT_FOUND',
-            code: Response::HTTP_NOT_FOUND,
-            extraData: ['id' => (string) $id]
-        ));
+        parent::__construct('Product not found', 'PRODUCT_NOT_FOUND', $id);
     }
 }

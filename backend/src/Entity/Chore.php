@@ -6,18 +6,15 @@ namespace App\Entity;
 
 use App\Enum\ScheduleType;
 use App\Repository\ChoreRepository;
-use App\Response\Chore\ChoreResponse;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
-use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ChoreRepository::class)]
 #[ORM\Table(name: 'chores')]
 #[ORM\HasLifecycleCallbacks]
-#[Map(target: ChoreResponse::class)]
 class Chore
 {
     #[ORM\Id]

@@ -8,7 +8,8 @@ use App\Enum\ScheduleType;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-final readonly class CreateChoreRequest
+/** Payload for both POST (create) and PUT (full update); the two verbs accept the same fields. */
+final readonly class SaveChoreRequest
 {
     public function __construct(
         #[Assert\NotBlank]

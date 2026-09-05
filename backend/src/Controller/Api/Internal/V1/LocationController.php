@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
-use App\Request\CreateLocationRequest;
-use App\Request\UpdateLocationRequest;
+use App\Request\SaveLocationRequest;
 use App\Response\Location\LocationListItemResponse;
 use App\Service\LocationService;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -52,13 +51,13 @@ final class LocationController extends AbstractController
 
     #[Route('/locations', name: 'api_locations_create', methods: ['POST'])]
     #[OA\Post(summary: 'Create location', description: 'Creates a storage location.')]
-    #[OA\RequestBody(required: true, content: new Model(type: CreateLocationRequest::class))]
+    #[OA\RequestBody(required: true, content: new Model(type: SaveLocationRequest::class))]
     #[OA\Response(response: 201, description: 'Location created', content: new OA\JsonContent(properties: [
         new OA\Property(property: 'data', ref: new Model(type: LocationListItemResponse::class))
     ]))]
     #[OA\Response(response: 409, description: 'Name already exists')]
     #[OA\Response(response: 422, description: 'Validation error')]
-    public function create(#[MapRequestPayload] CreateLocationRequest $request): JsonResponse
+    public function create(#[MapRequestPayload] SaveLocationRequest $request): JsonResponse
     {
         $location = $this->locationService->create($request);
 
@@ -72,13 +71,13 @@ final class LocationController extends AbstractController
         methods: ['PATCH']
     )]
     #[OA\Patch(summary: 'Rename location', description: 'Renames a storage location.')]
-    #[OA\RequestBody(required: true, content: new Model(type: UpdateLocationRequest::class))]
+    #[OA\RequestBody(required: true, content: new Model(type: SaveLocationRequest::class))]
     #[OA\Response(response: 200, description: 'Location updated', content: new OA\JsonContent(properties: [
         new OA\Property(property: 'data', ref: new Model(type: LocationListItemResponse::class))
     ]))]
     #[OA\Response(response: 404, description: 'Location not found')]
     #[OA\Response(response: 409, description: 'Name already exists')]
-    public function update(Uuid $uuid, #[MapRequestPayload] UpdateLocationRequest $request): JsonResponse
+    public function update(Uuid $uuid, #[MapRequestPayload] SaveLocationRequest $request): JsonResponse
     {
         $location = $this->locationService->update($uuid, $request);
 

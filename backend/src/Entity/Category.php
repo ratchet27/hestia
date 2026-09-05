@@ -5,13 +5,11 @@ declare(strict_types = 1);
 namespace App\Entity;
 
 use App\Repository\CategoryRepository;
-use App\Response\Category\CategoryResponse;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -19,7 +17,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'categories')]
 // Runtime uniqueness is enforced by the DB constraint (translated to 409 in the service); this documents the invariant and guards any non-service write path.
 #[UniqueEntity(fields: ['name'], message: 'Category with this name already exists')]
-#[Map(target: CategoryResponse::class)]
 class Category
 {
     #[ORM\Id]

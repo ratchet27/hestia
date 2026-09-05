@@ -10,8 +10,7 @@ use App\Exception\Category\CategoryNameTakenException;
 use App\Exception\Category\CategoryNotFoundException;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
-use App\Request\CreateCategoryRequest;
-use App\Request\UpdateCategoryRequest;
+use App\Request\SaveCategoryRequest;
 use App\Service\CategoryService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,7 +31,7 @@ class CategoryServiceTest extends TestCase
             $this->createStub(ProductRepository::class)
         );
 
-        $result = $service->create(new CreateCategoryRequest('Снеки'));
+        $result = $service->create(new SaveCategoryRequest('Снеки'));
         static::assertSame('Снеки', $result->getName());
     }
 
@@ -48,7 +47,7 @@ class CategoryServiceTest extends TestCase
         );
 
         $this->expectException(CategoryNameTakenException::class);
-        $service->create(new CreateCategoryRequest('Снеки'));
+        $service->create(new SaveCategoryRequest('Снеки'));
     }
 
     public function testUpdateTranslatesUniqueViolationToNameTaken(): void
@@ -65,7 +64,7 @@ class CategoryServiceTest extends TestCase
         $service = new CategoryService($em, $repo, $this->createStub(ProductRepository::class));
 
         $this->expectException(CategoryNameTakenException::class);
-        $service->update(Uuid::v7(), new UpdateCategoryRequest('Снеки'));
+        $service->update(Uuid::v7(), new SaveCategoryRequest('Снеки'));
     }
 
     public function testUpdateChangesNameAndFlushes(): void
@@ -81,7 +80,7 @@ class CategoryServiceTest extends TestCase
 
         $service = new CategoryService($em, $repo, $this->createStub(ProductRepository::class));
 
-        $result = $service->update(Uuid::v7(), new UpdateCategoryRequest('Снеки'));
+        $result = $service->update(Uuid::v7(), new SaveCategoryRequest('Снеки'));
         static::assertSame('Снеки', $result->getName());
     }
 
@@ -98,7 +97,7 @@ class CategoryServiceTest extends TestCase
 
         $service = new CategoryService($em, $repo, $this->createStub(ProductRepository::class));
 
-        $result = $service->update(Uuid::v7(), new UpdateCategoryRequest('Снеки'));
+        $result = $service->update(Uuid::v7(), new SaveCategoryRequest('Снеки'));
         static::assertSame('Снеки', $result->getName());
     }
 
@@ -114,7 +113,7 @@ class CategoryServiceTest extends TestCase
         );
 
         $this->expectException(CategoryNotFoundException::class);
-        $service->update(Uuid::v7(), new UpdateCategoryRequest('Снеки'));
+        $service->update(Uuid::v7(), new SaveCategoryRequest('Снеки'));
     }
 
     public function testDeleteInUseThrowsConflict(): void
