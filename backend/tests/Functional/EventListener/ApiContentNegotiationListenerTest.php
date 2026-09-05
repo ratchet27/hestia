@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Tests\Functional\EventListener;
 
-use App\Factory\UserFactory;
+use App\Tests\Factory\UserFactory;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;

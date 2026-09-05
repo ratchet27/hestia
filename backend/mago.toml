@@ -38,4 +38,4 @@ strict-list-index-checks = true
 no-boolean-literal-comparison = true
 check-missing-type-hints = true
 register-super-globals = true
-excludes = ["tests", "src/Story"]
+excludes = ["tests"]

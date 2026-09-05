@@ -112,20 +112,35 @@ class StockEntryService
             throw new InvalidLocationReferenceException($locationId);
         }
 
-        $available = $this->stockEntryRepository->countByProductAndLocation($productId, $locationId);
-        if ($available < $request->quantity) {
-            throw new InsufficientStockException($request->quantity, $available);
-        }
+        // Count, select FOR UPDATE and delete happen in one transaction: two
+        // concurrent consumers of the last unit cannot both succeed. If the locked
+        // select returns fewer rows than counted (a racer got there first), the
+        // requester is told the stock was insufficient instead of over-consuming.
+        $deletedIds = $this->entityManager->wrapInTransaction(function () use (
+            $productId,
+            $locationId,
+            $request
+        ): array {
+            $available = $this->stockEntryRepository->countByProductAndLocation($productId, $locationId);
+            if ($available < $request->quantity) {
+                throw new InsufficientStockException($request->quantity, $available);
+            }
 
-        $entries = $this->stockEntryRepository->findForFifoConsumption($productId, $locationId, $request->quantity);
-        $deletedIds = [];
+            $entries = $this->stockEntryRepository->findForFifoConsumption($productId, $locationId, $request->quantity);
+            if (count($entries) < $request->quantity) {
+                throw new InsufficientStockException($request->quantity, count($entries));
+            }
 
-        foreach ($entries as $entry) {
-            $deletedIds[] = $entry->getId();
-            $this->entityManager->remove($entry);
-        }
+            $deletedIds = [];
+            foreach ($entries as $entry) {
+                $deletedIds[] = $entry->getId();
+                $this->entityManager->remove($entry);
+            }
 
-        $this->entityManager->flush();
+            $this->entityManager->flush();
+
+            return $deletedIds;
+        });
 
         $remaining = $this->stockEntryRepository->countByProductAndLocation($productId, $locationId);
 
@@ -151,19 +166,27 @@ class StockEntryService
      */
     public function consumeAcrossLocations(Uuid $productId, int $quantity): int
     {
-        $previousQty = $this->stockEntryRepository->countByProduct($productId);
-        if ($previousQty < $quantity) {
-            throw new InsufficientStockException($quantity, $previousQty);
-        }
+        // Own transaction so the FOR UPDATE select is valid for direct callers; when
+        // called from RecipeService::cook this simply nests inside its transaction.
+        return $this->entityManager->wrapInTransaction(function () use ($productId, $quantity): int {
+            $previousQty = $this->stockEntryRepository->countByProduct($productId);
+            if ($previousQty < $quantity) {
+                throw new InsufficientStockException($quantity, $previousQty);
+            }
 
-        $entries = $this->stockEntryRepository->findForFifoConsumptionAcrossLocations($productId, $quantity);
-        foreach ($entries as $entry) {
-            $this->entityManager->remove($entry);
-        }
+            $entries = $this->stockEntryRepository->findForFifoConsumptionAcrossLocations($productId, $quantity);
+            if (count($entries) < $quantity) {
+                throw new InsufficientStockException($quantity, count($entries));
+            }
 
-        $this->entityManager->flush();
+            foreach ($entries as $entry) {
+                $this->entityManager->remove($entry);
+            }
 
-        return count($entries);
+            $this->entityManager->flush();
+
+            return count($entries);
+        });
     }
 
     /**

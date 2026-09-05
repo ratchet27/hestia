@@ -8,6 +8,7 @@ use App\Entity\StockEntry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\DBAL\LockMode;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -23,6 +24,9 @@ class StockEntryRepository extends ServiceEntityRepository
 
     /**
      * Find entries for FIFO consumption (earliest best_before first, NULL last, then created_at).
+     *
+     * Rows are locked FOR UPDATE, so two concurrent consumers cannot both select
+     * the same last unit. Must be called inside a transaction.
      *
      * @return StockEntry[]
      */
@@ -40,11 +44,14 @@ class StockEntryRepository extends ServiceEntityRepository
             ->addOrderBy('e.createdAt', 'ASC')
             ->setMaxResults($limit)
             ->getQuery()
+            ->setLockMode(LockMode::PESSIMISTIC_WRITE)
             ->getResult();
     }
 
     /**
      * Find entries for FIFO consumption across ALL locations (earliest best_before first, NULL last).
+     *
+     * Rows are locked FOR UPDATE; must be called inside a transaction.
      *
      * @return StockEntry[]
      */
@@ -60,6 +67,7 @@ class StockEntryRepository extends ServiceEntityRepository
             ->addOrderBy('e.createdAt', 'ASC')
             ->setMaxResults($limit)
             ->getQuery()
+            ->setLockMode(LockMode::PESSIMISTIC_WRITE)
             ->getResult();
     }
 

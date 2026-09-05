@@ -20,10 +20,16 @@ final readonly class HouseholdCalendar
     ) {
     }
 
+    /** The current instant, expressed in the household timezone. */
+    public function now(): \DateTimeImmutable
+    {
+        return $this->clock->now()->setTimezone($this->appTimezone->get());
+    }
+
     /** Midnight today in the household timezone. */
     public function today(): \DateTimeImmutable
     {
-        return $this->clock->now()->setTimezone($this->appTimezone->get())->setTime(0, 0);
+        return $this->now()->setTime(0, 0);
     }
 
     /**

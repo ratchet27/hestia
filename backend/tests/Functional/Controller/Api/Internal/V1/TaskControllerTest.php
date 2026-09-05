@@ -6,8 +6,8 @@ namespace App\Tests\Functional\Controller\Api\Internal\V1;
 
 use App\Entity\Task;
 use App\Enum\TaskPriority;
-use App\Factory\TaskFactory;
-use App\Factory\UserFactory;
+use App\Tests\Factory\TaskFactory;
+use App\Tests\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;

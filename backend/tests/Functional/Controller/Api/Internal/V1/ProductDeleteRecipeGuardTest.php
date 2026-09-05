@@ -5,10 +5,10 @@ declare(strict_types = 1);
 namespace App\Tests\Functional\Controller\Api\Internal\V1;
 
 use App\Entity\Product;
-use App\Factory\ProductFactory;
-use App\Factory\RecipeFactory;
-use App\Factory\RecipeIngredientFactory;
-use App\Factory\UserFactory;
+use App\Tests\Factory\ProductFactory;
+use App\Tests\Factory\RecipeFactory;
+use App\Tests\Factory\RecipeIngredientFactory;
+use App\Tests\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
