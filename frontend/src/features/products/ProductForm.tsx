@@ -1,4 +1,4 @@
-import { type ReactElement, useEffect, useState } from "react";
+import { type ReactElement, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ import type {
   ProductResponse,
 } from "../../api/generated/models";
 import { FormActions } from "../../components/FormActions";
+import { barcodesOf } from "./barcodes";
 
 interface ProductFormProps {
   product?: ProductResponse;
@@ -17,7 +18,6 @@ interface ProductFormProps {
   onSubmit: (data: CreateProductRequest) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
-  submitError?: Error | null;
 }
 
 /** Stored unit codes (the DB value); labels come from i18n `products.form.units`. */
@@ -33,6 +33,25 @@ interface FormValues {
   active: boolean;
 }
 
+const FORM_FIELDS: ReadonlyArray<keyof FormValues> = [
+  "name",
+  "unit",
+  "category_id",
+  "default_location_id",
+  "default_expiry_days",
+  "min_stock",
+  "active",
+];
+
+function isFormField(name: string): name is keyof FormValues {
+  return (FORM_FIELDS as ReadonlyArray<string>).includes(name);
+}
+
+// Mirrors Assert\Range on the backend DTO so the user sees the limit before
+// the round trip; the server still enforces it.
+const EXPIRY_DAYS_MAX = 3650;
+const MIN_STOCK_MAX = 100_000;
+
 export function ProductForm({
   product,
   initialBarcode,
@@ -41,16 +60,12 @@ export function ProductForm({
   onSubmit,
   onCancel,
   isSubmitting,
-  submitError,
 }: ProductFormProps): ReactElement {
   const { t } = useTranslation();
   const [barcodesExpanded, setBarcodesExpanded] = useState(!!initialBarcode);
   const [barcodes, setBarcodes] = useState<string[]>(() => {
     if (initialBarcode) return [initialBarcode];
-    if (product?.barcodes && Array.isArray(product.barcodes)) {
-      return product.barcodes.map((b) => b.barcode);
-    }
-    return [];
+    return barcodesOf(product).map((b) => b.barcode);
   });
   const [newBarcode, setNewBarcode] = useState("");
 
@@ -72,38 +87,28 @@ export function ProductForm({
     },
   });
 
-  // Map API errors to form fields or toast
-  useEffect(() => {
-    if (!(submitError instanceof ApiError)) return;
+  const applyServerError = (error: unknown): void => {
+    if (!(error instanceof ApiError)) throw error;
 
-    // Handle 409 Conflict - barcode already exists
-    if (submitError.isConflict && submitError.productName) {
-      toast.error(
-        t("barcodes.belongsTo", { product: submitError.productName }),
-      );
+    // 409: the barcode belongs to another product
+    if (error.isConflict && error.productName) {
+      toast.error(t("barcodes.belongsTo", { product: error.productName }));
       return;
     }
 
-    // Map 422 validation errors to form fields
-    if (submitError.isValidationError && submitError.violations) {
-      submitError.violations.forEach((violation) => {
-        const field = violation.propertyPath as keyof FormValues;
-        if (
-          [
-            "name",
-            "unit",
-            "category_id",
-            "default_location_id",
-            "default_expiry_days",
-            "min_stock",
-            "active",
-          ].includes(field)
-        ) {
+    // 422: the backend reports wire (snake_case) names, the same as FormValues
+    if (error.isValidationError && error.violations) {
+      for (const violation of error.violations) {
+        const field = violation.propertyPath;
+        if (isFormField(field)) {
           setError(field, { type: "server", message: violation.message });
         }
-      });
+      }
+      return;
     }
-  }, [submitError, setError, t]);
+
+    // Anything else already produced the global toast (queryClient onError).
+  };
 
   const handleAddBarcode = () => {
     const trimmed = newBarcode.trim();
@@ -117,7 +122,7 @@ export function ProductForm({
   };
 
   const onFormSubmit = async (values: FormValues): Promise<void> => {
-    const data: CreateProductRequest = {
+    const payload: CreateProductRequest = {
       name: values.name,
       unit: values.unit,
       category_id: values.category_id,
@@ -129,7 +134,11 @@ export function ProductForm({
       active: values.active,
       barcodes: barcodes.length > 0 ? barcodes : undefined,
     };
-    await onSubmit(data);
+    try {
+      await onSubmit(payload);
+    } catch (error) {
+      applyServerError(error);
+    }
   };
 
   return (
@@ -244,6 +253,10 @@ export function ProductForm({
             placeholder={t("products.form.optional")}
             {...register("default_expiry_days", {
               min: { value: 1, message: t("products.form.expiryMin") },
+              max: {
+                value: EXPIRY_DAYS_MAX,
+                message: t("products.form.expiryMax", { max: EXPIRY_DAYS_MAX }),
+              },
             })}
             className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
@@ -265,6 +278,10 @@ export function ProductForm({
             type="number"
             {...register("min_stock", {
               min: { value: 0, message: t("products.form.minStockNegative") },
+              max: {
+                value: MIN_STOCK_MAX,
+                message: t("products.form.minStockMax", { max: MIN_STOCK_MAX }),
+              },
             })}
             className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
           />

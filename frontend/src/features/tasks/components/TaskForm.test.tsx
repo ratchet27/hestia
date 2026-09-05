@@ -61,10 +61,13 @@ describe("TaskForm", () => {
       <TaskForm {...defaultProps} task={task} onDelete={onDelete} />,
     );
 
-    await user.click(screen.getByText("Удалить"));
-    // After clicking, confirmation buttons should appear
-    const deleteButtons = screen.getAllByText("Удалить");
-    expect(deleteButtons.length).toBeGreaterThanOrEqual(1);
+    await user.click(screen.getByRole("button", { name: "Удалить" }));
+    // First click only asks for confirmation.
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(screen.getAllByRole("button", { name: "Отмена" })).toHaveLength(2);
+
+    await user.click(screen.getByRole("button", { name: "Удалить" }));
+    expect(onDelete).toHaveBeenCalledTimes(1);
   });
 
   it("disables buttons when submitting", () => {

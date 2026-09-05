@@ -25,7 +25,7 @@ export function ProductsGridSkeleton({
   count?: number;
 }): ReactElement {
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div role="status" aria-busy="true" className="grid grid-cols-3 gap-4">
       {Array.from({ length: count }).map((_, i) => (
         <ProductSkeleton key={i} />
       ))}

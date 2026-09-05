@@ -17,16 +17,12 @@ import { Icons } from "../../components/Icons";
 import { Modal } from "../../components/Modal";
 import { PageHeader } from "../../components/PageHeader";
 import { ProductsGridSkeleton } from "../../components/ProductSkeleton";
+import { barcodesOf } from "./barcodes";
 import { ProductForm } from "./ProductForm";
 import { getCategoryColor } from "./utils/categoryColors";
 
-// The API may serialise `barcodes` as an array or as an object keyed by index
-// (a Doctrine collection quirk the generated type reflects); normalise once.
 function firstBarcode(product: ProductResponse): string | undefined {
-  const barcodes = product.barcodes;
-  if (!barcodes) return undefined;
-  const list = Array.isArray(barcodes) ? barcodes : Object.values(barcodes);
-  return list[0]?.barcode;
+  return barcodesOf(product)[0]?.barcode;
 }
 
 export function ProductsPage(): ReactElement {
@@ -218,7 +214,6 @@ export function ProductsPage(): ReactElement {
             onSubmit={handleCreateProduct}
             onCancel={() => setShowAddModal(false)}
             isSubmitting={createProduct.isPending}
-            submitError={createProduct.error}
           />
         </Modal>
       )}
@@ -235,7 +230,6 @@ export function ProductsPage(): ReactElement {
             onSubmit={handleUpdateProduct}
             onCancel={() => setEditingProduct(null)}
             isSubmitting={updateProduct.isPending}
-            submitError={updateProduct.error}
           />
         </Modal>
       )}

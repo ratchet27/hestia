@@ -48,6 +48,9 @@ export function TaskCard({
             e.stopPropagation();
             onToggleDone(task.id);
           }}
+          aria-label={
+            task.done ? t("tasks.items.markUndone") : t("tasks.items.markDone")
+          }
           className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
             task.done
               ? "bg-green-500 text-white"
@@ -67,7 +70,7 @@ export function TaskCard({
               <span className="text-sm text-stone-500">{formattedDueDate}</span>
             )}
             <span
-              className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityStyles[task.priority] ?? priorityStyles.medium}`}
+              className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityStyles[task.priority]}`}
             >
               {t(`tasks.items.priority.${task.priority}`)}
             </span>

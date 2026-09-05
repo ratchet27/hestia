@@ -40,7 +40,6 @@ export function CreateProductModal({
         onSubmit={handleSubmit}
         onCancel={onCancel}
         isSubmitting={createProduct.isPending}
-        submitError={createProduct.error}
       />
     </Modal>
   );

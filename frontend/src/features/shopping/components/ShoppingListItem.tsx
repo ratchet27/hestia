@@ -1,9 +1,4 @@
-import {
-  type KeyboardEvent,
-  type MouseEvent,
-  type ReactElement,
-  useState,
-} from "react";
+import type { KeyboardEvent, MouseEvent, ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import type { ShoppingItemResponse } from "@/api/generated/models";
 
@@ -21,14 +16,12 @@ export function ShoppingListItem({
   isDeleting = false,
 }: ShoppingListItemProps): ReactElement {
   const { t } = useTranslation();
-  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
   const handleCheckboxClick = (e: MouseEvent) => {
     e.stopPropagation();
-    setIsAnimatingOut(true);
-    setTimeout(() => {
-      onDelete();
-    }, 300);
+    // The delete mutation removes the row optimistically; no exit animation
+    // timer that could fire after unmount.
+    onDelete();
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,16 +38,12 @@ export function ShoppingListItem({
       tabIndex={0}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className={`p-4 flex items-center gap-4 hover:bg-stone-50 cursor-pointer transition-all duration-300 ${
-        isAnimatingOut
-          ? "opacity-0 max-h-0 py-0 overflow-hidden"
-          : "opacity-100 max-h-24"
-      }`}
+      className="p-4 flex items-center gap-4 hover:bg-stone-50 cursor-pointer"
     >
       <button
         type="button"
         onClick={handleCheckboxClick}
-        disabled={isDeleting || isAnimatingOut}
+        disabled={isDeleting}
         className="w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center hover:border-green-500 transition-colors disabled:opacity-50"
         aria-label={t("shopping.markBought")}
       />

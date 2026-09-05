@@ -72,8 +72,7 @@ describe("ProductsPage", () => {
 
     render(<ProductsPage />);
 
-    // Should show loading skeleton
-    expect(document.querySelector(".animate-pulse")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true");
 
     // Wait for products to load
     await screen.findByText("Молоко");

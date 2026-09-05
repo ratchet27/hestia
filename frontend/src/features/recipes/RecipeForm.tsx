@@ -38,7 +38,6 @@ export function RecipeForm({
   const { data: recipes = [] } = useRecipes();
   const create = useCreateRecipe();
   const update = useUpdateRecipe();
-  const submitError = create.error ?? update.error;
 
   const existing = recipeId
     ? recipes.find((r) => r.id === recipeId)
@@ -67,13 +66,14 @@ export function RecipeForm({
     }
   }, [existing, reset]);
 
-  // Surface backend errors (e.g. a 422 on save): highlight the offending fields
-  // and always show a toast so the failure is never silent.
-  useEffect(() => {
-    if (!(submitError instanceof ApiError)) return;
+  // Highlight the offending fields on a 422 and always toast, so a failed
+  // save is never silent. Runs from the submit path, not an effect, so it
+  // cannot replay when the modal re-opens.
+  const applyServerError = (error: unknown): void => {
+    if (!(error instanceof ApiError)) throw error;
 
-    if (submitError.isValidationError && submitError.violations?.length) {
-      for (const violation of submitError.violations) {
+    if (error.isValidationError && error.violations?.length) {
+      for (const violation of error.violations) {
         // Symfony paths like "ingredients[0].product_id" -> RHF "ingredients.0.product_id".
         const path = violation.propertyPath.replace(/\[(\d+)\]/g, ".$1");
         if (
@@ -92,8 +92,8 @@ export function RecipeForm({
       return;
     }
 
-    toast.error(submitError.message || t("common.error"));
-  }, [submitError, setError, t]);
+    toast.error(error.message || t("common.error"));
+  };
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -125,9 +125,9 @@ export function RecipeForm({
         await create.mutateAsync(payload);
       }
       onClose();
-    } catch {
-      // Failure is surfaced via the submitError effect (field highlight + toast);
-      // keep the form open so the user can correct and retry.
+    } catch (error) {
+      // Keep the form open so the user can correct and retry.
+      applyServerError(error);
     }
   });
 

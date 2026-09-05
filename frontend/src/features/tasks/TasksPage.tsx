@@ -24,6 +24,12 @@ import { TaskCard } from "./components/TaskCard";
 import { TaskForm, type TaskFormValues } from "./components/TaskForm";
 import { groupChores, groupTasks } from "./grouping";
 
+// Exactly one editor can be open; `task`/`chore` undefined means "create".
+type Editor =
+  | { type: "none" }
+  | { type: "task"; task?: TaskResponse }
+  | { type: "chore"; chore?: ChoreResponse };
+
 export function TasksPage(): ReactElement {
   const { t } = useTranslation();
 
@@ -48,78 +54,59 @@ export function TasksPage(): ReactElement {
   const deleteChore = useDeleteChore();
   const markChoreDone = useMarkChoreDone();
 
-  const [showTaskForm, setShowTaskForm] = useState(false);
-  const [editingTask, setEditingTask] = useState<TaskResponse | null>(null);
-  const [showChoreForm, setShowChoreForm] = useState(false);
-  const [editingChore, setEditingChore] = useState<ChoreResponse | null>(null);
+  const [editor, setEditor] = useState<Editor>({ type: "none" });
+  const close = () => setEditor({ type: "none" });
 
-  const handleCreateTask = async (data: TaskFormValues): Promise<void> => {
-    await createTask.mutateAsync({
+  const saveTask = async (data: TaskFormValues): Promise<void> => {
+    const payload = {
       name: data.name,
       due_date: data.due_date || undefined,
       priority: data.priority,
-    });
-    toast.success(t("tasks.items.form.created"));
-    setShowTaskForm(false);
+    };
+    if (editor.type === "task" && editor.task) {
+      await updateTask.mutateAsync({ id: editor.task.id, data: payload });
+      toast.success(t("tasks.items.form.updated"));
+    } else {
+      await createTask.mutateAsync(payload);
+      toast.success(t("tasks.items.form.created"));
+    }
+    close();
   };
 
-  const handleUpdateTask = async (data: TaskFormValues): Promise<void> => {
-    if (!editingTask) return;
-    await updateTask.mutateAsync({
-      id: editingTask.id,
-      data: {
-        name: data.name,
-        due_date: data.due_date || undefined,
-        priority: data.priority,
-      },
-    });
-    toast.success(t("tasks.items.form.updated"));
-    setEditingTask(null);
-  };
-
-  const handleDeleteTask = async (): Promise<void> => {
-    if (!editingTask) return;
-    await deleteTask.mutateAsync(editingTask.id);
+  const removeTask = async (): Promise<void> => {
+    if (editor.type !== "task" || !editor.task) return;
+    await deleteTask.mutateAsync(editor.task.id);
     toast.success(t("tasks.items.form.deleted"));
-    setEditingTask(null);
+    close();
+  };
+
+  const saveChore = async (data: ChoreFormValues): Promise<void> => {
+    const payload = {
+      name: data.name,
+      schedule_type: data.schedule_type,
+      schedule_value: Number.parseInt(data.schedule_value, 10),
+      assignee: data.assignee || undefined,
+    };
+    if (editor.type === "chore" && editor.chore) {
+      await updateChore.mutateAsync({ id: editor.chore.id, data: payload });
+      toast.success(t("tasks.chores.form.updated"));
+    } else {
+      await createChore.mutateAsync(payload);
+      toast.success(t("tasks.chores.form.created"));
+    }
+    close();
+  };
+
+  const removeChore = async (): Promise<void> => {
+    if (editor.type !== "chore" || !editor.chore) return;
+    await deleteChore.mutateAsync(editor.chore.id);
+    toast.success(t("tasks.chores.form.deleted"));
+    close();
   };
 
   const handleToggleTaskDone = async (id: string): Promise<void> => {
     await toggleTaskDone.mutateAsync(id);
     toast.success(t("tasks.items.form.toggled"));
-  };
-
-  const handleCreateChore = async (data: ChoreFormValues): Promise<void> => {
-    await createChore.mutateAsync({
-      name: data.name,
-      schedule_type: data.schedule_type,
-      schedule_value: Number.parseInt(data.schedule_value, 10),
-      assignee: data.assignee || undefined,
-    });
-    toast.success(t("tasks.chores.form.created"));
-    setShowChoreForm(false);
-  };
-
-  const handleUpdateChore = async (data: ChoreFormValues): Promise<void> => {
-    if (!editingChore) return;
-    await updateChore.mutateAsync({
-      id: editingChore.id,
-      data: {
-        name: data.name,
-        schedule_type: data.schedule_type,
-        schedule_value: Number.parseInt(data.schedule_value, 10),
-        assignee: data.assignee || undefined,
-      },
-    });
-    toast.success(t("tasks.chores.form.updated"));
-    setEditingChore(null);
-  };
-
-  const handleDeleteChore = async (): Promise<void> => {
-    if (!editingChore) return;
-    await deleteChore.mutateAsync(editingChore.id);
-    toast.success(t("tasks.chores.form.deleted"));
-    setEditingChore(null);
   };
 
   const handleMarkChoreDone = async (id: string): Promise<void> => {
@@ -131,6 +118,10 @@ export function TasksPage(): ReactElement {
   const isError = tasksError || choresError;
   const choreGroups = groupChores(chores);
   const taskGroups = groupTasks(activeTasks, completedTasks);
+
+  const openTask = (task?: TaskResponse) => setEditor({ type: "task", task });
+  const openChore = (chore?: ChoreResponse) =>
+    setEditor({ type: "chore", chore });
 
   // The header is rendered once; only the body below it changes with state.
   let body: ReactElement;
@@ -152,7 +143,8 @@ export function TasksPage(): ReactElement {
             </h3>
             <button
               type="button"
-              onClick={() => setShowChoreForm(true)}
+              onClick={() => openChore()}
+              aria-label={t("tasks.chores.form.createTitle")}
               className="text-sm text-amber-600 hover:underline"
             >
               + {t("tasks.chores.add")}
@@ -169,7 +161,7 @@ export function TasksPage(): ReactElement {
                     key={chore.id}
                     chore={chore}
                     onMarkDone={handleMarkChoreDone}
-                    onClick={setEditingChore}
+                    onClick={openChore}
                   />
                 ))}
               </div>
@@ -186,7 +178,7 @@ export function TasksPage(): ReactElement {
                     key={chore.id}
                     chore={chore}
                     onMarkDone={handleMarkChoreDone}
-                    onClick={setEditingChore}
+                    onClick={openChore}
                   />
                 ))}
               </div>
@@ -205,7 +197,8 @@ export function TasksPage(): ReactElement {
             </h3>
             <button
               type="button"
-              onClick={() => setShowTaskForm(true)}
+              onClick={() => openTask()}
+              aria-label={t("tasks.items.form.createTitle")}
               className="text-sm text-amber-600 hover:underline"
             >
               + {t("tasks.items.add")}
@@ -223,7 +216,7 @@ export function TasksPage(): ReactElement {
                     key={task.id}
                     task={task}
                     onToggleDone={handleToggleTaskDone}
-                    onClick={setEditingTask}
+                    onClick={openTask}
                   />
                 ))}
               </div>
@@ -240,7 +233,7 @@ export function TasksPage(): ReactElement {
                     key={task.id}
                     task={task}
                     onToggleDone={handleToggleTaskDone}
-                    onClick={setEditingTask}
+                    onClick={openTask}
                   />
                 ))}
               </div>
@@ -262,7 +255,7 @@ export function TasksPage(): ReactElement {
                     key={task.id}
                     task={task}
                     onToggleDone={handleToggleTaskDone}
-                    onClick={setEditingTask}
+                    onClick={openTask}
                   />
                 ))}
               </div>
@@ -279,59 +272,41 @@ export function TasksPage(): ReactElement {
 
       {body}
 
-      {showTaskForm && (
+      {editor.type === "task" && (
         <Modal
-          title={t("tasks.items.form.createTitle")}
-          onClose={() => setShowTaskForm(false)}
+          title={
+            editor.task
+              ? t("tasks.items.form.editTitle")
+              : t("tasks.items.form.createTitle")
+          }
+          onClose={close}
         >
           <TaskForm
-            onSubmit={handleCreateTask}
-            onCancel={() => setShowTaskForm(false)}
-            isSubmitting={createTask.isPending}
-          />
-        </Modal>
-      )}
-
-      {editingTask && (
-        <Modal
-          title={t("tasks.items.form.editTitle")}
-          onClose={() => setEditingTask(null)}
-        >
-          <TaskForm
-            task={editingTask}
-            onSubmit={handleUpdateTask}
-            onCancel={() => setEditingTask(null)}
-            onDelete={handleDeleteTask}
-            isSubmitting={updateTask.isPending}
+            task={editor.task}
+            onSubmit={saveTask}
+            onCancel={close}
+            onDelete={editor.task ? removeTask : undefined}
+            isSubmitting={createTask.isPending || updateTask.isPending}
             isDeleting={deleteTask.isPending}
           />
         </Modal>
       )}
 
-      {showChoreForm && (
+      {editor.type === "chore" && (
         <Modal
-          title={t("tasks.chores.form.createTitle")}
-          onClose={() => setShowChoreForm(false)}
+          title={
+            editor.chore
+              ? t("tasks.chores.form.editTitle")
+              : t("tasks.chores.form.createTitle")
+          }
+          onClose={close}
         >
           <ChoreForm
-            onSubmit={handleCreateChore}
-            onCancel={() => setShowChoreForm(false)}
-            isSubmitting={createChore.isPending}
-          />
-        </Modal>
-      )}
-
-      {editingChore && (
-        <Modal
-          title={t("tasks.chores.form.editTitle")}
-          onClose={() => setEditingChore(null)}
-        >
-          <ChoreForm
-            chore={editingChore}
-            onSubmit={handleUpdateChore}
-            onCancel={() => setEditingChore(null)}
-            onDelete={handleDeleteChore}
-            isSubmitting={updateChore.isPending}
+            chore={editor.chore}
+            onSubmit={saveChore}
+            onCancel={close}
+            onDelete={editor.chore ? removeChore : undefined}
+            isSubmitting={createChore.isPending || updateChore.isPending}
             isDeleting={deleteChore.isPending}
           />
         </Modal>

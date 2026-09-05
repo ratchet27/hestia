@@ -104,9 +104,7 @@ describe("TasksPage", () => {
       expect(screen.queryByText("Загрузка...")).not.toBeInTheDocument();
     });
 
-    const addButtons = screen.getAllByText(/\+ Добавить/);
-    // Second add button is for tasks (first is chores)
-    await user.click(addButtons[1]!);
+    await user.click(screen.getByRole("button", { name: "Новая задача" }));
 
     expect(screen.getByText("Новая задача")).toBeInTheDocument();
   });
@@ -117,9 +115,7 @@ describe("TasksPage", () => {
       expect(screen.queryByText("Загрузка...")).not.toBeInTheDocument();
     });
 
-    const addButtons = screen.getAllByText(/\+ Добавить/);
-    // First add button is for chores
-    await user.click(addButtons[0]!);
+    await user.click(screen.getByRole("button", { name: "Новое дело" }));
 
     expect(screen.getByText("Новое дело")).toBeInTheDocument();
   });

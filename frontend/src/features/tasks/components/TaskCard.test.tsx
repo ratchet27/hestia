@@ -15,22 +15,14 @@ describe("TaskCard", () => {
     expect(screen.getByText("Buy milk")).toBeInTheDocument();
   });
 
-  it("renders priority badge", () => {
-    const task = createTaskResponse({ priority: "high" });
+  it.each([
+    ["high", "Высокий"],
+    ["medium", "Средний"],
+    ["low", "Низкий"],
+  ] as const)("renders the %s priority badge", (priority, label) => {
+    const task = createTaskResponse({ priority });
     render(<TaskCard {...defaultProps} task={task} />);
-    expect(screen.getByText("Высокий")).toBeInTheDocument();
-  });
-
-  it("renders low priority badge", () => {
-    const task = createTaskResponse({ priority: "low" });
-    render(<TaskCard {...defaultProps} task={task} />);
-    expect(screen.getByText("Низкий")).toBeInTheDocument();
-  });
-
-  it("renders medium priority badge", () => {
-    const task = createTaskResponse({ priority: "medium" });
-    render(<TaskCard {...defaultProps} task={task} />);
-    expect(screen.getByText("Средний")).toBeInTheDocument();
+    expect(screen.getByText(label)).toBeInTheDocument();
   });
 
   it("renders due date when present", () => {
@@ -79,10 +71,9 @@ describe("TaskCard", () => {
     const { user } = render(
       <TaskCard task={task} onToggleDone={onToggleDone} onClick={vi.fn()} />,
     );
-    // The checkbox button is the one with the circle styling
-    const buttons = screen.getAllByRole("button");
-    // Inner button (checkbox) is the second one
-    await user.click(buttons[1]!);
+    await user.click(
+      screen.getByRole("button", { name: "Отметить выполненной" }),
+    );
     expect(onToggleDone).toHaveBeenCalledWith(task.id);
   });
 
@@ -93,8 +84,9 @@ describe("TaskCard", () => {
     const { user } = render(
       <TaskCard task={task} onToggleDone={onToggleDone} onClick={onClick} />,
     );
-    const buttons = screen.getAllByRole("button");
-    await user.click(buttons[1]!);
+    await user.click(
+      screen.getByRole("button", { name: "Отметить выполненной" }),
+    );
     expect(onClick).not.toHaveBeenCalled();
   });
 

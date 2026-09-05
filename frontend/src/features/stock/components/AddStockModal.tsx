@@ -42,7 +42,7 @@ export function AddStockModal({
   } = useForm<AddStockFormData>({
     defaultValues: {
       productId: preselectedProduct?.id ?? "",
-      locationId: preselectedProduct?.default_location?.id ?? "",
+      locationId: preselectedProduct?.default_location.id ?? "",
       quantity: 1,
       bestBefore: "",
     },
@@ -50,24 +50,11 @@ export function AddStockModal({
 
   const selectedProductId = watch("productId");
 
-  // Set form values when preselectedProduct is provided
+  // The modal is mounted per open, so `defaultValues` already covers the
+  // preselected product; only a later product change needs to move the location.
   useEffect(() => {
-    if (preselectedProduct) {
-      setValue("productId", preselectedProduct.id);
-      if (preselectedProduct.default_location?.id) {
-        setValue("locationId", preselectedProduct.default_location.id);
-      }
-    }
-  }, [preselectedProduct, setValue]);
-
-  // Update location when product selection changes
-  useEffect(() => {
-    if (selectedProductId) {
-      const product = products.find((p) => p.id === selectedProductId);
-      if (product?.default_location?.id) {
-        setValue("locationId", product.default_location.id);
-      }
-    }
+    const product = products.find((p) => p.id === selectedProductId);
+    if (product) setValue("locationId", product.default_location.id);
   }, [selectedProductId, products, setValue]);
 
   return (
