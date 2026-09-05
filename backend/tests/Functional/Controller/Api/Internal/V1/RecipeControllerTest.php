@@ -5,12 +5,12 @@ declare(strict_types = 1);
 namespace App\Tests\Functional\Controller\Api\Internal\V1;
 
 use App\Enum\ShoppingListSource;
-use App\Factory\LocationFactory;
-use App\Factory\ProductFactory;
-use App\Factory\RecipeFactory;
-use App\Factory\RecipeIngredientFactory;
-use App\Factory\StockEntryFactory;
-use App\Factory\UserFactory;
+use App\Tests\Factory\LocationFactory;
+use App\Tests\Factory\ProductFactory;
+use App\Tests\Factory\RecipeFactory;
+use App\Tests\Factory\RecipeIngredientFactory;
+use App\Tests\Factory\StockEntryFactory;
+use App\Tests\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -155,7 +155,7 @@ class RecipeControllerTest extends WebTestCase
     public function testAddMissingDoesNotDuplicateExistingItem(): void
     {
         $product = ProductFactory::createOne(['name' => 'Sauce', 'minStock' => 0]);
-        \App\Factory\ShoppingListItemFactory::createOne([
+        \App\Tests\Factory\ShoppingListItemFactory::createOne([
             'product' => $product,
             'amount' => 1,
             'source' => ShoppingListSource::MANUAL

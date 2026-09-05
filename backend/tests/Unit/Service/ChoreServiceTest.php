@@ -10,6 +10,7 @@ use App\Repository\ChoreRepository;
 use App\Request\UpdateChoreRequest;
 use App\Service\ChoreService;
 use App\Service\Time\AppTimezone;
+use App\Service\Time\HouseholdCalendar;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Clock\MockClock;
@@ -32,7 +33,11 @@ class ChoreServiceTest extends TestCase
 
         $em = $this->createStub(EntityManagerInterface::class);
 
-        $service = new ChoreService($em, $repository, $clock, new AppTimezone('+05:00', 'Asia/Almaty'));
+        $service = new ChoreService(
+            $em,
+            $repository,
+            new HouseholdCalendar($clock, new AppTimezone('+05:00', 'Asia/Almaty'))
+        );
 
         $result = $service->markChoreDone(Uuid::v7());
 
@@ -90,6 +95,10 @@ class ChoreServiceTest extends TestCase
 
         $em = $this->createStub(EntityManagerInterface::class);
 
-        return new ChoreService($em, $repository, $clock, new AppTimezone('+05:00', 'Asia/Almaty'));
+        return new ChoreService(
+            $em,
+            $repository,
+            new HouseholdCalendar($clock, new AppTimezone('+05:00', 'Asia/Almaty'))
+        );
     }
 }

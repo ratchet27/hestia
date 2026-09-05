@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\Factory;
+namespace App\Tests\Factory;
 
 use App\Entity\ShoppingListItem;
 use App\Enum\ShoppingListSource;

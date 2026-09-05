@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class SeedCommand extends Command
 {
     /** @var string[] */
-    private const array CATEGORIES = [
+    public const array CATEGORIES = [
         'Молочные',
         'Хлеб',
         'Мясо',
@@ -32,7 +32,7 @@ class SeedCommand extends Command
     ];
 
     /** @var string[] */
-    private const array LOCATIONS = [
+    public const array LOCATIONS = [
         'Холодильник',
         'Кладовая',
         'Ванная',

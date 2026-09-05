@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\Factory;
+namespace App\Tests\Factory;
 
 use App\Entity\Chore;
 use App\Enum\ScheduleType;

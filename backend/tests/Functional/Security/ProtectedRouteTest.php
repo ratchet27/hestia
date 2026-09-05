@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Tests\Functional\Security;
 
-use App\Factory\UserFactory;
+use App\Tests\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;

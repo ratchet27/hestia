@@ -6,8 +6,8 @@ namespace App\Tests\Functional\Controller\Api\Internal\V1;
 
 use App\Entity\Chore;
 use App\Enum\ScheduleType;
-use App\Factory\ChoreFactory;
-use App\Factory\UserFactory;
+use App\Tests\Factory\ChoreFactory;
+use App\Tests\Factory\UserFactory;
 use App\Tests\Functional\Trait\ApiTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;

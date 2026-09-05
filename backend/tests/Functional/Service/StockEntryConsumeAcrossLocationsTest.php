@@ -4,9 +4,9 @@ declare(strict_types = 1);
 
 namespace App\Tests\Functional\Service;
 
-use App\Factory\LocationFactory;
-use App\Factory\ProductFactory;
-use App\Factory\StockEntryFactory;
+use App\Tests\Factory\LocationFactory;
+use App\Tests\Factory\ProductFactory;
+use App\Tests\Factory\StockEntryFactory;
 use App\Repository\StockEntryRepository;
 use App\Service\StockEntryService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
