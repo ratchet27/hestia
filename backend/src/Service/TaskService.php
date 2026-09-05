@@ -8,8 +8,7 @@ use App\Entity\Task;
 use App\Enum\TaskPriority;
 use App\Exception\Task\TaskNotFoundException;
 use App\Repository\TaskRepository;
-use App\Request\CreateTaskRequest;
-use App\Request\UpdateTaskRequest;
+use App\Request\SaveTaskRequest;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -41,7 +40,7 @@ class TaskService
         return $task;
     }
 
-    public function createTask(CreateTaskRequest $request): Task
+    public function createTask(SaveTaskRequest $request): Task
     {
         $task = new Task();
         $task->setName($request->name);
@@ -57,7 +56,7 @@ class TaskService
         return $task;
     }
 
-    public function updateTask(Uuid $id, UpdateTaskRequest $request): Task
+    public function updateTask(Uuid $id, SaveTaskRequest $request): Task
     {
         $task = $this->getTask($id);
         $task->setName($request->name);

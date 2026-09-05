@@ -11,8 +11,7 @@ use App\Exception\Location\LocationNotFoundException;
 use App\Repository\LocationRepository;
 use App\Repository\ProductRepository;
 use App\Repository\StockEntryRepository;
-use App\Request\CreateLocationRequest;
-use App\Request\UpdateLocationRequest;
+use App\Request\SaveLocationRequest;
 use App\Response\Location\LocationListItemResponse;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,7 +59,7 @@ readonly class LocationService
         return new LocationListItemResponse($location->getId(), $location->getName(), $this->usageCount($location));
     }
 
-    public function create(CreateLocationRequest $request): Location
+    public function create(SaveLocationRequest $request): Location
     {
         $location = new Location();
         $location->setName($request->name);
@@ -71,7 +70,7 @@ readonly class LocationService
         return $location;
     }
 
-    public function update(Uuid $id, UpdateLocationRequest $request): Location
+    public function update(Uuid $id, SaveLocationRequest $request): Location
     {
         $location = $this->locationRepository->find($id) ?? throw new LocationNotFoundException($id);
 

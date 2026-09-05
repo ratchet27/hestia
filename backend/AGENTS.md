@@ -109,6 +109,21 @@ public function show(Uuid $uuid): JsonResponse
 - UUID primary keys preferred
 - For unique fields: use BOTH `#[UniqueEntity]` (validation) AND `#[ORM\Column(unique: true)]` (database constraint)
 
+### Errors
+
+Every domain error is an `ApiException` carrying an RFC 7807 `ApiProblem`:
+`title` (generic, human), `type` (stable SCREAMING_SNAKE code the frontend matches on),
+`code` (HTTP status), optional `detail` (specifics for this occurrence, e.g. "only 2
+available") and flat snake_case `extraData`. Rules:
+
+- "Not found" errors extend `EntityNotFoundException` and only supply title + type.
+- Use `Response::HTTP_*` constants, never bare ints. 404 = missing, 409 = the current
+  state conflicts with a well-formed request (name taken, in use, insufficient stock,
+  not cookable), 422 = a reference in the payload does not resolve.
+- Put per-occurrence text in `detail`, not in `extraData['message']`; the frontend
+  already prefers `detail` for toasts.
+- Exception classes are `final`.
+
 ### Response mapping
 
 Turn entities into response DTOs using exactly one of these, by case:

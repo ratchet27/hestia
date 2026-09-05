@@ -11,8 +11,7 @@ use App\Exception\Location\LocationNotFoundException;
 use App\Repository\LocationRepository;
 use App\Repository\ProductRepository;
 use App\Repository\StockEntryRepository;
-use App\Request\CreateLocationRequest;
-use App\Request\UpdateLocationRequest;
+use App\Request\SaveLocationRequest;
 use App\Service\LocationService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,7 +33,7 @@ class LocationServiceTest extends TestCase
         );
 
         $this->expectException(LocationNameTakenException::class);
-        $service->create(new CreateLocationRequest('Кладовка'));
+        $service->create(new SaveLocationRequest('Кладовка'));
     }
 
     public function testCreatePersistsAndReturnsLocation(): void
@@ -50,7 +49,7 @@ class LocationServiceTest extends TestCase
             $this->createStub(StockEntryRepository::class)
         );
 
-        $result = $service->create(new CreateLocationRequest('Кладовка'));
+        $result = $service->create(new SaveLocationRequest('Кладовка'));
         static::assertSame('Кладовка', $result->getName());
     }
 
@@ -72,7 +71,7 @@ class LocationServiceTest extends TestCase
             $this->createStub(StockEntryRepository::class)
         );
 
-        $result = $service->update(Uuid::v7(), new UpdateLocationRequest('Кладовка'));
+        $result = $service->update(Uuid::v7(), new SaveLocationRequest('Кладовка'));
         static::assertSame('Кладовка', $result->getName());
     }
 
@@ -94,7 +93,7 @@ class LocationServiceTest extends TestCase
             $this->createStub(StockEntryRepository::class)
         );
 
-        $result = $service->update(Uuid::v7(), new UpdateLocationRequest('Кладовка'));
+        $result = $service->update(Uuid::v7(), new SaveLocationRequest('Кладовка'));
         static::assertSame('Кладовка', $result->getName());
     }
 
@@ -111,7 +110,7 @@ class LocationServiceTest extends TestCase
         );
 
         $this->expectException(LocationNotFoundException::class);
-        $service->update(Uuid::v7(), new UpdateLocationRequest('Кладовка'));
+        $service->update(Uuid::v7(), new SaveLocationRequest('Кладовка'));
     }
 
     public function testUpdateTranslatesUniqueViolationToNameTaken(): void
@@ -133,7 +132,7 @@ class LocationServiceTest extends TestCase
         );
 
         $this->expectException(LocationNameTakenException::class);
-        $service->update(Uuid::v7(), new UpdateLocationRequest('Кладовка'));
+        $service->update(Uuid::v7(), new SaveLocationRequest('Кладовка'));
     }
 
     public function testDeleteInUseThrowsConflict(): void

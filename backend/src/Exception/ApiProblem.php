@@ -19,7 +19,9 @@ final readonly class ApiProblem implements JsonSerializable
         public string $title,
         public string $type,
         public int $code = Response::HTTP_BAD_REQUEST,
-        public array $extraData = []
+        public array $extraData = [],
+        /** Human-readable specifics for this occurrence (RFC 7807 `detail`); title stays generic. */
+        public ?string $detail = null
     ) {
     }
 
@@ -32,6 +34,7 @@ final readonly class ApiProblem implements JsonSerializable
             'title' => $this->title,
             'type' => $this->type,
             'code' => $this->code,
+            ...( $this->detail !== null ? ['detail' => $this->detail] : [] ),
             ...$this->extraData
         ];
     }

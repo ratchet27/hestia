@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Controller\Api\Internal\V1;
 
-use App\Request\CreateCategoryRequest;
-use App\Request\UpdateCategoryRequest;
+use App\Request\SaveCategoryRequest;
 use App\Response\Category\CategoryListItemResponse;
 use App\Service\CategoryService;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -52,13 +51,13 @@ final class CategoryController extends AbstractController
 
     #[Route('/categories', name: 'api_categories_create', methods: ['POST'])]
     #[OA\Post(summary: 'Create category', description: 'Creates a product category.')]
-    #[OA\RequestBody(required: true, content: new Model(type: CreateCategoryRequest::class))]
+    #[OA\RequestBody(required: true, content: new Model(type: SaveCategoryRequest::class))]
     #[OA\Response(response: 201, description: 'Category created', content: new OA\JsonContent(properties: [
         new OA\Property(property: 'data', ref: new Model(type: CategoryListItemResponse::class))
     ]))]
     #[OA\Response(response: 409, description: 'Name already exists')]
     #[OA\Response(response: 422, description: 'Validation error')]
-    public function create(#[MapRequestPayload] CreateCategoryRequest $request): JsonResponse
+    public function create(#[MapRequestPayload] SaveCategoryRequest $request): JsonResponse
     {
         $category = $this->categoryService->create($request);
 
@@ -72,13 +71,13 @@ final class CategoryController extends AbstractController
         methods: ['PATCH']
     )]
     #[OA\Patch(summary: 'Rename category', description: 'Renames a product category.')]
-    #[OA\RequestBody(required: true, content: new Model(type: UpdateCategoryRequest::class))]
+    #[OA\RequestBody(required: true, content: new Model(type: SaveCategoryRequest::class))]
     #[OA\Response(response: 200, description: 'Category updated', content: new OA\JsonContent(properties: [
         new OA\Property(property: 'data', ref: new Model(type: CategoryListItemResponse::class))
     ]))]
     #[OA\Response(response: 404, description: 'Category not found')]
     #[OA\Response(response: 409, description: 'Name already exists')]
-    public function update(Uuid $uuid, #[MapRequestPayload] UpdateCategoryRequest $request): JsonResponse
+    public function update(Uuid $uuid, #[MapRequestPayload] SaveCategoryRequest $request): JsonResponse
     {
         $category = $this->categoryService->update($uuid, $request);
 

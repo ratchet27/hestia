@@ -7,7 +7,7 @@ namespace App\Tests\Unit\Service;
 use App\Entity\Chore;
 use App\Enum\ScheduleType;
 use App\Repository\ChoreRepository;
-use App\Request\UpdateChoreRequest;
+use App\Request\SaveChoreRequest;
 use App\Service\ChoreService;
 use App\Service\Time\AppTimezone;
 use App\Service\Time\HouseholdCalendar;
@@ -58,7 +58,7 @@ class ChoreServiceTest extends TestCase
 
         $service = $this->serviceWith($chore, $clock);
 
-        $request = new UpdateChoreRequest('Old name', 'interval', 2);
+        $request = new SaveChoreRequest('Old name', 'interval', 2);
         $result = $service->updateChore(Uuid::v7(), $request);
 
         // Anchored to "now" (Jun 6) + 2 days = Jun 8, not from the stale Jan next-due.
@@ -80,7 +80,7 @@ class ChoreServiceTest extends TestCase
         $service = $this->serviceWith($chore, $clock);
 
         // Same schedule, new name + assignee → next-due must not move.
-        $request = new UpdateChoreRequest('New name', 'interval', 14, 'Pavel');
+        $request = new SaveChoreRequest('New name', 'interval', 14, 'Pavel');
         $result = $service->updateChore(Uuid::v7(), $request);
 
         static::assertSame('New name', $result->getName());

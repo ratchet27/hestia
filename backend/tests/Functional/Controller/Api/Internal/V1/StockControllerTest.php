@@ -401,7 +401,7 @@ class StockControllerTest extends WebTestCase
             'location_id' => (string) $location->getId(),
             'quantity' => 5
         ]);
-        $data = static::assertErrorResponse($response, Response::HTTP_BAD_REQUEST);
+        $data = static::assertErrorResponse($response, Response::HTTP_CONFLICT);
 
         static::assertSame('INSUFFICIENT_STOCK', $data['type']);
     }

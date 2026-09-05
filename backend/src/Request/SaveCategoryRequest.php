@@ -6,7 +6,8 @@ namespace App\Request;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-final readonly class UpdateCategoryRequest
+/** Payload for both POST (create) and PUT (full update); the two verbs accept the same fields. */
+final readonly class SaveCategoryRequest
 {
     public function __construct(
         #[Assert\NotBlank]

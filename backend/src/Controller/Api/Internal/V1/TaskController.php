@@ -5,8 +5,7 @@ declare(strict_types = 1);
 namespace App\Controller\Api\Internal\V1;
 
 use App\Exception\ApiProblem;
-use App\Request\CreateTaskRequest;
-use App\Request\UpdateTaskRequest;
+use App\Request\SaveTaskRequest;
 use App\Response\Task\TaskResponse;
 use App\Service\TaskService;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -84,7 +83,7 @@ final class TaskController extends AbstractController
     #[OA\Response(response: 400, description: 'Invalid input', content: new Model(type: ApiProblem::class))]
     public function create(
         #[MapRequestPayload]
-        CreateTaskRequest $request
+        SaveTaskRequest $request
     ): JsonResponse {
         $task = $this->taskService->createTask($request);
 
@@ -108,7 +107,7 @@ final class TaskController extends AbstractController
     public function update(
         Uuid $uuid,
         #[MapRequestPayload]
-        UpdateTaskRequest $request
+        SaveTaskRequest $request
     ): JsonResponse {
         $task = $this->taskService->updateTask($uuid, $request);
 

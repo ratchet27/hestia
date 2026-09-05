@@ -10,8 +10,7 @@ use App\Exception\Category\CategoryNameTakenException;
 use App\Exception\Category\CategoryNotFoundException;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
-use App\Request\CreateCategoryRequest;
-use App\Request\UpdateCategoryRequest;
+use App\Request\SaveCategoryRequest;
 use App\Response\Category\CategoryListItemResponse;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -56,7 +55,7 @@ readonly class CategoryService
         return new CategoryListItemResponse($category->getId(), $category->getName(), $this->usageCount($category));
     }
 
-    public function create(CreateCategoryRequest $request): Category
+    public function create(SaveCategoryRequest $request): Category
     {
         $category = new Category();
         $category->setName($request->name);
@@ -67,7 +66,7 @@ readonly class CategoryService
         return $category;
     }
 
-    public function update(Uuid $id, UpdateCategoryRequest $request): Category
+    public function update(Uuid $id, SaveCategoryRequest $request): Category
     {
         $category = $this->categoryRepository->find($id) ?? throw new CategoryNotFoundException($id);
 

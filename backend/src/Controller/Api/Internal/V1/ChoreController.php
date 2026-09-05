@@ -5,8 +5,7 @@ declare(strict_types = 1);
 namespace App\Controller\Api\Internal\V1;
 
 use App\Exception\ApiProblem;
-use App\Request\CreateChoreRequest;
-use App\Request\UpdateChoreRequest;
+use App\Request\SaveChoreRequest;
 use App\Response\Chore\ChoreResponse;
 use App\Service\ChoreService;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -81,7 +80,7 @@ final class ChoreController extends AbstractController
     #[OA\Response(response: 400, description: 'Invalid input', content: new Model(type: ApiProblem::class))]
     public function create(
         #[MapRequestPayload]
-        CreateChoreRequest $request
+        SaveChoreRequest $request
     ): JsonResponse {
         $chore = $this->choreService->createChore($request);
 
@@ -105,7 +104,7 @@ final class ChoreController extends AbstractController
     public function update(
         Uuid $uuid,
         #[MapRequestPayload]
-        UpdateChoreRequest $request
+        SaveChoreRequest $request
     ): JsonResponse {
         $chore = $this->choreService->updateChore($uuid, $request);
 
