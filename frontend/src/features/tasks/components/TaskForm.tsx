@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import type { TaskResponse } from "../../../api/generated/models";
+import { FormActions } from "../../../components/FormActions";
 
 interface TaskFormProps {
   task?: TaskResponse;
@@ -27,7 +27,6 @@ export function TaskForm({
   isDeleting,
 }: TaskFormProps): React.ReactElement {
   const { t } = useTranslation();
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const {
     register,
@@ -101,62 +100,18 @@ export function TaskForm({
         </select>
       </div>
 
-      <div className="flex gap-3 mt-6">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isSubmitting || isDeleting}
-          className="flex-1 px-4 py-2 border border-stone-300 rounded-lg hover:bg-stone-50 transition-colors disabled:opacity-50"
-        >
-          {t("tasks.form.cancel")}
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting || isDeleting}
-          className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
-        >
-          {isSubmitting
-            ? task
-              ? t("tasks.form.saving")
-              : t("tasks.form.creating")
-            : task
-              ? t("tasks.form.save")
-              : t("tasks.form.create")}
-        </button>
-      </div>
-
-      {task && onDelete && (
-        <div className="border-t border-stone-200 pt-4 mt-4">
-          {showDeleteConfirm ? (
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-2 border border-stone-300 rounded-lg hover:bg-stone-50 transition-colors disabled:opacity-50"
-              >
-                {t("tasks.form.cancel")}
-              </button>
-              <button
-                type="button"
-                onClick={onDelete}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
-              >
-                {isDeleting ? t("tasks.form.deleting") : t("tasks.form.delete")}
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-            >
-              {t("tasks.form.delete")}
-            </button>
-          )}
-        </div>
-      )}
+      <FormActions
+        onCancel={onCancel}
+        isSubmitting={isSubmitting}
+        submitLabel={task ? t("tasks.form.save") : t("tasks.form.create")}
+        submittingLabel={
+          task ? t("tasks.form.saving") : t("tasks.form.creating")
+        }
+        onDelete={task && onDelete ? onDelete : undefined}
+        isDeleting={isDeleting}
+        deleteLabel={t("tasks.form.delete")}
+        deletingLabel={t("tasks.form.deleting")}
+      />
     </form>
   );
 }

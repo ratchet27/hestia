@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { useAuth } from "./data/hooks";
@@ -15,11 +16,12 @@ function ProtectedRoute({
 }: {
   children: React.ReactElement;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const { user, isLoading } = useAuth();
   if (isLoading) {
     return (
       <div className="min-h-screen bg-stone-900 flex items-center justify-center text-stone-400">
-        Загрузка...
+        {t("common.loading")}
       </div>
     );
   }

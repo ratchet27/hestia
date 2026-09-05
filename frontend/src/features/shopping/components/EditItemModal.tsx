@@ -1,32 +1,29 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ShoppingItemResponse } from "@/api/generated/models";
+import { FormActions } from "@/components/FormActions";
+import { Modal } from "@/components/Modal";
 
 interface EditItemModalProps {
-  item: ShoppingItemResponse | null;
-  isOpen: boolean;
+  item: ShoppingItemResponse;
   onClose: () => void;
   onSave: (id: string, amount: number, note: string) => void;
   isSaving?: boolean;
 }
 
+/**
+ * Keyed on item.id by the parent, so each opened item mounts a fresh form and
+ * the initial values come straight from props (no prop→state sync effect).
+ */
 export function EditItemModal({
   item,
-  isOpen,
   onClose,
   onSave,
   isSaving = false,
-}: EditItemModalProps): React.ReactElement | null {
-  const [amount, setAmount] = useState(1);
-  const [note, setNote] = useState("");
-
-  useEffect(() => {
-    if (item) {
-      setAmount(item.amount);
-      setNote(item.note ?? "");
-    }
-  }, [item]);
-
-  if (!isOpen || !item) return null;
+}: EditItemModalProps): React.ReactElement {
+  const { t } = useTranslation();
+  const [amount, setAmount] = useState(item.amount);
+  const [note, setNote] = useState(item.note ?? "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,82 +32,53 @@ export function EditItemModal({
     }
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: Modal backdrop click-to-dismiss pattern
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      onClick={handleBackdropClick}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") onClose();
-      }}
-    >
-      <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4 shadow-xl">
-        <h3 className="text-lg font-semibold text-stone-800 mb-4">
-          {item.name}
-        </h3>
-
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="amount"
-                className="block text-sm font-medium text-stone-700 mb-1"
-              >
-                Количество
-              </label>
-              <input
-                id="amount"
-                type="number"
-                min="1"
-                value={amount}
-                onChange={(e) => setAmount(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="note"
-                className="block text-sm font-medium text-stone-700 mb-1"
-              >
-                Заметка
-              </label>
-              <input
-                id="note"
-                type="text"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Например: определённый бренд"
-                className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
-            </div>
+    <Modal title={item.name} onClose={onClose}>
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="amount"
+              className="block text-sm font-medium text-stone-700 mb-1"
+            >
+              {t("shopping.edit.amount")}
+            </label>
+            <input
+              id="amount"
+              type="number"
+              min="1"
+              value={amount}
+              onChange={(e) => setAmount(Number(e.target.value))}
+              className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
           </div>
 
-          <div className="flex gap-3 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSaving}
-              className="flex-1 px-4 py-2 border border-stone-300 rounded-lg hover:bg-stone-50 transition-colors disabled:opacity-50"
+          <div>
+            <label
+              htmlFor="note"
+              className="block text-sm font-medium text-stone-700 mb-1"
             >
-              Отмена
-            </button>
-            <button
-              type="submit"
-              disabled={isSaving || amount < 1}
-              className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
-            >
-              {isSaving ? "Сохранение..." : "Сохранить"}
-            </button>
+              {t("shopping.edit.note")}
+            </label>
+            <input
+              id="note"
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={t("shopping.edit.notePlaceholder")}
+              className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+
+        <FormActions
+          onCancel={onClose}
+          isSubmitting={isSaving}
+          submitLabel={t("shopping.edit.save")}
+          submittingLabel={t("shopping.edit.saving")}
+          submitDisabled={amount < 1}
+        />
+      </form>
+    </Modal>
   );
 }

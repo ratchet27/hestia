@@ -6,6 +6,7 @@ import {
   useCreateProduct,
   useLocations,
 } from "../../../api/queries";
+import { Modal } from "../../../components/Modal";
 import { ProductForm } from "../../products/ProductForm";
 
 interface CreateProductModalProps {
@@ -31,21 +32,16 @@ export function CreateProductModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-        <h3 className="text-xl font-bold text-stone-800 mb-4">
-          {t("products.newProduct")}
-        </h3>
-        <ProductForm
-          initialBarcode={initialBarcode}
-          categories={categories}
-          locations={locations}
-          onSubmit={handleSubmit}
-          onCancel={onCancel}
-          isSubmitting={createProduct.isPending}
-          submitError={createProduct.error}
-        />
-      </div>
-    </div>
+    <Modal title={t("products.newProduct")} onClose={onCancel}>
+      <ProductForm
+        initialBarcode={initialBarcode}
+        categories={categories}
+        locations={locations}
+        onSubmit={handleSubmit}
+        onCancel={onCancel}
+        isSubmitting={createProduct.isPending}
+        submitError={createProduct.error}
+      />
+    </Modal>
   );
 }

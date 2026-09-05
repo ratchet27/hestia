@@ -7,6 +7,7 @@ import type {
   CreateProductRequest,
   ProductResponse,
 } from "../../api/generated/models";
+import { FormActions } from "../../components/FormActions";
 
 interface ProductFormProps {
   product?: ProductResponse;
@@ -18,6 +19,9 @@ interface ProductFormProps {
   isSubmitting: boolean;
   submitError?: Error | null;
 }
+
+/** Stored unit codes (the DB value); labels come from i18n `products.form.units`. */
+const UNIT_CODES = ["шт", "кг", "г", "л", "мл", "уп"] as const;
 
 interface FormValues {
   name: string;
@@ -135,13 +139,13 @@ export function ProductForm({
           htmlFor="product-name"
           className="block text-sm font-medium text-stone-700 mb-1"
         >
-          Название
+          {t("products.form.name")}
         </label>
         <input
           id="product-name"
           type="text"
-          placeholder="Например: Молоко 3.2%"
-          {...register("name", { required: "Название обязательно" })}
+          placeholder={t("products.form.namePlaceholder")}
+          {...register("name", { required: t("products.form.nameRequired") })}
           className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
         />
         {errors.name && (
@@ -154,19 +158,18 @@ export function ProductForm({
           htmlFor="product-unit"
           className="block text-sm font-medium text-stone-700 mb-1"
         >
-          Единица измерения
+          {t("products.form.unit")}
         </label>
         <select
           id="product-unit"
-          {...register("unit", { required: "Единица измерения обязательна" })}
+          {...register("unit", { required: t("products.form.unitRequired") })}
           className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
         >
-          <option value="шт">шт (штуки)</option>
-          <option value="кг">кг (килограммы)</option>
-          <option value="г">г (граммы)</option>
-          <option value="л">л (литры)</option>
-          <option value="мл">мл (миллилитры)</option>
-          <option value="уп">уп (упаковки)</option>
+          {UNIT_CODES.map((code) => (
+            <option key={code} value={code}>
+              {t(`products.form.units.${code}`)}
+            </option>
+          ))}
         </select>
         {errors.unit && (
           <p className="mt-1 text-sm text-red-600">{errors.unit.message}</p>
@@ -178,11 +181,13 @@ export function ProductForm({
           htmlFor="product-category"
           className="block text-sm font-medium text-stone-700 mb-1"
         >
-          Категория
+          {t("products.form.category")}
         </label>
         <select
           id="product-category"
-          {...register("category_id", { required: "Категория обязательна" })}
+          {...register("category_id", {
+            required: t("products.form.categoryRequired"),
+          })}
           className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
         >
           {categories.map((cat) => (
@@ -203,12 +208,12 @@ export function ProductForm({
           htmlFor="product-location"
           className="block text-sm font-medium text-stone-700 mb-1"
         >
-          Место хранения
+          {t("products.form.location")}
         </label>
         <select
           id="product-location"
           {...register("default_location_id", {
-            required: "Место хранения обязательно",
+            required: t("products.form.locationRequired"),
           })}
           className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
         >
@@ -231,14 +236,14 @@ export function ProductForm({
             htmlFor="product-expiry"
             className="block text-sm font-medium text-stone-700 mb-1"
           >
-            Срок годности (дни)
+            {t("products.form.expiryDays")}
           </label>
           <input
             id="product-expiry"
             type="number"
-            placeholder="Необязательно"
+            placeholder={t("products.form.optional")}
             {...register("default_expiry_days", {
-              min: { value: 1, message: "Должно быть больше 0" },
+              min: { value: 1, message: t("products.form.expiryMin") },
             })}
             className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
@@ -253,13 +258,13 @@ export function ProductForm({
             htmlFor="product-min-stock"
             className="block text-sm font-medium text-stone-700 mb-1"
           >
-            Мин. запас
+            {t("products.form.minStock")}
           </label>
           <input
             id="product-min-stock"
             type="number"
             {...register("min_stock", {
-              min: { value: 0, message: "Не может быть отрицательным" },
+              min: { value: 0, message: t("products.form.minStockNegative") },
             })}
             className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
@@ -279,7 +284,7 @@ export function ProductForm({
           className="w-4 h-4 text-amber-500 border-stone-300 rounded focus:ring-amber-500"
         />
         <label htmlFor="active" className="text-sm font-medium text-stone-700">
-          Активен
+          {t("products.form.active")}
         </label>
       </div>
 
@@ -340,23 +345,14 @@ export function ProductForm({
         )}
       </div>
 
-      <div className="flex gap-3 mt-6">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isSubmitting}
-          className="flex-1 px-4 py-2 border border-stone-300 rounded-lg hover:bg-stone-50 transition-colors disabled:opacity-50"
-        >
-          Отмена
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
-        >
-          {isSubmitting ? "Сохранение..." : product ? "Сохранить" : "Создать"}
-        </button>
-      </div>
+      <FormActions
+        onCancel={onCancel}
+        isSubmitting={isSubmitting}
+        submitLabel={
+          product ? t("products.form.save") : t("products.form.create")
+        }
+        submittingLabel={t("products.form.saving")}
+      />
     </form>
   );
 }

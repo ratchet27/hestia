@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ShoppingItemResponse } from "@/api/generated/models";
 import {
   useAddShoppingItem,
@@ -6,6 +7,7 @@ import {
   useShoppingList,
   useUpdateShoppingItem,
 } from "@/api/queries";
+import { PageHeader } from "@/components/PageHeader";
 import {
   EditItemModal,
   ProductSearchInput,
@@ -13,6 +15,7 @@ import {
 } from "./components";
 
 export function ShoppingPage(): React.ReactElement {
+  const { t } = useTranslation();
   const [editingItem, setEditingItem] = useState<ShoppingItemResponse | null>(
     null,
   );
@@ -47,18 +50,18 @@ export function ShoppingPage(): React.ReactElement {
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-stone-800">Список покупок</h2>
-          <p className="text-stone-500 mt-1">Общий список для всей семьи</p>
-        </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold text-amber-600">
-            {pendingItems.length}
-          </p>
-          <p className="text-sm text-stone-500">к покупке</p>
-        </div>
-      </div>
+      <PageHeader
+        title={t("shopping.title")}
+        subtitle={t("shopping.subtitle")}
+        actions={
+          <div className="text-right">
+            <p className="text-2xl font-bold text-amber-600">
+              {pendingItems.length}
+            </p>
+            <p className="text-sm text-stone-500">{t("shopping.toBuy")}</p>
+          </div>
+        }
+      />
 
       <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 mb-6">
         <ProductSearchInput
@@ -70,15 +73,17 @@ export function ShoppingPage(): React.ReactElement {
 
       <div className="bg-white rounded-xl shadow-sm border border-stone-200">
         <div className="p-4 border-b border-stone-100">
-          <h3 className="font-semibold text-stone-800">К покупке</h3>
+          <h3 className="font-semibold text-stone-800">
+            {t("shopping.pending")}
+          </h3>
         </div>
         <div className="divide-y divide-stone-100">
           {isLoading ? (
-            <div className="p-4 text-center text-stone-500">Загрузка...</div>
+            <div className="p-4 text-center text-stone-500">
+              {t("common.loading")}
+            </div>
           ) : pendingItems.length === 0 ? (
-            <p className="p-4 text-stone-500">
-              Список пуст. Найдите товар выше, чтобы добавить.
-            </p>
+            <p className="p-4 text-stone-500">{t("shopping.empty")}</p>
           ) : (
             pendingItems.map((item) => (
               <ShoppingListItem
@@ -93,13 +98,15 @@ export function ShoppingPage(): React.ReactElement {
         </div>
       </div>
 
-      <EditItemModal
-        item={editingItem}
-        isOpen={editingItem !== null}
-        onClose={() => setEditingItem(null)}
-        onSave={handleSave}
-        isSaving={updateMutation.isPending}
-      />
+      {editingItem && (
+        <EditItemModal
+          key={editingItem.id}
+          item={editingItem}
+          onClose={() => setEditingItem(null)}
+          onSave={handleSave}
+          isSaving={updateMutation.isPending}
+        />
+      )}
     </div>
   );
 }
