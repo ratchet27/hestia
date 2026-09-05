@@ -1,5 +1,6 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import i18n from "../i18n";
 import { ApiError } from "./client";
 
 function handleGlobalError(error: unknown): void {
@@ -25,7 +26,7 @@ function handleGlobalError(error: unknown): void {
   } else if (error instanceof Error) {
     toast.error(error.message);
   } else {
-    toast.error("Произошла ошибка");
+    toast.error(i18n.t("common.error"));
   }
 }
 

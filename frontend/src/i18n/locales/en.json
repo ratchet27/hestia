@@ -26,7 +26,50 @@
   },
   "products": {
     "newProduct": "New product",
-    "created": "Product created"
+    "created": "Product created",
+    "title": "Products",
+    "subtitle": "Product and barcode catalogue",
+    "editProduct": "Edit product",
+    "updated": "Product updated",
+    "loadFailed": "Could not load products. Check the server connection.",
+    "searchPlaceholder": "Search by name...",
+    "allCategories": "All categories",
+    "active": "Active",
+    "archived": "Archived",
+    "barcode": "Barcode: {{code}}",
+    "unit": "Unit: {{unit}}",
+    "expiryDays": "Shelf life: {{days}} d.",
+    "location": "Location: {{name}}",
+    "minStock": "Min. stock: {{count}}",
+    "noneFound": "No products found",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "E.g. Milk 3.2%",
+      "nameRequired": "Name is required",
+      "unit": "Unit",
+      "unitRequired": "Unit is required",
+      "category": "Category",
+      "categoryRequired": "Category is required",
+      "location": "Storage location",
+      "locationRequired": "Storage location is required",
+      "expiryDays": "Shelf life (days)",
+      "optional": "Optional",
+      "expiryMin": "Must be greater than 0",
+      "minStock": "Min. stock",
+      "minStockNegative": "Cannot be negative",
+      "active": "Active",
+      "create": "Create",
+      "save": "Save",
+      "saving": "Saving...",
+      "units": {
+        "шт": "pcs (pieces)",
+        "кг": "kg (kilograms)",
+        "г": "g (grams)",
+        "л": "l (litres)",
+        "мл": "ml (millilitres)",
+        "уп": "pk (packs)"
+      }
+    }
   },
   "nav": {
     "home": "Home",
@@ -250,5 +293,25 @@
     "deleteDisabledReason": "Used by {{n}} — can't delete",
     "add": "Add",
     "addPlaceholder": "Add…"
+  },
+  "shopping": {
+    "title": "Shopping list",
+    "subtitle": "One list for the whole household",
+    "toBuy": "to buy",
+    "pending": "To buy",
+    "empty": "The list is empty. Search for a product above to add it.",
+    "markBought": "Mark as bought",
+    "amount": "{{amount}} pcs",
+    "auto": "Auto",
+    "searchPlaceholder": "Add a product...",
+    "add": "Add",
+    "addCustom": "Add \"{{name}}\"",
+    "edit": {
+      "amount": "Amount",
+      "note": "Note",
+      "notePlaceholder": "E.g. a specific brand",
+      "save": "Save",
+      "saving": "Saving..."
+    }
   }
 }

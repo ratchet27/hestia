@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ProductResponse } from "@/api/generated/models";
 import { useProducts } from "@/api/queries";
 
@@ -13,6 +14,7 @@ export function ProductSearchInput({
   onAddCustom,
   isAdding = false,
 }: ProductSearchInputProps): React.ReactElement {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -110,7 +112,7 @@ export function ProductSearchInput({
         <input
           ref={inputRef}
           type="text"
-          placeholder="Добавить товар..."
+          placeholder={t("shopping.searchPlaceholder")}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -129,7 +131,7 @@ export function ProductSearchInput({
           disabled={!search.trim() || isAdding}
           className="px-6 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Добавить
+          {t("shopping.add")}
         </button>
       </div>
 
@@ -160,7 +162,7 @@ export function ProductSearchInput({
                   : ""
               }`}
             >
-              Добавить «{search}»
+              {t("shopping.addCustom", { name: search })}
             </button>
           )}
         </div>

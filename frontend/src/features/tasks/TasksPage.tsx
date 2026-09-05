@@ -16,6 +16,8 @@ import {
   useToggleTaskDone,
   useUpdateTask,
 } from "../../api/queries/tasks";
+import { Modal } from "../../components/Modal";
+import { PageHeader } from "../../components/PageHeader";
 import { ChoreCard } from "./components/ChoreCard";
 import { ChoreForm, type ChoreFormValues } from "./components/ChoreForm";
 import { TaskCard } from "./components/TaskCard";
@@ -133,49 +135,21 @@ export function TasksPage(): React.ReactElement {
 
   const isLoading = tasksLoading || choresLoading;
   const isError = tasksError || choresError;
-
-  if (isLoading) {
-    return (
-      <div className="p-8">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-stone-800">
-            {t("tasks.title")}
-          </h2>
-          <p className="text-stone-500 mt-1">{t("tasks.subtitle")}</p>
-        </div>
-        <div className="text-stone-500">{t("common.loading")}</div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="p-8">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-stone-800">
-            {t("tasks.title")}
-          </h2>
-          <p className="text-stone-500 mt-1">{t("tasks.subtitle")}</p>
-        </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          {t("tasks.errors.loadFailed")}
-        </div>
-      </div>
-    );
-  }
-
   const choreGroups = groupChores(chores);
   const taskGroups = groupTasks(activeTasks, completedTasks);
 
-  return (
-    <div className="p-8">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-stone-800">
-          {t("tasks.title")}
-        </h2>
-        <p className="text-stone-500 mt-1">{t("tasks.subtitle")}</p>
+  // The header is rendered once; only the body below it changes with state.
+  let body: React.ReactElement;
+  if (isLoading) {
+    body = <div className="text-stone-500">{t("common.loading")}</div>;
+  } else if (isError) {
+    body = (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+        {t("tasks.errors.loadFailed")}
       </div>
-
+    );
+  } else {
+    body = (
       <div className="grid grid-cols-2 gap-6">
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -302,71 +276,71 @@ export function TasksPage(): React.ReactElement {
           )}
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="p-8">
+      <PageHeader title={t("tasks.title")} subtitle={t("tasks.subtitle")} />
+
+      {body}
 
       {showTaskForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h3 className="text-xl font-bold text-stone-800 mb-4">
-              {t("tasks.items.form.createTitle")}
-            </h3>
-            <TaskForm
-              onSubmit={handleCreateTask}
-              onCancel={() => setShowTaskForm(false)}
-              isSubmitting={createTask.isPending}
-            />
-          </div>
-        </div>
+        <Modal
+          title={t("tasks.items.form.createTitle")}
+          onClose={() => setShowTaskForm(false)}
+        >
+          <TaskForm
+            onSubmit={handleCreateTask}
+            onCancel={() => setShowTaskForm(false)}
+            isSubmitting={createTask.isPending}
+          />
+        </Modal>
       )}
 
       {editingTask && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h3 className="text-xl font-bold text-stone-800 mb-4">
-              {t("tasks.items.form.editTitle")}
-            </h3>
-            <TaskForm
-              task={editingTask}
-              onSubmit={handleUpdateTask}
-              onCancel={() => setEditingTask(null)}
-              onDelete={handleDeleteTask}
-              isSubmitting={updateTask.isPending}
-              isDeleting={deleteTask.isPending}
-            />
-          </div>
-        </div>
+        <Modal
+          title={t("tasks.items.form.editTitle")}
+          onClose={() => setEditingTask(null)}
+        >
+          <TaskForm
+            task={editingTask}
+            onSubmit={handleUpdateTask}
+            onCancel={() => setEditingTask(null)}
+            onDelete={handleDeleteTask}
+            isSubmitting={updateTask.isPending}
+            isDeleting={deleteTask.isPending}
+          />
+        </Modal>
       )}
 
       {showChoreForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h3 className="text-xl font-bold text-stone-800 mb-4">
-              {t("tasks.chores.form.createTitle")}
-            </h3>
-            <ChoreForm
-              onSubmit={handleCreateChore}
-              onCancel={() => setShowChoreForm(false)}
-              isSubmitting={createChore.isPending}
-            />
-          </div>
-        </div>
+        <Modal
+          title={t("tasks.chores.form.createTitle")}
+          onClose={() => setShowChoreForm(false)}
+        >
+          <ChoreForm
+            onSubmit={handleCreateChore}
+            onCancel={() => setShowChoreForm(false)}
+            isSubmitting={createChore.isPending}
+          />
+        </Modal>
       )}
 
       {editingChore && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h3 className="text-xl font-bold text-stone-800 mb-4">
-              {t("tasks.chores.form.editTitle")}
-            </h3>
-            <ChoreForm
-              chore={editingChore}
-              onSubmit={handleUpdateChore}
-              onCancel={() => setEditingChore(null)}
-              onDelete={handleDeleteChore}
-              isSubmitting={updateChore.isPending}
-              isDeleting={deleteChore.isPending}
-            />
-          </div>
-        </div>
+        <Modal
+          title={t("tasks.chores.form.editTitle")}
+          onClose={() => setEditingChore(null)}
+        >
+          <ChoreForm
+            chore={editingChore}
+            onSubmit={handleUpdateChore}
+            onCancel={() => setEditingChore(null)}
+            onDelete={handleDeleteChore}
+            isSubmitting={updateChore.isPending}
+            isDeleting={deleteChore.isPending}
+          />
+        </Modal>
       )}
     </div>
   );

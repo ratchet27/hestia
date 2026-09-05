@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ShoppingItemResponse } from "@/api/generated/models";
 
 interface ShoppingListItemProps {
@@ -14,6 +15,7 @@ export function ShoppingListItem({
   onDelete,
   isDeleting = false,
 }: ShoppingListItemProps): React.ReactElement {
+  const { t } = useTranslation();
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
@@ -49,7 +51,7 @@ export function ShoppingListItem({
         onClick={handleCheckboxClick}
         disabled={isDeleting || isAnimatingOut}
         className="w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center hover:border-green-500 transition-colors disabled:opacity-50"
-        aria-label="Отметить купленным"
+        aria-label={t("shopping.markBought")}
       />
       <div className="flex-1 min-w-0">
         <p className="font-medium text-stone-800 truncate">{item.name}</p>
@@ -58,11 +60,11 @@ export function ShoppingListItem({
         )}
       </div>
       <span className="text-sm text-stone-500 whitespace-nowrap">
-        {item.amount} шт.
+        {t("shopping.amount", { amount: item.amount })}
       </span>
       {item.source === "auto" && (
         <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-          Авто
+          {t("shopping.auto")}
         </span>
       )}
     </div>
