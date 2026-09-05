@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import type { ChoreResponse, TaskResponse } from "../../api/generated/models";
@@ -24,7 +24,7 @@ import { TaskCard } from "./components/TaskCard";
 import { TaskForm, type TaskFormValues } from "./components/TaskForm";
 import { groupChores, groupTasks } from "./grouping";
 
-export function TasksPage(): React.ReactElement {
+export function TasksPage(): ReactElement {
   const { t } = useTranslation();
 
   const {
@@ -57,7 +57,7 @@ export function TasksPage(): React.ReactElement {
     await createTask.mutateAsync({
       name: data.name,
       due_date: data.due_date || undefined,
-      priority: data.priority as "low" | "medium" | "high",
+      priority: data.priority,
     });
     toast.success(t("tasks.items.form.created"));
     setShowTaskForm(false);
@@ -70,7 +70,7 @@ export function TasksPage(): React.ReactElement {
       data: {
         name: data.name,
         due_date: data.due_date || undefined,
-        priority: data.priority as "low" | "medium" | "high",
+        priority: data.priority,
       },
     });
     toast.success(t("tasks.items.form.updated"));
@@ -92,10 +92,7 @@ export function TasksPage(): React.ReactElement {
   const handleCreateChore = async (data: ChoreFormValues): Promise<void> => {
     await createChore.mutateAsync({
       name: data.name,
-      schedule_type: data.schedule_type as
-        | "interval"
-        | "fixed_weekly"
-        | "fixed_monthly",
+      schedule_type: data.schedule_type,
       schedule_value: Number.parseInt(data.schedule_value, 10),
       assignee: data.assignee || undefined,
     });
@@ -109,10 +106,7 @@ export function TasksPage(): React.ReactElement {
       id: editingChore.id,
       data: {
         name: data.name,
-        schedule_type: data.schedule_type as
-          | "interval"
-          | "fixed_weekly"
-          | "fixed_monthly",
+        schedule_type: data.schedule_type,
         schedule_value: Number.parseInt(data.schedule_value, 10),
         assignee: data.assignee || undefined,
       },
@@ -139,7 +133,7 @@ export function TasksPage(): React.ReactElement {
   const taskGroups = groupTasks(activeTasks, completedTasks);
 
   // The header is rendered once; only the body below it changes with state.
-  let body: React.ReactElement;
+  let body: ReactElement;
   if (isLoading) {
     body = <div className="text-stone-500">{t("common.loading")}</div>;
   } else if (isError) {

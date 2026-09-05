@@ -1,7 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { createStockEntry, wrapResponse } from "./data";
 
-// Default success handlers - provide sensible defaults for all API endpoints
+// Default success handlers: every GET a page issues on mount answers with an
+// empty (or minimal) list, so a test only overrides what it asserts on.
 export const handlers = [
   http.get("*/api/internal/v1/auth/me", () =>
     HttpResponse.json({ message: "Authentication required." }, { status: 401 }),
@@ -26,5 +27,16 @@ export const handlers = [
   ),
   http.get("*/api/internal/v1/chores", () =>
     HttpResponse.json(wrapResponse([])),
+  ),
+  http.get("*/api/internal/v1/categories", () =>
+    HttpResponse.json(wrapResponse([])),
+  ),
+  http.get("*/api/internal/v1/shopping-list", () =>
+    HttpResponse.json(wrapResponse([])),
+  ),
+  http.get("*/api/internal/v1/telegram/status", () =>
+    HttpResponse.json({
+      data: { configured: false, daily_summary_time: "09:00" },
+    }),
   ),
 ];

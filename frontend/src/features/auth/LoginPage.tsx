@@ -1,10 +1,10 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, type ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router-dom";
 import { ApiError } from "../../api/client";
 import { useAuth } from "../../data/hooks";
 
-export function LoginPage(): React.ReactElement {
+export function LoginPage(): ReactElement {
   const { t } = useTranslation();
   const { user, login } = useAuth();
   const [username, setUsername] = useState("");

@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import type { StockEntryResponse } from "../../../api/generated/models";
+import { formatShortDate } from "../../../lib/dates";
+import { entryQuantity } from "../../../lib/quantity";
 import {
-  formatExpiryDate,
   getExpiryStatus,
   getRelativeExpiryText,
   statusColors,
@@ -21,7 +22,7 @@ export function StockRow({ entry, onConsume }: StockRowProps) {
     ? getRelativeExpiryText(days, t)
     : null;
   const dateText = entry.best_before
-    ? formatExpiryDate(entry.best_before)
+    ? formatShortDate(entry.best_before)
     : null;
 
   return (
@@ -35,7 +36,9 @@ export function StockRow({ entry, onConsume }: StockRowProps) {
           </span>
         </div>
       </td>
-      <td className="px-4 py-3.5 text-stone-600">1 {entry.product.unit}</td>
+      <td className="px-4 py-3.5 text-stone-600">
+        {entryQuantity(entry.product.unit)}
+      </td>
       <td className="px-4 py-3.5">
         {entry.best_before ? (
           <div className="flex flex-col">

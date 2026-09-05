@@ -1,4 +1,5 @@
-export function ProductSkeleton(): React.ReactElement {
+import type { ReactElement } from "react";
+export function ProductSkeleton(): ReactElement {
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 animate-pulse">
       <div className="flex justify-between items-start mb-3">
@@ -22,7 +23,7 @@ export function ProductsGridSkeleton({
   count = 6,
 }: {
   count?: number;
-}): React.ReactElement {
+}): ReactElement {
   return (
     <div className="grid grid-cols-3 gap-4">
       {Array.from({ length: count }).map((_, i) => (

@@ -1,7 +1,8 @@
+import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../data/hooks";
 
-export function UserProfile(): React.ReactElement | null {
+export function UserProfile(): ReactElement | null {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
 

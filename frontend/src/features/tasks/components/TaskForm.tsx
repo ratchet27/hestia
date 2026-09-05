@@ -1,6 +1,7 @@
+import type { ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import type { TaskResponse } from "../../../api/generated/models";
+import type { TaskPriority, TaskResponse } from "../../../api/generated/models";
 import { FormActions } from "../../../components/FormActions";
 
 interface TaskFormProps {
@@ -15,7 +16,7 @@ interface TaskFormProps {
 export interface TaskFormValues {
   name: string;
   due_date: string;
-  priority: string;
+  priority: TaskPriority;
 }
 
 export function TaskForm({
@@ -25,7 +26,7 @@ export function TaskForm({
   onDelete,
   isSubmitting,
   isDeleting,
-}: TaskFormProps): React.ReactElement {
+}: TaskFormProps): ReactElement {
   const { t } = useTranslation();
 
   const {

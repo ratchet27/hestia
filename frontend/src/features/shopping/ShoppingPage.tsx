@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ShoppingItemResponse } from "@/api/generated/models";
 import {
@@ -14,7 +14,7 @@ import {
   ShoppingListItem,
 } from "./components";
 
-export function ShoppingPage(): React.ReactElement {
+export function ShoppingPage(): ReactElement {
   const { t } = useTranslation();
   const [editingItem, setEditingItem] = useState<ShoppingItemResponse | null>(
     null,

@@ -35,7 +35,7 @@ describe("StockRow", () => {
       </table>,
     );
 
-    expect(screen.getByText("через 3 дн.")).toBeInTheDocument();
+    expect(screen.getByText("через 3 дня")).toBeInTheDocument();
     expect(screen.getByText(/25 янв\./)).toBeInTheDocument();
   });
 

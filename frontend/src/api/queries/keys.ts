@@ -1,7 +1,4 @@
 export interface ProductFilters {
-  name?: string;
-  categoryId?: string;
-  active?: boolean;
   includeArchived?: boolean;
 }
 
@@ -10,58 +7,61 @@ export interface StockFilters {
   productId?: string;
 }
 
+// Every resource follows the same shape: `all` is the invalidation root,
+// `list(...)`/`detail(id)` extend it. Keeping the root as a prefix of every
+// key means one `invalidateQueries({ queryKey: x.all })` covers the resource.
 export const queryKeys = {
-  // Products
-  products: {
-    all: ["products"] as const,
-    list: (filters?: ProductFilters) => ["products", filters ?? {}] as const,
-    detail: (id: string) => ["product", id] as const,
+  auth: {
+    me: ["auth", "me"] as const,
   },
 
-  // Categories
+  products: {
+    all: ["products"] as const,
+    list: (filters?: ProductFilters) =>
+      [...queryKeys.products.all, "list", filters ?? {}] as const,
+    detail: (id: string) => [...queryKeys.products.all, "detail", id] as const,
+  },
+
   categories: {
     all: ["categories"] as const,
   },
 
-  // Locations
   locations: {
     all: ["locations"] as const,
   },
 
-  // Stocks
   stocks: {
     all: ["stocks"] as const,
     entries: (filters?: StockFilters) =>
-      ["stocks", "entries", filters ?? {}] as const,
-    expiring: (days: number) => ["stocks", "expiring", days] as const,
+      [...queryKeys.stocks.all, "entries", filters ?? {}] as const,
+    expiring: (days: number) =>
+      [...queryKeys.stocks.all, "expiring", days] as const,
   },
 
-  // Shopping List
   shoppingList: {
     all: ["shopping-list"] as const,
-    list: () => ["shopping-list", "list"] as const,
+    list: () => [...queryKeys.shoppingList.all, "list"] as const,
   },
 
-  // Tasks
   tasks: {
     all: ["tasks"] as const,
-    list: (status: string) => ["tasks", status] as const,
+    list: (status: TaskListStatus) =>
+      [...queryKeys.tasks.all, "list", status] as const,
   },
 
-  // Chores
   chores: {
     all: ["chores"] as const,
-    list: () => ["chores", "list"] as const,
+    list: () => [...queryKeys.chores.all, "list"] as const,
   },
 
-  // Recipes
   recipes: {
     all: ["recipes"] as const,
     list: () => [...queryKeys.recipes.all, "list"] as const,
   },
 
-  // Telegram
   telegram: {
     status: ["telegram", "status"] as const,
   },
 } as const;
+
+export type TaskListStatus = "active" | "completed" | "all";

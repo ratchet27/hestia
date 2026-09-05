@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { type ReactElement, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import type {
   CreateProductRequest,
   ProductResponse,
@@ -28,10 +29,14 @@ function firstBarcode(product: ProductResponse): string | undefined {
   return list[0]?.barcode;
 }
 
-export function ProductsPage(): React.ReactElement {
+export function ProductsPage(): ReactElement {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  // The category filter lives in the URL so a reload or a shared link keeps it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFilter = searchParams.get("category") ?? "all";
+  const setCategoryFilter = (id: string) =>
+    setSearchParams(id === "all" ? {} : { category: id }, { replace: true });
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductResponse | null>(
     null,
@@ -82,7 +87,7 @@ export function ProductsPage(): React.ReactElement {
   };
 
   // The header is rendered once; only the body below it changes with state.
-  let body: React.ReactElement;
+  let body: ReactElement;
   if (productsLoading) {
     body = <ProductsGridSkeleton count={9} />;
   } else if (productsError) {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactElement, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface ManagedItem {
@@ -21,11 +21,14 @@ export function ManagedList({
   onAdd,
   onRename,
   onDelete,
-}: ManagedListProps): React.ReactElement {
+}: ManagedListProps): ReactElement {
   const { t } = useTranslation();
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  // Enter submits and unmounts the input, which fires its blur handler; the
+  // ref makes the second call a no-op instead of a second PATCH.
+  const renameInFlight = useRef(false);
 
   const submitAdd = async () => {
     const name = newName.trim();
@@ -35,9 +38,17 @@ export function ManagedList({
   };
 
   const submitRename = async (id: string) => {
-    const name = editName.trim();
-    if (name) await onRename(id, name);
-    setEditingId(null);
+    if (renameInFlight.current) return;
+    renameInFlight.current = true;
+    try {
+      const name = editName.trim();
+      if (name && name !== items.find((i) => i.id === id)?.name) {
+        await onRename(id, name);
+      }
+      setEditingId(null);
+    } finally {
+      renameInFlight.current = false;
+    }
   };
 
   return (

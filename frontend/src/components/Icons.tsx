@@ -1,5 +1,6 @@
+import type { ReactElement } from "react";
 export const Icons = {
-  Dashboard: (): React.ReactElement => (
+  Dashboard: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -14,7 +15,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Stock: (): React.ReactElement => (
+  Stock: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -29,7 +30,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Products: (): React.ReactElement => (
+  Products: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -44,7 +45,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Shopping: (): React.ReactElement => (
+  Shopping: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -59,7 +60,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Recipes: (): React.ReactElement => (
+  Recipes: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -74,7 +75,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Tasks: (): React.ReactElement => (
+  Tasks: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -89,7 +90,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Settings: (): React.ReactElement => (
+  Settings: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -110,7 +111,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Scan: (): React.ReactElement => (
+  Scan: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -125,7 +126,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Plus: (): React.ReactElement => (
+  Plus: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -140,7 +141,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Minus: (): React.ReactElement => (
+  Minus: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -155,7 +156,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Check: (): React.ReactElement => (
+  Check: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -170,7 +171,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Warning: (): React.ReactElement => (
+  Warning: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -185,7 +186,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Search: (): React.ReactElement => (
+  Search: (): ReactElement => (
     <svg
       className="w-5 h-5"
       fill="none"

@@ -6,13 +6,13 @@ import {
   postApiCategoriesCreate,
 } from "../generated/categories/categories";
 import { queryKeys } from "./keys";
+import { unwrap } from "./unwrap";
 
 export function useCategories() {
   return useQuery({
     queryKey: queryKeys.categories.all,
     queryFn: async () => {
-      const response = await getApiCategoriesList();
-      return response.data.data ?? [];
+      return unwrap(await getApiCategoriesList());
     },
     staleTime: 10 * 60 * 1000,
   });

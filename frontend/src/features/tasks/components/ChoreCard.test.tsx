@@ -1,9 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createChoreResponse } from "@/test/mocks/data";
 import { render, screen, userEvent } from "@/test/utils";
 import { ChoreCard } from "./ChoreCard";
 
 describe("ChoreCard", () => {
+  // Local noon on a fixed day: day arithmetic must not depend on when CI runs.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 2, 10, 12, 0));
+  });
+  afterEach(() => vi.useRealTimers());
+
   const defaultProps = {
     onMarkDone: vi.fn(),
     onClick: vi.fn(),
@@ -33,7 +40,16 @@ describe("ChoreCard", () => {
       schedule_value: 5,
     });
     render(<ChoreCard {...defaultProps} chore={chore} />);
-    expect(screen.getByText(/Каждые 5 дн\./)).toBeInTheDocument();
+    expect(screen.getByText(/Каждые 5 дней/)).toBeInTheDocument();
+  });
+
+  it("uses the singular form for a daily interval", () => {
+    const chore = createChoreResponse({
+      schedule_type: "interval",
+      schedule_value: 1,
+    });
+    render(<ChoreCard {...defaultProps} chore={chore} />);
+    expect(screen.getByText(/Каждый день/)).toBeInTheDocument();
   });
 
   it("shows fixed_weekly schedule label", () => {
@@ -77,7 +93,7 @@ describe("ChoreCard", () => {
       next_due_at: new Date(Date.now() + 86400000 * 5).toISOString(),
     });
     render(<ChoreCard {...defaultProps} chore={chore} />);
-    expect(screen.getByText(/Через \d+ дн\./)).toBeInTheDocument();
+    expect(screen.getByText(/Через 5 дней/)).toBeInTheDocument();
   });
 
   it("calls onClick when card is clicked", async () => {

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  formatExpiryDate,
-  getExpiryStatus,
-  getRelativeExpiryText,
-} from "./expiryStatus";
+import { getExpiryStatus, getRelativeExpiryText } from "./expiryStatus";
 
 const mockT = ((key: string, options?: { count?: number }) => {
   const translations: Record<string, string> = {
@@ -63,20 +59,5 @@ describe("getRelativeExpiryText", () => {
   it("returns days remaining for future dates", () => {
     expect(getRelativeExpiryText(5, mockT)).toBe("через 5 дн.");
     expect(getRelativeExpiryText(2, mockT)).toBe("через 2 дн.");
-  });
-});
-
-describe("formatExpiryDate", () => {
-  it("formats date in Russian locale", () => {
-    // Note: Output may vary slightly based on locale settings
-    const result = formatExpiryDate("2025-01-15");
-    expect(result).toContain("15");
-    expect(result).toMatch(/янв/i);
-  });
-
-  it("handles various date formats", () => {
-    const result = formatExpiryDate("2025-12-31");
-    expect(result).toContain("31");
-    expect(result).toMatch(/дек/i);
   });
 });

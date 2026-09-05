@@ -1,6 +1,8 @@
+import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import type { TaskResponse } from "../../../api/generated/models";
 import { Icons } from "../../../components/Icons";
+import { formatShortDate } from "../../../lib/dates";
 
 interface TaskCardProps {
   task: TaskResponse;
@@ -18,14 +20,11 @@ export function TaskCard({
   task,
   onToggleDone,
   onClick,
-}: TaskCardProps): React.ReactElement {
+}: TaskCardProps): ReactElement {
   const { t } = useTranslation();
 
   const formattedDueDate = task.due_date
-    ? new Date(task.due_date).toLocaleDateString("ru-RU", {
-        day: "numeric",
-        month: "short",
-      })
+    ? formatShortDate(task.due_date)
     : null;
 
   return (

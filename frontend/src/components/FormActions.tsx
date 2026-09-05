@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface FormActionsProps {
@@ -28,7 +28,7 @@ export function FormActions({
   deleteLabel,
   deletingLabel,
   submitDisabled = false,
-}: FormActionsProps): React.ReactElement {
+}: FormActionsProps): ReactElement {
   const { t } = useTranslation();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const busy = isSubmitting || isDeleting;

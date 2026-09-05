@@ -119,11 +119,11 @@
     "quantity": "Quantity",
     "bestBefore": "Best before",
     "allUnderControl": "All under control",
-    "nextExpiry": "Next expiry in {{days}} days",
     "noAttentionNeeded": "No products need attention",
     "needToHandleToday": "🕐 Need to handle today",
     "collapse": "Collapse",
-    "showAll": "Show all ({{count}})"
+    "showAll_one": "Show all ({{count}})",
+    "showAll_other": "Show all ({{count}})"
   },
   "addStock": {
     "title": "Add to stock",
@@ -151,7 +151,8 @@
     "instructions": "Instructions",
     "sourceUrl": "Source URL",
     "canCook": "Ready to cook",
-    "missingIngredients": "Missing {{count}} ingr.",
+    "missingIngredients_one": "Missing {{count}} ingredient",
+    "missingIngredients_other": "Missing {{count}} ingredients",
     "ingredients": "Ingredients:",
     "cook": "Cook",
     "addToShoppingList": "Add to shopping list",
@@ -164,8 +165,10 @@
     "today": "today",
     "tomorrow": "tomorrow",
     "yesterday": "yesterday",
-    "daysAgo": "{{count}} days ago",
-    "inDays": "in {{count}} days"
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days"
   },
   "auth": {
     "appTagline": "Household tracker",
@@ -193,11 +196,14 @@
         "overdue": "Overdue",
         "upcoming": "Upcoming"
       },
-      "overdue": "Overdue by {{count}} days",
+      "overdue_one": "Overdue by {{count}} day",
+      "overdue_other": "Overdue by {{count}} days",
       "today": "Today!",
-      "daysLeft": "In {{count}} days",
+      "daysLeft_one": "In {{count}} day",
+      "daysLeft_other": "In {{count}} days",
       "schedule": {
-        "interval": "Every {{count}} days",
+        "interval_one": "Every day",
+        "interval_other": "Every {{count}} days",
         "fixedWeekly": "Every {{day}}",
         "fixedMonthly": "Every {{day}}th of the month"
       },

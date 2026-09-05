@@ -7,14 +7,12 @@ interface AttentionSectionProps {
   items: ExpiringEntryResponse[];
   onDone: (entry: ExpiringEntryResponse) => void;
   onThrow: (entry: ExpiringEntryResponse) => void;
-  nextExpiryDays?: number;
 }
 
 export function AttentionSection({
   items,
   onDone,
   onThrow,
-  nextExpiryDays,
 }: AttentionSectionProps) {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
@@ -29,9 +27,7 @@ export function AttentionSection({
               {t("stock.allUnderControl")}
             </span>
             <span className="text-stone-600 text-sm">
-              {nextExpiryDays !== undefined
-                ? t("stock.nextExpiry", { days: nextExpiryDays })
-                : t("stock.noAttentionNeeded")}
+              {t("stock.noAttentionNeeded")}
             </span>
           </div>
         </div>

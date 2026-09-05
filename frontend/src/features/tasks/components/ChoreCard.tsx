@@ -1,5 +1,10 @@
+import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
-import type { ChoreResponse } from "../../../api/generated/models";
+import type {
+  ChoreResponse,
+  ScheduleType,
+} from "../../../api/generated/models";
+import { getDaysUntil } from "../../../lib/dates";
 
 interface ChoreCardProps {
   chore: ChoreResponse;
@@ -7,18 +12,8 @@ interface ChoreCardProps {
   onClick: (chore: ChoreResponse) => void;
 }
 
-function getDaysUntil(dateStr: string): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(dateStr);
-  target.setHours(0, 0, 0, 0);
-  return Math.round(
-    (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-  );
-}
-
 function getScheduleLabel(
-  scheduleType: string,
+  scheduleType: ScheduleType,
   scheduleValue: number,
   t: (key: string, opts?: Record<string, unknown>) => string,
 ): string {
@@ -31,8 +26,6 @@ function getScheduleLabel(
       });
     case "fixed_monthly":
       return t("tasks.chores.schedule.fixedMonthly", { day: scheduleValue });
-    default:
-      return "";
   }
 }
 
@@ -40,7 +33,7 @@ export function ChoreCard({
   chore,
   onMarkDone,
   onClick,
-}: ChoreCardProps): React.ReactElement {
+}: ChoreCardProps): ReactElement {
   const { t } = useTranslation();
 
   const days = getDaysUntil(chore.next_due_at);

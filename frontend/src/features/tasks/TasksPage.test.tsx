@@ -1,6 +1,6 @@
 import { within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createChoreResponse,
   createTaskResponse,
@@ -11,6 +11,13 @@ import { render, screen, waitFor } from "@/test/utils";
 import { TasksPage } from "./TasksPage";
 
 describe("TasksPage", () => {
+  // Local noon on a fixed day: day arithmetic must not depend on when CI runs.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 2, 10, 12, 0));
+  });
+  afterEach(() => vi.useRealTimers());
+
   it("renders page title", async () => {
     render(<TasksPage />);
     await waitFor(() => {

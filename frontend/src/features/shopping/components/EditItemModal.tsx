@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type FormEvent, type ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ShoppingItemResponse } from "@/api/generated/models";
 import { FormActions } from "@/components/FormActions";
@@ -20,12 +20,12 @@ export function EditItemModal({
   onClose,
   onSave,
   isSaving = false,
-}: EditItemModalProps): React.ReactElement {
+}: EditItemModalProps): ReactElement {
   const { t } = useTranslation();
   const [amount, setAmount] = useState(item.amount);
   const [note, setNote] = useState(item.note ?? "");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (amount > 0) {
       onSave(item.id, amount, note);

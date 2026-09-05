@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import type { ExpiringEntryResponse } from "../../../api/generated/models";
+import { formatShortDate } from "../../../lib/dates";
+import { entryQuantity } from "../../../lib/quantity";
 import {
-  formatExpiryDate,
   getExpiryStatus,
   getRelativeExpiryText,
   statusBorderColors,
@@ -18,7 +19,7 @@ export function AttentionCard({ entry, onDone, onThrow }: AttentionCardProps) {
   const { t } = useTranslation();
   const status = getExpiryStatus(entry.days_until_expiry);
   const relativeText = getRelativeExpiryText(entry.days_until_expiry, t);
-  const dateText = formatExpiryDate(entry.best_before);
+  const dateText = formatShortDate(entry.best_before);
 
   return (
     <div
@@ -34,7 +35,9 @@ export function AttentionCard({ entry, onDone, onThrow }: AttentionCardProps) {
       </div>
 
       <div className="flex justify-between items-start mt-2 text-[13px]">
-        <span className="text-stone-500">1 {entry.product.unit}</span>
+        <span className="text-stone-500">
+          {entryQuantity(entry.product.unit)}
+        </span>
         <div className="flex flex-col items-end">
           <span className={`font-medium ${statusColors[status]}`}>
             {status === "expired" && "\u26a0\ufe0f "}

@@ -6,13 +6,13 @@ import {
   postApiLocationsCreate,
 } from "../generated/locations/locations";
 import { queryKeys } from "./keys";
+import { unwrap } from "./unwrap";
 
 export function useLocations() {
   return useQuery({
     queryKey: queryKeys.locations.all,
     queryFn: async () => {
-      const response = await getApiLocationsList();
-      return response.data.data ?? [];
+      return unwrap(await getApiLocationsList());
     },
     staleTime: 10 * 60 * 1000,
   });
