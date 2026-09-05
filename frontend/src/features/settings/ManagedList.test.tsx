@@ -54,6 +54,29 @@ describe("ManagedList", () => {
     expect(props.onDelete).toHaveBeenCalledWith("a");
   });
 
+  it("submits a rename once when Enter is followed by blur", async () => {
+    const props = setup();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Холодильник" }));
+    const input = screen.getByDisplayValue("Холодильник");
+    await user.clear(input);
+    await user.type(input, "Морозилка{Enter}");
+    // Enter unmounts the input, which fires its blur handler as well.
+    expect(props.onRename).toHaveBeenCalledTimes(1);
+    expect(props.onRename).toHaveBeenCalledWith("a", "Морозилка");
+  });
+
+  it("does not PATCH when the name is unchanged", async () => {
+    const props = setup();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: "Холодильник" }));
+    await user.keyboard("{Enter}");
+    expect(props.onRename).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: "Холодильник" }),
+    ).toBeInTheDocument();
+  });
+
   it("does not call onDelete when confirm is cancelled", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
     const props = setup();

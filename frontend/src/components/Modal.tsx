@@ -1,4 +1,10 @@
-import { type ReactNode, useEffect, useId, useRef } from "react";
+import {
+  type ReactElement,
+  type ReactNode,
+  useEffect,
+  useId,
+  useRef,
+} from "react";
 
 interface ModalProps {
   title: string;
@@ -18,7 +24,7 @@ export function Modal({
   onClose,
   children,
   size = "md",
-}: ModalProps): React.ReactElement {
+}: ModalProps): ReactElement {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
 

@@ -60,6 +60,16 @@ double unwrap. Get this depth wrong and you silently bind the wrong object.
 - `apiFetch` sends `credentials: "include"` and attaches the `X-CSRF-Token` header from the
   `XSRF-TOKEN` cookie (`getCsrfToken`). Auth is a session cookie (no token in JS).
 - On an unexpected `401` (not `/auth/me` or `/auth/login`) it hard-redirects to `/login`.
+- **Hooks in `src/api/queries/` call the generated functions only** (no hand-written
+  `apiFetch<Envelope>(url)` calls) and return `unwrap(await generatedCall())`. `unwrap`
+  (`src/api/queries/unwrap.ts`) strips the double envelope and narrows the generated
+  success|error union; `apiFetch` already threw for non-2xx, so no `if (status === 201)` guards.
+- Query keys come from `src/api/queries/keys.ts`; every key extends its resource's `all` root,
+  so `invalidateQueries({ queryKey: x.all })` always covers the whole resource.
+- Dates: `src/lib/dates.ts` (`getDaysUntil`, locale-aware `formatShortDate`). Do not
+  hand-roll `toLocaleDateString("ru-RU", …)` or day arithmetic in components.
+- Tests that depend on "today" pin the clock: `vi.useFakeTimers({ toFake: ["Date"] })` +
+  `vi.setSystemTime(...)`. Faking only `Date` keeps `waitFor`/`userEvent` timers real.
 
 ## Auth & dev server
 

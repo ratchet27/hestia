@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createChoreResponse, createTaskResponse } from "@/test/mocks/data";
 import { groupChores, groupTasks } from "./grouping";
 
@@ -11,6 +11,13 @@ function isoDaysFromToday(days: number): string {
   d.setDate(d.getDate() + days);
   return d.toISOString();
 }
+
+// Local noon on a fixed day: day arithmetic must not depend on when CI runs.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date(2026, 2, 10, 12, 0));
+});
+afterEach(() => vi.useRealTimers());
 
 describe("groupChores", () => {
   it("splits overdue from upcoming by next_due_at", () => {

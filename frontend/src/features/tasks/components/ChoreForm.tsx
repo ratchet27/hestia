@@ -1,6 +1,10 @@
+import type { ReactElement } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import type { ChoreResponse } from "../../../api/generated/models";
+import type {
+  ChoreResponse,
+  ScheduleType,
+} from "../../../api/generated/models";
 import { FormActions } from "../../../components/FormActions";
 
 interface ChoreFormProps {
@@ -14,7 +18,7 @@ interface ChoreFormProps {
 
 export interface ChoreFormValues {
   name: string;
-  schedule_type: string;
+  schedule_type: ScheduleType;
   schedule_value: string;
   assignee: string;
 }
@@ -26,7 +30,7 @@ export function ChoreForm({
   onDelete,
   isSubmitting,
   isDeleting,
-}: ChoreFormProps): React.ReactElement {
+}: ChoreFormProps): ReactElement {
   const { t } = useTranslation();
 
   const {

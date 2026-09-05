@@ -1,5 +1,5 @@
 import { HttpResponse, http } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createChoreResponse,
   createExpiringEntry,
@@ -13,6 +13,13 @@ import { render, screen } from "@/test/utils";
 import { DashboardPage } from "./DashboardPage";
 
 describe("DashboardPage", () => {
+  // Local noon on a fixed day: day arithmetic must not depend on when CI runs.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 2, 10, 12, 0));
+  });
+  afterEach(() => vi.useRealTimers());
+
   function setupMocks({
     stockEntries = [],
     products = [],
@@ -131,8 +138,8 @@ describe("DashboardPage", () => {
     const chore = createChoreResponse({
       id: "chore-test-1",
       name: "Помыть полы",
-      // past date so getDaysUntil <= 0, making it a today-chore
-      next_due_at: "2026-05-31T00:00:00+00:00",
+      // before the fixed clock (2026-03-10), so getDaysUntil <= 0: a today-chore
+      next_due_at: "2026-03-01T00:00:00+00:00",
     });
 
     let markDoneHit = false;

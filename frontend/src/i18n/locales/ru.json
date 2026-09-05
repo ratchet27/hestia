@@ -121,11 +121,12 @@
     "quantity": "Количество",
     "bestBefore": "Годен до",
     "allUnderControl": "Все под контролем",
-    "nextExpiry": "Следующее истекает через {{days}} дней",
     "noAttentionNeeded": "Нет продуктов, требующих внимания",
     "needToHandleToday": "🕐 Нужно разобраться сегодня",
     "collapse": "Свернуть",
-    "showAll": "Показать все ({{count}})"
+    "showAll_one": "Показать все ({{count}})",
+    "showAll_few": "Показать все ({{count}})",
+    "showAll_many": "Показать все ({{count}})"
   },
   "addStock": {
     "title": "Добавить в запасы",
@@ -153,7 +154,9 @@
     "instructions": "Инструкция",
     "sourceUrl": "Ссылка на источник",
     "canCook": "Можно готовить",
-    "missingIngredients": "Не хватает {{count}} ингр.",
+    "missingIngredients_one": "Не хватает {{count}} ингредиента",
+    "missingIngredients_few": "Не хватает {{count}} ингредиентов",
+    "missingIngredients_many": "Не хватает {{count}} ингредиентов",
     "ingredients": "Ингредиенты:",
     "cook": "Приготовить",
     "addToShoppingList": "В список покупок",
@@ -166,8 +169,12 @@
     "today": "сегодня",
     "tomorrow": "завтра",
     "yesterday": "вчера",
-    "daysAgo": "{{count}} дн. назад",
-    "inDays": "через {{count}} дн."
+    "daysAgo_one": "{{count}} день назад",
+    "daysAgo_few": "{{count}} дня назад",
+    "daysAgo_many": "{{count}} дней назад",
+    "inDays_one": "через {{count}} день",
+    "inDays_few": "через {{count}} дня",
+    "inDays_many": "через {{count}} дней"
   },
   "auth": {
     "appTagline": "Домашний учёт",
@@ -195,11 +202,17 @@
         "overdue": "Просрочено",
         "upcoming": "Предстоящие"
       },
-      "overdue": "Просрочено на {{count}} дн.",
+      "overdue_one": "Просрочено на {{count}} день",
+      "overdue_few": "Просрочено на {{count}} дня",
+      "overdue_many": "Просрочено на {{count}} дней",
       "today": "Сегодня!",
-      "daysLeft": "Через {{count}} дн.",
+      "daysLeft_one": "Через {{count}} день",
+      "daysLeft_few": "Через {{count}} дня",
+      "daysLeft_many": "Через {{count}} дней",
       "schedule": {
-        "interval": "Каждые {{count}} дн.",
+        "interval_one": "Каждый день",
+        "interval_few": "Каждые {{count}} дня",
+        "interval_many": "Каждые {{count}} дней",
         "fixedWeekly": "Каждый {{day}}",
         "fixedMonthly": "Каждое {{day}}-е число"
       },

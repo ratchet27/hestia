@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { type ReactElement, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ import {
   useUpdateRecipe,
 } from "../../api/queries/recipes";
 import { Modal } from "../../components/Modal";
+import { ingredientsOf, toIngredientPayloads } from "./ingredients";
 
 interface IngredientRow {
   product_id: string;
@@ -31,7 +32,7 @@ export function RecipeForm({
 }: {
   recipeId: string | null;
   onClose: () => void;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { data: products = [] } = useProducts();
   const { data: recipes = [] } = useRecipes();
@@ -42,11 +43,6 @@ export function RecipeForm({
   const existing = recipeId
     ? recipes.find((r) => r.id === recipeId)
     : undefined;
-  const existingIngredients = existing
-    ? Array.isArray(existing.ingredients)
-      ? existing.ingredients
-      : Object.values(existing.ingredients ?? {})
-    : [];
 
   const { register, control, handleSubmit, setError, reset, formState } =
     useForm<RecipeFormValues>({
@@ -54,11 +50,7 @@ export function RecipeForm({
         name: existing?.name ?? "",
         instructions: existing?.instructions ?? "",
         source_url: existing?.source_url ?? "",
-        ingredients: existingIngredients.map((i) => ({
-          product_id: i.product_id,
-          required_count: i.required_count ?? 1,
-          consume_on_cook: i.consume_on_cook ?? true,
-        })),
+        ingredients: toIngredientPayloads(ingredientsOf(existing)),
       },
     });
 
@@ -66,18 +58,11 @@ export function RecipeForm({
   // Re-populate the form once the existing record becomes available.
   useEffect(() => {
     if (existing) {
-      const ings = Array.isArray(existing.ingredients)
-        ? existing.ingredients
-        : Object.values(existing.ingredients ?? {});
       reset({
         name: existing.name ?? "",
         instructions: existing.instructions ?? "",
         source_url: existing.source_url ?? "",
-        ingredients: ings.map((i) => ({
-          product_id: i.product_id,
-          required_count: i.required_count ?? 1,
-          consume_on_cook: i.consume_on_cook ?? true,
-        })),
+        ingredients: toIngredientPayloads(ingredientsOf(existing)),
       });
     }
   }, [existing, reset]);

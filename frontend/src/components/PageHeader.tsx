@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 interface PageHeaderProps {
   title: string;
@@ -12,7 +12,7 @@ export function PageHeader({
   title,
   subtitle,
   actions,
-}: PageHeaderProps): React.ReactElement {
+}: PageHeaderProps): ReactElement {
   return (
     <header className="flex items-start justify-between mb-6">
       <div>

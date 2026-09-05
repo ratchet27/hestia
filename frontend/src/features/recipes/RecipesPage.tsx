@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useAddMissingToShoppingList,
@@ -6,9 +6,10 @@ import {
   useRecipes,
 } from "../../api/queries/recipes";
 import { Icons } from "../../components/Icons";
+import { ingredientsOf } from "./ingredients";
 import { RecipeForm } from "./RecipeForm";
 
-export function RecipesPage(): React.ReactElement {
+export function RecipesPage(): ReactElement {
   const { t } = useTranslation();
   const { data: recipes = [], isLoading } = useRecipes();
   const cook = useCookRecipe();
@@ -39,9 +40,7 @@ export function RecipesPage(): React.ReactElement {
 
       <div className="grid grid-cols-2 gap-6">
         {recipes.map((recipe) => {
-          const ingredients = Array.isArray(recipe.ingredients)
-            ? recipe.ingredients
-            : Object.values(recipe.ingredients ?? {});
+          const ingredients = ingredientsOf(recipe);
           const missingCount = ingredients.filter((i) => !i.has_enough).length;
 
           return (

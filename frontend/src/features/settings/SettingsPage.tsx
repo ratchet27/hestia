@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import {
@@ -19,7 +20,7 @@ import {
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { ManagedList } from "./ManagedList";
 
-export function SettingsPage(): React.ReactElement {
+export function SettingsPage(): ReactElement {
   const { t } = useTranslation();
 
   const locations = useLocations();

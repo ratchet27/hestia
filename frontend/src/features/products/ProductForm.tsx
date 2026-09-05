@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -42,7 +42,7 @@ export function ProductForm({
   onCancel,
   isSubmitting,
   submitError,
-}: ProductFormProps): React.ReactElement {
+}: ProductFormProps): ReactElement {
   const { t } = useTranslation();
   const [barcodesExpanded, setBarcodesExpanded] = useState(!!initialBarcode);
   const [barcodes, setBarcodes] = useState<string[]>(() => {

@@ -36,6 +36,8 @@ afterEach(() => {
   cleanup();
   server.resetHandlers();
   consoleError.mockRestore();
+  // Pages keep filters in the URL; jsdom shares one location per file.
+  window.history.replaceState(null, "", "/");
 });
 
 afterAll(() => server.close());

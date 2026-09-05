@@ -8,13 +8,13 @@ import {
   putApiInternalV1RecipesUpdate,
 } from "../generated/recipes/recipes";
 import { queryKeys } from "./keys";
+import { unwrap } from "./unwrap";
 
 export function useRecipes() {
   return useQuery({
     queryKey: queryKeys.recipes.list(),
     queryFn: async () => {
-      const response = await getApiInternalV1RecipesIndex();
-      return response.data.data ?? [];
+      return unwrap(await getApiInternalV1RecipesIndex());
     },
   });
 }
@@ -23,11 +23,7 @@ export function useCreateRecipe() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: SaveRecipeRequest) => {
-      const response = await postApiInternalV1RecipesCreate(data);
-      if (response.status === 201) {
-        return response.data.data!;
-      }
-      throw new Error("Failed to create recipe");
+      return unwrap(await postApiInternalV1RecipesCreate(data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.all });
@@ -45,11 +41,7 @@ export function useUpdateRecipe() {
       id: string;
       data: SaveRecipeRequest;
     }) => {
-      const response = await putApiInternalV1RecipesUpdate(id, data);
-      if (response.status === 200) {
-        return response.data.data!;
-      }
-      throw new Error("Failed to update recipe");
+      return unwrap(await putApiInternalV1RecipesUpdate(id, data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.all });
@@ -61,11 +53,7 @@ export function useCookRecipe() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await postApiInternalV1RecipesCook(id);
-      if (response.status === 200) {
-        return response.data.data!;
-      }
-      throw new Error("Failed to cook recipe");
+      return unwrap(await postApiInternalV1RecipesCook(id));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.all });
@@ -80,11 +68,7 @@ export function useAddMissingToShoppingList() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await postApiInternalV1RecipesAddMissing(id);
-      if (response.status === 200) {
-        return response.data.data!;
-      }
-      throw new Error("Failed to add missing ingredients to shopping list");
+      return unwrap(await postApiInternalV1RecipesAddMissing(id));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.shoppingList.all });

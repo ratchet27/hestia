@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
@@ -14,8 +15,8 @@ import { TasksPage } from "./features/tasks/TasksPage";
 function ProtectedRoute({
   children,
 }: {
-  children: React.ReactElement;
-}): React.ReactElement {
+  children: ReactElement;
+}): ReactElement {
   const { t } = useTranslation();
   const { user, isLoading } = useAuth();
   if (isLoading) {
@@ -31,7 +32,7 @@ function ProtectedRoute({
   return children;
 }
 
-export default function App(): React.ReactElement {
+export default function App(): ReactElement {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />

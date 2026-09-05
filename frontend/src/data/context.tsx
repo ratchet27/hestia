@@ -1,9 +1,17 @@
-import { createContext, type ReactNode, useEffect, useState } from "react";
-import { apiFetch } from "../api/client";
-import type { User } from "./types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createContext, type ReactElement, type ReactNode } from "react";
+import {
+  getApiAuthCsrf,
+  getApiAuthMe,
+  postApiAuthLogin,
+  postApiAuthLogout,
+} from "../api/generated/auth/auth";
+import type { UserResponse } from "../api/generated/models";
+import { queryKeys } from "../api/queries/keys";
+import { unwrap } from "../api/queries/unwrap";
 
 export interface AuthContextValue {
-  user: User | null;
+  user: UserResponse | null;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -15,66 +23,46 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export function AuthProvider({
-  children,
-}: AuthProviderProps): React.ReactElement {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function AuthProvider({ children }: AuthProviderProps): ReactElement {
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    let cancelled = false;
-
-    apiFetch<{ data: { data?: User }; status: number; headers: Headers }>(
-      "/api/internal/v1/auth/me",
-    )
-      .then((result) => {
-        if (!cancelled) {
-          setUser(result.data.data ?? null);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setUser(null);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // The session is a query like any other: TanStack owns the loading flag,
+  // request cancellation and dedup. A 401 from /auth/me is "anonymous", not an
+  // error, so it resolves to null instead of putting the query in error state.
+  const { data: user = null, isLoading } = useQuery({
+    queryKey: queryKeys.auth.me,
+    queryFn: async (): Promise<UserResponse | null> => {
+      try {
+        return unwrap(await getApiAuthMe());
+      } catch {
+        return null;
+      }
+    },
+    staleTime: Infinity,
+    retry: false,
+  });
 
   const login = async (username: string, password: string): Promise<void> => {
-    // Attempt CSRF token fetch; ignore failures
+    // Primes the XSRF-TOKEN cookie the login POST must echo; a failure here
+    // surfaces as a 403 on the login call itself.
     try {
-      await apiFetch("/api/internal/v1/auth/csrf");
+      await getApiAuthCsrf();
     } catch {
       // ignore
     }
 
-    const result = await apiFetch<{
-      data: { data?: User };
-      status: number;
-      headers: Headers;
-    }>("/api/internal/v1/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ username, password }),
-    });
-
-    setUser(result.data.data ?? null);
+    const me = unwrap(await postApiAuthLogin({ username, password }));
+    queryClient.setQueryData(queryKeys.auth.me, me);
   };
 
   const logout = async (): Promise<void> => {
     try {
-      await apiFetch("/api/internal/v1/auth/logout", { method: "POST" });
+      await postApiAuthLogout();
     } catch {
-      // ignore failures
+      // The cookie is gone either way; the UI treats the user as signed out.
     }
-    setUser(null);
+    queryClient.setQueryData(queryKeys.auth.me, null);
+    queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "auth" });
   };
 
   return (

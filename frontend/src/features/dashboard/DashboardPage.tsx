@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useProducts, useShoppingList } from "../../api/queries";
@@ -5,13 +6,14 @@ import { useChores, useMarkChoreDone } from "../../api/queries/chores";
 import { useExpiringStock, useStockEntries } from "../../api/queries/stocks";
 import { useTasks } from "../../api/queries/tasks";
 import { Icons } from "../../components/Icons";
-import { formatDate, getDaysUntil } from "../../data/types";
+import { formatShortDate, getDaysUntil } from "../../lib/dates";
+import { entryQuantity } from "../../lib/quantity";
 import {
   getExpiryStatus,
   getRelativeExpiryText,
 } from "../stock/utils/expiryStatus";
 
-export function DashboardPage(): React.ReactElement {
+export function DashboardPage(): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: products = [] } = useProducts();
@@ -119,7 +121,8 @@ export function DashboardPage(): React.ReactElement {
                           {item.product.name}
                         </p>
                         <p className="text-sm text-stone-500">
-                          1 {item.product.unit} · {item.location.name}
+                          {entryQuantity(item.product.unit)} ·{" "}
+                          {item.location.name}
                         </p>
                       </div>
                       <span
@@ -252,7 +255,7 @@ export function DashboardPage(): React.ReactElement {
                   >
                     <p className="font-medium text-stone-800">{task.name}</p>
                     <span className="text-sm text-stone-500">
-                      {formatDate(task.due_date ?? null)}
+                      {formatShortDate(task.due_date ?? null)}
                     </span>
                   </div>
                 ))}

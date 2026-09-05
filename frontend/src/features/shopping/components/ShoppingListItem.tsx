@@ -1,4 +1,9 @@
-import { useState } from "react";
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactElement,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import type { ShoppingItemResponse } from "@/api/generated/models";
 
@@ -14,11 +19,11 @@ export function ShoppingListItem({
   onClick,
   onDelete,
   isDeleting = false,
-}: ShoppingListItemProps): React.ReactElement {
+}: ShoppingListItemProps): ReactElement {
   const { t } = useTranslation();
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
 
-  const handleCheckboxClick = (e: React.MouseEvent) => {
+  const handleCheckboxClick = (e: MouseEvent) => {
     e.stopPropagation();
     setIsAnimatingOut(true);
     setTimeout(() => {
@@ -26,7 +31,7 @@ export function ShoppingListItem({
     }, 300);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onClick();

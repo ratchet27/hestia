@@ -1,5 +1,5 @@
 import type { ChoreResponse, TaskResponse } from "../../api/generated/models";
-import { getDaysUntil } from "../../data/types";
+import { getDaysUntil } from "../../lib/dates";
 
 export interface GroupedChores {
   overdue: ChoreResponse[];

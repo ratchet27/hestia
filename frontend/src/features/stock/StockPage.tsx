@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { type ReactElement, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import type {
   ExpiringEntryResponse,
   ProductResponse,
@@ -29,11 +30,13 @@ type ModalState =
   | { type: "add"; preselectedProduct?: ProductResponse }
   | { type: "createProduct"; barcode: string };
 
-export function StockPage(): React.ReactElement {
+export function StockPage(): ReactElement {
   const { t } = useTranslation();
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    null,
-  );
+  // The active tab lives in the URL so a reload or a shared link keeps it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedLocationId = searchParams.get("location");
+  const setSelectedLocationId = (id: string | null) =>
+    setSearchParams(id ? { location: id } : {}, { replace: true });
   const [searchTerm, setSearchTerm] = useState("");
   const [modalState, setModalState] = useState<ModalState>({ type: "none" });
 

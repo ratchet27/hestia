@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 import { Icons } from "./Icons";
@@ -13,7 +14,7 @@ const navItems = [
   { path: "/settings", labelKey: "nav.settings", icon: Icons.Settings },
 ];
 
-export function Navigation(): React.ReactElement {
+export function Navigation(): ReactElement {
   const { t } = useTranslation();
 
   return (

@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  type ReactElement,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import type { ProductResponse } from "@/api/generated/models";
 import { useProducts } from "@/api/queries";
@@ -13,7 +19,7 @@ export function ProductSearchInput({
   onAddProduct,
   onAddCustom,
   isAdding = false,
-}: ProductSearchInputProps): React.ReactElement {
+}: ProductSearchInputProps): ReactElement {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -72,7 +78,7 @@ export function ProductSearchInput({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (!isOpen || totalOptions === 0) {
       if (e.key === "Enter" && search.trim()) {
         e.preventDefault();

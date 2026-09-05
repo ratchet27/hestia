@@ -22,17 +22,6 @@ export function getRelativeExpiryText(
   return t("expiry.inDays", { count: daysUntilExpiry });
 }
 
-export function formatExpiryDate(dateStr: string): string {
-  // Parse as local date (not UTC) to avoid timezone shifts
-  const [year, month, day] = dateStr.split("-").map(Number) as [
-    number,
-    number,
-    number,
-  ];
-  const date = new Date(year, month - 1, day);
-  return date.toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
-}
-
 export const statusColors: Record<ExpiryStatus, string> = {
   expired: "text-red-700",
   today: "text-orange-700",
