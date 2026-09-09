@@ -219,3 +219,11 @@ deletes items without an undo.
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+Third-party material included in this repository:
+
+- The Docker setup under `backend/` is derived from
+  [symfony-docker](https://github.com/dunglas/symfony-docker) (MIT, Fabien
+  Potencier; notice kept in [`backend/LICENSE`](backend/LICENSE)).
+- The SVG icons in `frontend/src/components/Icons.tsx` are from
+  [Heroicons](https://heroicons.com/) (MIT, Tailwind Labs).
