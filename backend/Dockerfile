@@ -128,11 +128,16 @@ FROM oven/bun:1 AS frontend_builder
 
 WORKDIR /src
 
+# `frontend` is a named build context, not a stage; hadolint cannot see it.
+# hadolint ignore=DL3022
 COPY --from=frontend package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
+# hadolint ignore=DL3022
 COPY --from=frontend index.html vite.config.ts tsconfig.json ./
+# hadolint ignore=DL3022
 COPY --from=frontend public ./public
+# hadolint ignore=DL3022
 COPY --from=frontend src ./src
 
 # Same-origin API: relative URLs (frontend/src/api/client.ts). Set explicitly
