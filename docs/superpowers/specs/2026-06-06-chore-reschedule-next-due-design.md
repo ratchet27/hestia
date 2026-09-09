@@ -123,6 +123,6 @@ don't write them. `now()` already resolves the household timezone
 ## Verification
 
 ```bash
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 ```

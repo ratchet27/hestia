@@ -139,7 +139,7 @@ Verification before claiming the fix is safe:
 ## Verification
 
 ```bash
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 # Mutation run over the new scope (services + logic entities):
 docker compose exec php vendor/bin/infection --threads=max

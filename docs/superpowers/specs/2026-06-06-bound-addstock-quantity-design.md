@@ -93,12 +93,12 @@ one-row-per-unit storage model is **not** changed.
 
 ```bash
 # backend
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 grep -n "LessThanOrEqual" src/Request/AddStockRequest.php
 
 # frontend
-cd /home/pavel/projects/personal/hestia/frontend
+cd <repo>/frontend
 bun run check && bun run test:run
 grep -n "quantityMax" src/i18n/locales/en.json src/i18n/locales/ru.json
 ```

@@ -33,16 +33,16 @@ GPG signing is configured automatically for this repo.
 
 ## Quick Commands
 
-Always run from the correct directory. Use full paths to avoid mistakes.
+Always run from the correct directory. The paths below resolve from anywhere inside the repo, so use them verbatim instead of guessing a relative path.
 
 | Task | Command |
 |------|---------|
-| Frontend check (auto-fix) | `cd /home/pavel/projects/personal/hestia/frontend && bun run check:write` |
-| Frontend check (verify only / CI parity) | `cd /home/pavel/projects/personal/hestia/frontend && bun run check` |
-| Frontend test | `cd /home/pavel/projects/personal/hestia/frontend && bun run test:run` |
-| Backend check | `cd /home/pavel/projects/personal/hestia/backend && make lint` |
-| Backend test | `cd /home/pavel/projects/personal/hestia/backend && make test` |
-| Regenerate API | `cd /home/pavel/projects/personal/hestia/frontend && NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api` |
+| Frontend check (auto-fix) | `cd "$(git rev-parse --show-toplevel)"/frontend && bun run check:write` |
+| Frontend check (verify only / CI parity) | `cd "$(git rev-parse --show-toplevel)"/frontend && bun run check` |
+| Frontend test | `cd "$(git rev-parse --show-toplevel)"/frontend && bun run test:run` |
+| Backend check | `cd "$(git rev-parse --show-toplevel)"/backend && make lint` |
+| Backend test | `cd "$(git rev-parse --show-toplevel)"/backend && make test` |
+| Regenerate API | `cd "$(git rev-parse --show-toplevel)"/frontend && NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api` |
 
 ### Common Mistakes to Avoid
 

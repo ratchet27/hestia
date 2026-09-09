@@ -64,13 +64,13 @@ Compare incoming array with existing barcodes on product:
 **Step 5: Regenerate frontend API types**
 
 ```bash
-cd /home/pavel/projects/hestia/frontend && NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api
+cd <repo>/frontend && NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api
 ```
 
 **Step 6: Run backend lint and tests**
 
 ```bash
-cd /home/pavel/projects/hestia/backend && make lint && make test
+cd <repo>/backend && make lint && make test
 ```
 
 **Step 7: Commit**
@@ -125,7 +125,7 @@ Add to `frontend/src/features/stock/components/index.ts`.
 **Step 3: Run frontend check**
 
 ```bash
-cd /home/pavel/projects/hestia/frontend && bun run check
+cd <repo>/frontend && bun run check
 ```
 
 **Step 4: Commit**
@@ -169,7 +169,7 @@ useForm<AddStockFormData>({
 **Step 3: Run frontend check**
 
 ```bash
-cd /home/pavel/projects/hestia/frontend && bun run check
+cd <repo>/frontend && bun run check
 ```
 
 **Step 4: Commit**
@@ -295,7 +295,7 @@ Map 409 Conflict to user-friendly message in error handling.
 **Step 6: Run frontend check**
 
 ```bash
-cd /home/pavel/projects/hestia/frontend && bun run check
+cd <repo>/frontend && bun run check
 ```
 
 **Step 7: Commit**
@@ -374,7 +374,7 @@ If ProductForm is currently used inline on products page, create a modal wrapper
 **Step 5: Run frontend check and tests**
 
 ```bash
-cd /home/pavel/projects/hestia/frontend && bun run check && bun run test:run
+cd <repo>/frontend && bun run check && bun run test:run
 ```
 
 **Step 6: Commit**
@@ -418,7 +418,7 @@ Replace hardcoded Russian strings with `t()` calls.
 **Step 3: Run frontend check**
 
 ```bash
-cd /home/pavel/projects/hestia/frontend && bun run check
+cd <repo>/frontend && bun run check
 ```
 
 **Step 4: Commit**
@@ -434,13 +434,13 @@ git add -A && git commit -s -m "feat(frontend): add barcode translations"
 **Step 1: Run all backend tests**
 
 ```bash
-cd /home/pavel/projects/hestia/backend && make lint && make test
+cd <repo>/backend && make lint && make test
 ```
 
 **Step 2: Run all frontend tests**
 
 ```bash
-cd /home/pavel/projects/hestia/frontend && bun run check && bun run test:run
+cd <repo>/frontend && bun run check && bun run test:run
 ```
 
 **Step 3: Manual test**

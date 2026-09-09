@@ -136,7 +136,7 @@ Infection's scope — the W4 tie-in):
 ## Verification
 
 ```bash
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 grep -n "persist\|flush\|assertNameAvailable\|usageCount" \
   src/Controller/Api/Internal/V1/CategoryController.php \

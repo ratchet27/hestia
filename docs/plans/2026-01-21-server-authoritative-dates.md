@@ -47,7 +47,7 @@ private function calculateDaysUntilExpiry(?\DateTimeInterface $bestBefore): ?int
 
 **Step 2: Run backend tests**
 
-Run: `cd /home/pavel/projects/hestia/backend && make test`
+Run: `cd <repo>/backend && make test`
 Expected: All tests pass
 
 **Step 3: Commit**
@@ -63,7 +63,7 @@ git commit -s -m "feat(backend): add days_until_expiry to StockEntryResponse"
 
 **Step 1: Regenerate API types**
 
-Run: `cd /home/pavel/projects/hestia/frontend && NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api`
+Run: `cd <repo>/frontend && NODE_TLS_REJECT_UNAUTHORIZED=0 bun run generate-api`
 
 **Step 2: Verify the new field exists**
 
@@ -101,7 +101,7 @@ const days = entry.days_until_expiry ?? Infinity;
 
 **Step 3: Run frontend check and tests**
 
-Run: `cd /home/pavel/projects/hestia/frontend && bun run check && bun run test:run`
+Run: `cd <repo>/frontend && bun run check && bun run test:run`
 Expected: All pass
 
 **Step 4: Commit**
@@ -117,12 +117,12 @@ git commit -s -m "refactor(frontend): use server-provided days_until_expiry inst
 
 **Step 1: Run all backend tests**
 
-Run: `cd /home/pavel/projects/hestia/backend && make test`
+Run: `cd <repo>/backend && make test`
 Expected: All tests pass
 
 **Step 2: Run all frontend tests**
 
-Run: `cd /home/pavel/projects/hestia/frontend && bun run test:run`
+Run: `cd <repo>/frontend && bun run test:run`
 Expected: All tests pass
 
 **Step 3: Manual test**

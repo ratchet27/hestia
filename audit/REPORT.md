@@ -1,5 +1,30 @@
 # Hestia — Full Codebase Audit
 
+> **Status (2026-09-09).** Every High and Medium finding and every security finding is resolved on `master`
+> (SEC-9 as soon as #108 merges). What remains is Low/Nit code-quality slop, listed at the end of this
+> section. The report below is kept unchanged as the record of what was found at `6560b3e`.
+>
+> | PR | Findings closed |
+> |----|-----------------|
+> | #94 | SEC-1, SEC-2, SEC-10, SEC-13, INF-1, INF-2, INF-3, INF-4, INF-5, INF-6, INF-7, INF-9 |
+> | #95 | SEC-4, B-A1, B-A2, B-A3, B-A4 |
+> | #96 | B-S1, B-S2, B-S10, INF-10, F-S1, F-S6, F-S9, F-S16, F-S17, D-1 … D-8 |
+> | #98 | B-A5 |
+> | #99 | F-A1 |
+> | #100 | B-A6, B-A11, B-S8, B-S14 |
+> | #101 | F-S3, F-S4, F-S5, F-S12, F-A4 |
+> | #102 | B-S3, B-S7, B-A7, B-A8 |
+> | #103 | F-S2, F-S7, F-S8, F-S10, F-A2, F-A5, F-A7, F-A8, F-A9, F-A10, F-A11, F-A12, F-A13, F-A15, F-A16, F-A17 |
+> | #104 | SEC-11, SEC-12, SEC-14, SEC-15 |
+> | #105 | F-S11, F-S13, F-S14, F-S15, F-A3, F-A14, F-A18 |
+> | #106 | SEC-5, SEC-6, SEC-7, SEC-8 |
+> | #107 | SEC-3 |
+> | #108 | SEC-9 (open) |
+>
+> **Still open, all Low or Nit, no user-visible or security impact:**
+> B-S4 (response-mapping styles, partly unified by #98/#102), B-S5, B-S6, B-S9, B-S11, B-S12, B-S13,
+> B-S15, B-S16, B-S17, B-A9, B-A10, B-A12, B-A13, F-A6, INF-8. Fix as the surrounding code is touched.
+
 Date: 2026-09-05. Commit audited: `6560b3e` (master, clean tree). Read-only audit; no source file was modified.
 
 Scope: `backend/src` (151 files, ~8.4k LOC), `backend/tests` (44 files, ~7.1k LOC), `backend/config`, `backend/migrations`, compose/Dockerfile/Caddy, `frontend/src` excluding `frontend/src/api/generated` (~9.2k hand-written LOC; 4.4k generated LOC excluded), CI workflows, `docs/` (~30k lines of Markdown). `vendor/`, `node_modules/`, `frontend/dist`, `config/reference.php` excluded.

@@ -137,7 +137,7 @@ validated input in the app. The day-math itself (#53) is unchanged.
 ## Verification
 
 ```bash
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 
 # DTO + binding in place
