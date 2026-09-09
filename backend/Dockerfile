@@ -119,6 +119,27 @@ RUN <<-'EOF'
 	rm -rf /var/lib/apt/lists/*
 EOF
 
+# hestia: frontend build. The prod image serves the SPA from the same origin
+# as the API (docs/design_decisions_log.md §4), so the Vite build is baked into
+# /app/public. `frontend` is a named build context (compose.prod.yaml
+# `additional_contexts`, or `docker build --build-context frontend=../frontend`);
+# the dev target does not use this stage.
+FROM oven/bun:1 AS frontend_builder
+
+WORKDIR /src
+
+COPY --from=frontend package.json bun.lock ./
+RUN bun install --frozen-lockfile
+
+COPY --from=frontend index.html vite.config.ts tsconfig.json ./
+COPY --from=frontend public ./public
+COPY --from=frontend src ./src
+
+# Same-origin API: relative URLs (frontend/src/api/client.ts). Set explicitly
+# so a stray frontend/.env in the build context cannot override it.
+ENV VITE_API_BASE_URL=
+RUN bun run build
+
 # Prod FrankenPHP image
 FROM debian:13-slim AS frankenphp_prod
 
@@ -155,6 +176,8 @@ RUN <<-EOF
 EOF
 
 COPY --link --exclude=var --from=frankenphp_prod_builder /app /app
+# hestia: SPA shell + hashed assets next to index.php (Caddyfile serves them).
+COPY --link --from=frontend_builder /src/dist /app/public
 # Group 0 + g=u for arbitrary-UID runtimes (e.g. OpenShift).
 COPY --chown=www-data:0 --from=frankenphp_prod_builder /app/var /app/var
 RUN chmod g=u /app/var

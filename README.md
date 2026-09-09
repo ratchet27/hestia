@@ -75,7 +75,7 @@ The reasoning is written down as it happened:
 
 ```mermaid
 flowchart LR
-    SPA["React SPA<br/>(Vite dev server proxies /api)"]
+    SPA["React SPA<br/>(built into the prod image;<br/>Vite dev server proxies /api)"]
     Caddy["FrankenPHP / Caddy"]
     App["Symfony API<br/>/api/internal/v1"]
     DB[("PostgreSQL")]
@@ -137,6 +137,10 @@ The Vite dev server proxies `/api` to the backend so the browser sees a single
 origin and the session cookie stays first-party. API docs are at
 `https://localhost/api/doc` (dev only; the route is not registered in prod).
 
+In production there is no separate frontend server: the Docker image build runs
+`bun run build` and bakes the SPA into `/app/public`, and Caddy serves it with an
+SPA fallback next to the API. See [docs/deployment.md](docs/deployment.md).
+
 The Docker setup under `backend/` is a copy of
 [symfony-docker](https://github.com/dunglas/symfony-docker); the synced upstream
 commit is noted at the top of `backend/Dockerfile`. Upstream's `template-sync`
@@ -195,6 +199,15 @@ Each feature in `docs/plans/` and `docs/superpowers/specs/` was designed before 
 was built. The step-by-step implementation plans that followed each design were
 removed once the code landed; git history keeps them. The design documents were
 written with AI assistance, as was some of the implementation.
+
+## Deployment
+
+One image, one host. `docker compose -f compose.yaml -f compose.prod.yaml build`
+under `backend/` produces `app-php-prod`: FrankenPHP, the Symfony app and the
+built React SPA. Caddy terminates TLS (Let's Encrypt when `SERVER_NAME` is a
+public hostname) and routes `/api/*` to PHP, everything else to the SPA.
+[docs/deployment.md](docs/deployment.md) has the steps, the environment
+variables, and what is deliberately not automated yet.
 
 ## Status
 
