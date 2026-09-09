@@ -1,3 +1,4 @@
+// Icons from Heroicons v1 outline set (https://heroicons.com), MIT, Tailwind Labs.
 import type { ReactElement } from "react";
 export const Icons = {
   Dashboard: (): ReactElement => (
