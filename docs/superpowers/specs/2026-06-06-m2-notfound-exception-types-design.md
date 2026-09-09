@@ -101,7 +101,7 @@ Both payload-reference classes are already thrown from the services; only the em
 ## Verification
 
 ```bash
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 
 # Distinct codes at the 422 variants, NOT_FOUND only at the 404 variants:
@@ -111,7 +111,7 @@ grep -rn "CATEGORY_NOT_FOUND\|LOCATION_NOT_FOUND\|INVALID_CATEGORY_REFERENCE\|IN
 Frontend (confirmation only — expected to print nothing):
 
 ```bash
-grep -rn "CATEGORY_NOT_FOUND\|LOCATION_NOT_FOUND" /home/pavel/projects/personal/hestia/frontend/src
+grep -rn "CATEGORY_NOT_FOUND\|LOCATION_NOT_FOUND" <repo>/frontend/src
 ```
 
 ## Hard-evaluate-first notes

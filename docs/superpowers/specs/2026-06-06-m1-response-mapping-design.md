@@ -98,14 +98,14 @@ No new error paths. Null-safety is preserved exactly: `best_before` may be null 
 ## Verification
 
 ```bash
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 # no inline response arrays remain in the controller:
 grep -n "'id' =>" src/Controller/Api/Internal/V1/StockController.php   # expect: no match
 # factories exist:
 grep -rn "public static function fromEntity" src/Response/Stock/
 
-cd /home/pavel/projects/personal/hestia/frontend
+cd <repo>/frontend
 bun run check
 ```
 

@@ -284,7 +284,7 @@ treat its churn as a real change.
 Docker creates files as root. If you encounter `EACCES: permission denied` errors when writing files:
 
 1. **Stop execution immediately**
-2. Ask the user to run: `sudo chown -R $USER:$USER /home/pavel/projects/personal/hestia/backend`
+2. Ask the user to run: `sudo chown -R $USER:$USER <repo>/backend`
 3. Wait for confirmation before continuing
 
 Do NOT work around this by writing files through Docker exec - it masks the underlying issue and creates inconsistent file ownership.

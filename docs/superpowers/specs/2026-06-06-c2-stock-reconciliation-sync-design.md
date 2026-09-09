@@ -131,7 +131,7 @@ bulk of the work.
 ## Verification
 
 ```bash
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 grep -n "StockChangedMessage\|SendDailyExpirySummary" config/packages/messenger.yaml  # StockChanged no longer async
 ```

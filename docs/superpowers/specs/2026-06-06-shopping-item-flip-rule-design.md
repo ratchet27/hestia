@@ -120,7 +120,7 @@ behavior-preservation proof: `ShoppingListControllerTest`,
 ## Verification
 
 ```bash
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 # expect: no MANUAL setSource left in user-edit paths
 grep -n "setSource(ShoppingListSource::MANUAL)" src/Service/ShoppingListService.php

@@ -185,7 +185,7 @@ one helper; touch the frontend (it already consumes server-provided days); modif
 ## Verification
 
 ```bash
-cd /home/pavel/projects/personal/hestia/backend
+cd <repo>/backend
 make lint && make test
 grep -rn "DateTimeImmutable('today')" src/Service/StockEntryService.php src/Response/Stock/   # expect: no hits
 grep -n "new \\\\DateTimeImmutable()" src/Repository/StockEntryRepository.php                 # expect: no hits in findExpiring
