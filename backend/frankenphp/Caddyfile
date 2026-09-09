@@ -29,16 +29,30 @@
 	# Disable Topics tracking if not enabled explicitly: https://github.com/jkarlin/topics
 	header ?Permissions-Policy "browsing-topics=()"
 
-	# Defence in depth: the app has no inline scripts or third-party assets, so a
-	# strict policy costs nothing. Dev relaxes CSP_POLICY for Swagger UI
+	# Defence in depth: scripts, fetch and frames are locked to this origin.
+	# The SPA needs two relaxations: img-src data: (inline SVG icons in the
+	# compiled CSS) and style-src 'unsafe-inline' (react-hot-toast injects a
+	# <style> element at runtime; a nonce would need per-request generation
+	# that Caddy does not do). Dev overrides CSP_POLICY for Swagger UI
 	# (compose.override.yaml); prod keeps the default below.
 	header {
-		Content-Security-Policy "{$CSP_POLICY:default-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'}"
+		Content-Security-Policy "{$CSP_POLICY:default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'}"
 		X-Content-Type-Options nosniff
 		X-Frame-Options DENY
 		Referrer-Policy strict-origin-when-cross-origin
 		-Server
 	}
+
+	# hestia: SPA fallback. Any non-file path outside the backend's own prefixes
+	# is a client-side route and gets the app shell, which the prod image bakes
+	# into /app/public. In dev the shell is served by Vite, index.html does not
+	# exist here, and such paths fall through to Symfony (404) as upstream does.
+	@spaRoute {
+		not file {path}
+		not path /api/* /_error/*
+		file /index.html
+	}
+	rewrite @spaRoute /index.html
 
 	@phpRoute {
 		not file {path}

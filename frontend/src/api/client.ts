@@ -1,4 +1,7 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://localhost";
+// Empty by default: the API is same-origin. In dev the Vite proxy forwards /api
+// to the backend; in prod Caddy serves the SPA and the API from one host.
+// Set VITE_API_BASE_URL only when the API lives elsewhere.
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export interface ApiErrorResponse {
   status: number;

@@ -118,6 +118,10 @@ This makes future external APIs possible without refactors.
   routes dynamic requests to Symfony
 - Multi-subdomain split (`ui.*` / `api.*`) with a parent-domain cookie is deferred
   to the roadmap — see spec §19
+- Implemented 2026-09: the prod Docker image builds the SPA in a `bun` stage and
+  copies `dist/` into `/app/public`; the Caddyfile rewrites non-file, non-`/api`
+  paths to `index.html`. One deployable artifact, no CORS, strict CSP. Trade-off
+  accepted: a frontend-only change rebuilds the image. See `docs/deployment.md`.
 
 _History: originally planned as two subdomains (`ui` + `api`) with a shared cookie
 domain; superseded by the single-origin model above._

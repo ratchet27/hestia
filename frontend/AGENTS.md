@@ -75,9 +75,10 @@ double unwrap. Get this depth wrong and you silently bind the wrong object.
 
 Auth is a same-origin session cookie (`SameSite=Lax`). In dev the frontend is `http://localhost:5173`
 and the API is `https://localhost` — **different "sites" under schemeful same-site**, which drops the
-cookie. `vite.config.ts` proxies `/api` → `https://localhost` so the browser sees one origin; set
-`VITE_API_BASE_URL` to the dev-server origin in a (gitignored) `.env.local`. Don't "fix" this by
-loosening the cookie to `SameSite=None`.
+cookie. `vite.config.ts` proxies `/api` → `https://localhost` so the browser sees one origin, and
+`src/api/client.ts` uses relative URLs (`VITE_API_BASE_URL` is empty by default), so no `.env` is
+needed. In prod the build is baked into the backend image and served by Caddy from the same origin
+(`docs/deployment.md`). Don't "fix" the dev split by loosening the cookie to `SameSite=None`.
 
 ## Testing
 
